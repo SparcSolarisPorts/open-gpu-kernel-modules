@@ -5,12 +5,16 @@
 #
 #   sudo sh solaris-probe.sh
 #
-# The report goes to /var/tmp/nvprobe-<host>-<time>/. The script loads no
-# modules, adds no drivers and edits nothing under /etc. It compiles a few
-# tiny files in a private temporary directory and removes them on exit.
+# Everything prints to the terminal and nothing is saved. To keep a copy:
+#   sudo sh solaris-probe.sh 2>&1 | tee /var/tmp/probe.txt
 #
-# Send back report.txt and gpu-nodes.txt. prtconf-v.txt is the full device
-# dump; it can hold serial numbers and MAC addresses, so keep it local.
+# The script loads no modules, adds no drivers and edits nothing under /etc.
+# It compiles a few tiny files in a private temporary directory and removes
+# them on exit. The full prtconf -v dump can hold serial numbers and MAC
+# addresses, so it stays in that directory; only the GPU nodes and the PCIe
+# root complex nodes are printed, each limited to its own properties. Read
+# the output before sharing it. The kernel interface and header scans can
+# take a minute or two each.
 
 set -u
 PATH=/usr/sbin:/usr/bin:/sbin:$PATH:/usr/gnu/bin
@@ -18,23 +22,20 @@ PATH=/usr/sbin:/usr/bin:/sbin:$PATH:/usr/gnu/bin
 [ "$(uname -s)" = SunOS ] || { echo "solaris-probe: SunOS only" >&2; exit 1; }
 [ "$(id -u)" = 0 ] || echo "note: not root; device listings will be incomplete" >&2
 
-HOST=$(uname -n)
-OUT=/var/tmp/nvprobe-$HOST-$(date +%Y%m%d-%H%M%S)
-mkdir -p "$OUT" || { echo "cannot create $OUT" >&2; exit 1; }
-REPORT=$OUT/report.txt
 TMP=$(mktemp -d /var/tmp/nvprobe.XXXXXX) || exit 1
-trap 'rm -rf "$TMP"' 0 1 2 15
+trap 'rm -rf "$TMP"' 0
+trap 'exit 1' 1 2 15
 
-say() { printf '%s\n' "$*" >> "$REPORT"; }
-section() { printf '\n==== %s ====\n' "$*" >> "$REPORT"; echo "probing: $*"; }
+say() { printf '%s\n' "$*"; }
+section() { printf '\n==== %s ====\n' "$*"; }
 have() { command -v "$1" >/dev/null 2>&1; }
 
-# runsh "pipeline": log the command, its output and a non-zero exit status.
+# runsh "pipeline": print the command, its output and a non-zero exit status.
 runsh() {
-    printf '$ %s\n' "$1" >> "$REPORT"
-    sh -c "$1" >> "$REPORT" 2>&1
+    printf '$ %s\n' "$1"
+    sh -c "$1" 2>&1
     rc=$?
-    [ $rc -eq 0 ] || printf '[exit %s]\n' "$rc" >> "$REPORT"
+    [ $rc -eq 0 ] || printf '[exit %s]\n' "$rc"
     return 0
 }
 
@@ -45,7 +46,7 @@ runsh "cat /etc/release"
 runsh "pagesize -a"
 runsh "psrinfo -pv"
 runsh "prtconf | egrep 'Memory size|System Configuration'"
-have virtinfo && runsh "virtinfo -a"
+have virtinfo && runsh "virtinfo -a | egrep 'Domain role|Domain name|Control domain'"
 [ -x /opt/SUNWldm/bin/ldm ] && runsh "/opt/SUNWldm/bin/ldm list"
 have beadm && runsh "beadm list"
 runsh "pkg list -H '*gcc*' '*header*' '*binutils*' '*assembler*' '*linker*' '*ctf*'"
@@ -97,8 +98,8 @@ unsigned int probe_le(volatile unsigned int *p)
 CEOF
 if have gcc; then
     for f in barrier hdr le; do
-        printf '$ gcc %s -c %s.c\n' "$KFLAGS" "$f" >> "$REPORT"
-        if gcc $KFLAGS -c "$TMP/$f.c" -o "$TMP/$f.o" >> "$REPORT" 2>&1; then
+        printf '$ gcc %s -c %s.c\n' "$KFLAGS" "$f"
+        if gcc $KFLAGS -c "$TMP/$f.c" -o "$TMP/$f.o" 2>&1; then
             say "$f.c: compiled"
         else
             say "$f.c: FAILED"
@@ -224,7 +225,7 @@ HEOF
 say "checked $n headers under $INC"
 if [ -s "$TMP/hdr.missing" ]; then
     say "MISSING headers: $(wc -l < "$TMP/hdr.missing" | tr -d ' ')"
-    cat "$TMP/hdr.missing" >> "$REPORT"
+    cat "$TMP/hdr.missing"
 else
     say "all present"
 fi
@@ -246,6 +247,7 @@ section "Kernel interfaces the port calls (looked up in module files)"
 if ! have nm; then
     say "nm not found, skipped"
 else
+    echo "  (running nm on every module file; this can take a minute or two)"
     : > "$TMP/modfiles"
     for k in /kernel /usr/kernel /platform/$PLAT/kernel; do
         [ -d "$k" ] && find "$k" -type f 2>/dev/null | grep "/$KISA/" >> "$TMP/modfiles"
@@ -258,6 +260,19 @@ else
     done < "$TMP/modfiles"
     say "global symbols collected: $(wc -l < "$TMP/symtab" | tr -d ' ')"
     cat > "$TMP/wanted" <<'SEOF'
+kobj_open_file
+kobj_read_file
+kobj_get_filesize
+kobj_close_file
+vn_open
+vn_rdwr
+vn_close
+page_numtopp
+page_numtopp_nowait
+page_resv
+pci_config_setup
+pci_config_teardown
+pcie_get_bdf_from_dip
 AcpiOsFree
 as_delete_callback
 as_dup
@@ -390,12 +405,62 @@ SEOF
             "$TMP/wanted" "$TMP/symtab" | sort > "$TMP/symresult"
         say "interfaces checked: $(wc -l < "$TMP/wanted" | tr -d ' ')"
         say "MISSING: $(grep -c '^MISSING' "$TMP/symresult")"
-        grep '^MISSING' "$TMP/symresult" >> "$REPORT"
-        cp "$TMP/symresult" "$OUT/symbols.txt"
-        say "(full list in symbols.txt)"
+        grep '^MISSING' "$TMP/symresult"
+        say "found (interface, first module that defines it):"
+        grep '^found' "$TMP/symresult"
     else
         say "no symbols collected; nm output format may differ"
     fi
+fi
+
+section "Alternatives for missing headers and interfaces"
+echo "  (searching every .h under /usr, /opt and /platform; this can take a minute or two)"
+alt() { printf '%s\n' "$*"; }
+G=ggrep
+have ggrep || G=egrep
+find /usr /opt /platform -xdev -type f -name '*.h' > "$TMP/allhdrs" 2>/dev/null
+say "headers found on the system: $(wc -l < "$TMP/allhdrs" | tr -d ' ')"
+
+# 1. Each header the port includes that /usr/include lacks: the same name
+#    elsewhere, similarly named headers, and installed packages that list it.
+if [ -s "$TMP/hdr.missing" ]; then
+    while read h; do
+        base=${h##*/}
+        stem=${base%.h}
+        alt ""
+        alt "== $h"
+        alt "-- same file name anywhere:"
+        $G "/$base\$" "$TMP/allhdrs" | head -10
+        alt "-- other headers with '$stem' in the name:"
+        $G -i "/[^/]*$stem[^/]*\$" "$TMP/allhdrs" | $G -v "/$base\$" | head -15
+        if have pkg; then
+            alt "-- installed packages that mention $base:"
+            pkg search -l -H "$base" < /dev/null 2>&1 | head -5
+        fi
+    done < "$TMP/hdr.missing"
+fi
+
+# 2. Headers whose names suggest a replacement for a missing facility.
+for kw in firm gfx fbio framebuf i2c acpi cfgacc pci_cap pcie_impl pci_impl kobj smbios ddidevmap hvio hsvc visual; do
+    alt ""
+    alt "== headers with '$kw' in the file name (first 12)"
+    $G -i "/[^/]*$kw[^/]*\$" "$TMP/allhdrs" | head -12
+done
+
+# 3. Where each interface the port calls is mentioned in /usr/include.
+if have ggrep && [ -f "$TMP/wanted" ]; then
+    awk 'NF' "$TMP/wanted" > "$TMP/wanted2"
+    ggrep -rHnwoF -f "$TMP/wanted2" /usr/include 2>/dev/null |
+        awk -F: '{ if (n[$3]++ < 2) print $3 "  " $1 ":" $2 }' | sort > "$TMP/decl"
+    alt ""
+    alt "== interfaces mentioned in /usr/include (first two places each)"
+    cat "$TMP/decl"
+    alt ""
+    alt "== interfaces mentioned nowhere in /usr/include"
+    # FILENAME, not NR == FNR: that test breaks when decl is empty.
+    awk 'FILENAME == ARGV[1] { d[$1] = 1; next } !($1 in d)' "$TMP/decl" "$TMP/wanted2"
+else
+    alt "no ggrep or no interface list; skipped the declaration search"
 fi
 
 section "Display and GPU devices"
@@ -406,16 +471,28 @@ runsh "ls -l /kernel/firmware 2>&1 | head"
 have prtdiag && runsh "prtdiag 2>&1 | head -80"
 have cfgadm && runsh "cfgadm -al 2>&1 | egrep -i 'pci|px' | head -40"
 if have prtconf; then
-    prtconf -v > "$OUT/prtconf-v.txt" 2>&1
-    awk '/^ *(display|pciex10de,[0-9a-f]+)([ ,(]|$)/ { n = 70 }
-         n > 0 { print; n-- }' "$OUT/prtconf-v.txt" > "$OUT/gpu-nodes.txt"
-    say "gpu-nodes.txt: $(wc -l < "$OUT/gpu-nodes.txt" | tr -d ' ') lines from prtconf -v"
+    # The full dump holds serial numbers and MAC addresses. It stays in the
+    # private temporary directory; only the excerpts below are printed.
+    prtconf -v > "$TMP/prtconf-v.txt" 2>&1
+    section "GPU and display nodes from prtconf -v"
+    # Each matching node and its own subtree only: stop at the first line
+    # that is not indented deeper than the node header.
+    awk '/^ *(display|pciex10de,[0-9a-f]+)([ ,(]|$)/ {
+             match($0, /^ */); ind = RLENGTH; p = 1; print; next }
+         p { match($0, /^ */); if (RLENGTH > ind) print; else p = 0 }' \
+        "$TMP/prtconf-v.txt"
+    # Each PCIe root complex (px nexus), its own properties only: bus-range
+    # and the ranges that map PCI bus addresses to CPU addresses, plus its
+    # minor nodes (dev_path names the root). A child node header, which is
+    # indented 8 and does not end in a colon, ends the excerpt.
+    section "PCIe root complex properties (px nexus)"
+    awk 'function flush() { if (buf ~ /SUNW,sun4v-pci/) printf "%s", buf; buf = "" }
+         /^    [^ ]/ { flush(); inpx = ($0 ~ /^    pci/); stopped = 0
+                       if (inpx) buf = $0 "\n"; next }
+         inpx && !stopped {
+             if ($0 ~ /^        [^ ]/ && $0 !~ /:[ ]*$/) stopped = 1
+             else buf = buf $0 "\n" }
+         END { flush() }' "$TMP/prtconf-v.txt"
 fi
 
 section "Done"
-say "report: $REPORT"
-echo
-echo "Done. Files in $OUT:"
-ls -l "$OUT"
-echo
-echo "Send back report.txt and gpu-nodes.txt. Keep prtconf-v.txt local."
