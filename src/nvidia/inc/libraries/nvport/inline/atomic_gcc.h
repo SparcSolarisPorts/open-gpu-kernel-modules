@@ -43,6 +43,8 @@ portAtomicMemoryFenceStore(void)
     __asm__ __volatile__ ("sfence" : : : "memory");
 #elif NVCPU_IS_RISCV64
     __asm__ __volatile__ ("fence" : : : "memory");
+#elif NVCPU_IS_FAMILY_SPARC
+    __asm__ __volatile__ ("membar #StoreStore" : : : "memory");
 #else
 #error "portAtomicMemoryFenceStore implementation not found"
 #endif
@@ -58,6 +60,8 @@ portAtomicMemoryFenceLoad(void)
     __asm__ __volatile__ ("lfence" : : : "memory");
 #elif NVCPU_IS_RISCV64
     __asm__ __volatile__ ("fence" : : : "memory");
+#elif NVCPU_IS_FAMILY_SPARC
+    __asm__ __volatile__ ("membar #LoadLoad" : : : "memory");
 #else
 #error "portAtomicMemoryFenceLoad implementation not found"
 #endif
@@ -73,6 +77,8 @@ portAtomicMemoryFenceFull(void)
     __asm__ __volatile__ ("mfence" : : : "memory");
 #elif NVCPU_IS_RISCV64
     __asm__ __volatile__ ("fence" : : : "memory");
+#elif NVCPU_IS_FAMILY_SPARC
+    __asm__ __volatile__ ("membar #LoadLoad | #LoadStore | #StoreLoad | #StoreStore" : : : "memory");
 #else
 #error "portAtomicMemoryFenceFull implementation not found"
 #endif
@@ -89,6 +95,8 @@ portAtomicTimerBarrier(void)
     __asm__ __volatile__ ("lfence" : : : "memory");
 #elif NVCPU_IS_RISCV64
     __asm__ __volatile__ ("fence.i" : : : "memory");
+#elif NVCPU_IS_FAMILY_SPARC
+    __asm__ __volatile__ ("membar #Sync" : : : "memory");
 #else
 #error "portAtomicTimerBarrier implementation not found"
 #endif

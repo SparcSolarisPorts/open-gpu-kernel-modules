@@ -179,6 +179,11 @@ ifeq ($(TARGET_ARCH),riscv64)
   CFLAGS += -DNV_RISCV64 -DNV_ARCH_BITS=64
 endif
 
+# isainfo -n reports sparcv9 on 64-bit SPARC Solaris.
+ifeq ($(TARGET_ARCH),sparcv9)
+  CFLAGS += -DNV_SPARC64 -DNV_ARCH_BITS=64
+endif
+
 ifeq ($(TARGET_OS),Linux)
   LIBDL_LIBS = -ldl
 else

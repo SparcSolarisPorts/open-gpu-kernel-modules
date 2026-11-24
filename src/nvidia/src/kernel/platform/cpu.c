@@ -532,6 +532,53 @@ void RmInitCpuInfo(
 
 #endif // NVCPU_IS_RISCV64
 
+/***************************************************************************/
+
+#if NVCPU_IS_FAMILY_SPARC
+
+/*
+ * ID the CPU. SPARC has no entry in the NV0000_CTRL_SYSTEM_CPU_TYPE list, so
+ * the type is reported as unknown.
+ */
+void RmInitCpuInfo(void)
+{
+    OBJSYS    *pSys = SYS_GET_INSTANCE();
+
+    // Do this only once.
+    if (pSys->cpuInfo.bInitialized)
+        return;
+
+    // Init structure to default
+    portMemSet(&pSys->cpuInfo, 0, sizeof(pSys->cpuInfo));
+
+    pSys->cpuInfo.type = NV0000_CTRL_SYSTEM_CPU_TYPE_UNKNOWN;
+    pSys->cpuInfo.caps = 0;
+
+    // Calculate the frequency
+    pSys->cpuInfo.clock = osGetCpuFrequency();
+
+    // Zero out the vendor-specific family, model & stepping
+    pSys->cpuInfo.family = 0;
+    pSys->cpuInfo.model  = 0;
+    pSys->cpuInfo.stepping = 0;
+
+    // host native page size: the base page on Solaris SPARC is 8 KB
+#ifdef PAGE_SIZE
+    pSys->cpuInfo.hostPageSize = PAGE_SIZE;
+#else
+    pSys->cpuInfo.hostPageSize = 8192;
+#endif
+
+    // Number of CPUs. Hardware threads are counted as logical CPUs.
+    pSys->cpuInfo.numPhysicalCpus = osGetCpuCount();
+    pSys->cpuInfo.numLogicalCpus = pSys->cpuInfo.numPhysicalCpus;
+    pSys->cpuInfo.maxLogicalCpus = pSys->cpuInfo.numPhysicalCpus;
+
+    pSys->cpuInfo.bInitialized = NV_TRUE;
+}
+
+#endif // NVCPU_IS_FAMILY_SPARC
+
 
 /***************************************************************************/
 

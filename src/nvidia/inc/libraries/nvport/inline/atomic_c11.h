@@ -50,6 +50,8 @@ portAtomicTimerBarrier(void)
     __asm__ __volatile__ ("lfence" : : : "memory");
 #elif NVCPU_IS_RISCV64
     __asm__ __volatile__ ("fence.i" : : : "memory");
+#elif NVCPU_IS_FAMILY_SPARC
+    __asm__ __volatile__ ("membar #Sync" : : : "memory");
 #else
 #error "portAtomicTimerBarrier implementation not found"
 #endif

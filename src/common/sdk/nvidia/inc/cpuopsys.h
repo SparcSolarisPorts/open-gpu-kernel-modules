@@ -173,6 +173,23 @@
 #    define NVCPU_FAMILY_X86
 #endif
 
+/*
+ * SPARC. SPARC is big-endian, and the base page is 8 KB on Solaris.
+ * gcc and the Studio compilers define __sparc and __sparcv9 for 64-bit code.
+ */
+#if defined(__sparc__) || defined(__sparc)
+#    if defined(__arch64__) || defined(__sparcv9)
+#        define NVCPU_SPARC64          /* 64-bit SPARC V9 */
+#    else
+#        define NVCPU_SPARC            /* 32-bit SPARC */
+#    endif
+#    define NVCPU_FAMILY_SPARC
+#    define NVCPU_MIN_PAGE_SHIFT 13
+#    ifndef NV_BIG_ENDIAN
+#        define NV_BIG_ENDIAN
+#    endif
+#endif
+
 #if defined(__riscv) && (__riscv_xlen==64)
 #    define NVCPU_RISCV64
 #    define NVCPU_FAMILY_RISCV
@@ -232,7 +249,8 @@
 
 #if defined(NVCPU_IA64) || defined(NVCPU_X86_64) || \
     defined(NV_MACINTOSH_64) || defined(NVCPU_AARCH64) || \
-    defined(NVCPU_PPC64LE) || defined(NVCPU_RISCV64)
+    defined(NVCPU_PPC64LE) || defined(NVCPU_RISCV64) || \
+    defined(NVCPU_SPARC64)
 #   define NV_64_BITS          /* all architectures where pointers are 64 bits */
 #else
 /* we assume 32 bits. I don't see a need for NV_16_BITS. */
@@ -401,6 +419,16 @@
 #define NVCPU_IS_XTENSA 1
 #else
 #define NVCPU_IS_XTENSA 0
+#endif
+#if defined(NVCPU_SPARC64)
+#define NVCPU_IS_SPARC64 1
+#else
+#define NVCPU_IS_SPARC64 0
+#endif
+#if defined(NVCPU_FAMILY_SPARC)
+#define NVCPU_IS_FAMILY_SPARC 1
+#else
+#define NVCPU_IS_FAMILY_SPARC 0
 #endif
 #if defined(NV_BIG_ENDIAN)
 #define NVCPU_IS_BIG_ENDIAN 1

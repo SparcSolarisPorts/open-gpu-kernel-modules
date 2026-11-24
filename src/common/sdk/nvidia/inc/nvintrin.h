@@ -52,6 +52,8 @@ nvMemoryLoadFence(void)
     __asm__ __volatile__ ("dmb sy" : : : "memory");
 #elif NVCPU_IS_FAMILY_RISCV
     __asm__ __volatile__ ("fence r, r" : : : "memory");
+#elif NVCPU_IS_FAMILY_SPARC
+    __asm__ __volatile__ ("membar #LoadLoad" : : : "memory");
 #else
 #error "unsupported compiler"
 #endif

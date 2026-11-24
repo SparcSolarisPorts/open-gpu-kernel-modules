@@ -78,6 +78,7 @@ int probe_barrier(int x)
     __asm__ __volatile__("membar #StoreStore" ::: "memory");
     __asm__ __volatile__("membar #LoadLoad" ::: "memory");
     __asm__ __volatile__("membar #LoadLoad | #LoadStore | #StoreLoad | #StoreStore" ::: "memory");
+    __asm__ __volatile__("membar #Sync" ::: "memory");
     __asm__ __volatile__("nop");
     return x;
 }

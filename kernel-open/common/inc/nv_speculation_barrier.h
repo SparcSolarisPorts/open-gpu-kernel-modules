@@ -86,6 +86,15 @@
  /* Not currently implemented for MSVC/ARM64. See bug 3366890. */
 #   define nv_speculation_barrier()
 #   define speculation_barrier() nv_speculation_barrier()
+#elif defined(__sparc__) || defined(__sparc)
+ /*
+  * SPARC V9. The architecture has no dedicated speculation barrier.
+  * membar #Sync keeps every later instruction from being initiated until all
+  * earlier operations have been performed, so it is used as a conservative
+  * one. It must come before the RISCV test below: NVCPU_IS_RISCV64 is
+  * defined (as 0) whenever cpuopsys.h was included.
+  */
+ #define NV_SPECULATION_BARRIER_SPARC
 #elif defined(NVCPU_IS_RISCV64)
 #   define nv_speculation_barrier()
 #else
@@ -138,6 +147,13 @@ static inline void nv_speculation_barrier(void)
 static inline void nv_speculation_barrier(void)
 {
     asm volatile("ori 31,31,0");
+}
+
+#elif defined(NV_SPECULATION_BARRIER_SPARC)
+
+static inline void nv_speculation_barrier(void)
+{
+    __asm__ __volatile__ ("membar #Sync" : : : "memory");
 }
 
 #elif defined(NV_SPECULATION_BARRIER_ARM_COMMON)

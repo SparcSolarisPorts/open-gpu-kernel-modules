@@ -57,6 +57,8 @@ static void EvoCoreKickoff(NVDmaBufferEvoPtr push_buffer, NvU32 putOffset)
     __asm__ __volatile__ ("dsb sy\n\t" : : : "memory");
 #elif NVCPU_IS_FAMILY_RISCV
     __asm__ __volatile__ ("fence iorw,iorw\n\t" : : : "memory");
+#elif NVCPU_IS_FAMILY_SPARC
+    __asm__ __volatile__ ("membar #Sync\n\t" : : : "memory");
 #else
     #error "unknown arch"
 #endif

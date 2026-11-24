@@ -334,6 +334,9 @@ static void InsertProgressTracker(NvPushChannelPtr p, NvU32 putOffset,
 #define NV_CPU_MEMFENCE()   __asm__ __volatile__ ("dsb sy\n\t" : : : "memory");
 #elif NVCPU_IS_FAMILY_RISCV
 #define NV_CPU_MEMFENCE()   __asm__ __volatile__ ("fence iorw,iorw\n\t" : : : "memory");
+#elif NVCPU_IS_FAMILY_SPARC
+/* #Sync waits for completion, not only order, before the doorbell write. */
+#define NV_CPU_MEMFENCE()   __asm__ __volatile__ ("membar #Sync\n\t" : : : "memory");
 #else
     #error "unknown arch"
 #endif
@@ -450,6 +453,8 @@ static void DoorbellKickoff(NvPushChannelPtr pChannel,
     __asm__ __volatile__ ("dsb sy\n\t" : : : "memory");
 #elif NVCPU_IS_FAMILY_RISCV
     __asm__ __volatile__ ("fence iorw,iorw\n\t" : : : "memory");
+#elif NVCPU_IS_FAMILY_SPARC
+    __asm__ __volatile__ ("membar #Sync\n\t" : : : "memory");
 #else
     #error "unknown arch"
 #endif

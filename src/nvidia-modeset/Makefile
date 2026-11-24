@@ -123,6 +123,14 @@ ifeq ($(TARGET_ARCH),riscv64)
   CFLAGS += -mno-relax
 endif
 
+ifeq ($(TARGET_ARCH),sparcv9)
+  # The flags Oracle documents for 64-bit gcc device drivers on Solaris 11.
+  CFLAGS += -m64
+  CFLAGS += -mcpu=v9
+  CFLAGS += -mcmodel=medlow
+  CFLAGS += -mno-fpu
+endif
+
 CFLAGS += -fno-pic
 CFLAGS += -fno-common
 CFLAGS += -fomit-frame-pointer
