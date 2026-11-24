@@ -449,6 +449,38 @@ void NV_API_CALL os_log_error(const char *fmt, va_list ap)
     vcmn_err(CE_WARN, fmt, ap);
 }
 
+#if defined(NV_SOLARIS)
+/*
+ * SPARC has no I/O port space and the kernel exports no inb()/outb().  Writes
+ * are dropped and reads return all ones, as a bus with no device would.
+ */
+void NV_API_CALL os_io_write_byte(NvU32 address, NvU8 value)
+{
+}
+
+void NV_API_CALL os_io_write_word(NvU32 address, NvU16 value)
+{
+}
+
+void NV_API_CALL os_io_write_dword(NvU32 address, NvU32 value)
+{
+}
+
+NvU8 NV_API_CALL os_io_read_byte(NvU32 address)
+{
+    return 0xff;
+}
+
+NvU16 NV_API_CALL os_io_read_word(NvU32 address)
+{
+    return 0xffff;
+}
+
+NvU32 NV_API_CALL os_io_read_dword(NvU32 address)
+{
+    return 0xffffffff;
+}
+#else
 void NV_API_CALL os_io_write_byte(NvU32 address, NvU8 value)
 {
     outb((int)address, value);
@@ -478,6 +510,7 @@ NvU32 NV_API_CALL os_io_read_dword(NvU32 address)
 {
     return inl((int)address);
 }
+#endif /* NV_SOLARIS */
 
 /*
  * Map a physical range (typically a BAR) into kernel virtual space.
@@ -561,7 +594,12 @@ NV_STATUS NV_API_CALL os_flush_user_cache(void)
 
 void NV_API_CALL os_flush_cpu_write_combine_buffer(void)
 {
+#if defined(NV_SOLARIS)
+    /* Order earlier stores, including merged device stores, before later ones. */
+    __asm__ __volatile__("membar #StoreStore" ::: "memory");
+#else
     __asm__ __volatile__("sfence" ::: "memory");
+#endif
 }
 
 void NV_API_CALL os_dbg_init(void)
