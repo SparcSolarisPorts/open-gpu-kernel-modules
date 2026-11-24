@@ -6647,6 +6647,36 @@ _kgspPrepareGspRmBinaryImage
     return NV_OK;
 }
 
+//
+// The radix3 page tables are read by Booter and GSP (little-endian) through
+// DMA. memdescGetPhysAddrs() stores host-order NvU64 entries, so on a
+// big-endian host each entry must be converted to little-endian after it has
+// been written. On a little-endian host this is a no-op.
+//
+static void
+_kgspRadix3TableToLe(NvU8 *pTable, NvU64 nEntries)
+{
+#if NVCPU_IS_BIG_ENDIAN
+    NvU64 e;
+    NvU8 t[8];
+    NvU32 k;
+
+    for (e = 0; e < nEntries; e++)
+    {
+        NvU8 *p = pTable + (e * 8);
+        NvU64 v = *(NvU64 *)p;
+
+        for (k = 0; k < 8; k++)
+            t[k] = (NvU8)(v >> (8 * k));   // least significant byte first
+        for (k = 0; k < 8; k++)
+            p[k] = t[k];
+    }
+#else
+    (void)pTable;
+    (void)nEntries;
+#endif
+}
+
 NV_STATUS
 kgspCreateRadix3_IMPL
 (
@@ -6771,6 +6801,7 @@ kgspCreateRadix3_IMPL
             RM_PAGE_SIZE,               // stride
             radix3[i + 1].nPages,       // count
             (RmPhysAddr *)(pRadix3Buf + radix3[i].offset)); // physical address table
+        _kgspRadix3TableToLe(pRadix3Buf + radix3[i].offset, radix3[i + 1].nPages);
     }
 
     dataOffset = radix3[3].offset;
@@ -6794,6 +6825,7 @@ kgspCreateRadix3_IMPL
         RM_PAGE_SIZE,               // stride
         radix3[3].nPages,           // count
         (RmPhysAddr *)(pRadix3Buf + radix3[2].offset));  // physical address table
+    _kgspRadix3TableToLe(pRadix3Buf + radix3[2].offset, radix3[3].nPages);
 
     //
     // No reason to keep this memory mapped on the CPU side.  Only GSP will
