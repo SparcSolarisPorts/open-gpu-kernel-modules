@@ -94,6 +94,7 @@
 #include "nvdm_format.h"
 #include "kernel/core/gmcapi_impl.h"
 #include "gmcapi/gmcapi_gsp.h"
+#include "rmgspseq.h" // full GspLoadExec*Params definitions (the event payload byte order conversion needs them)
 #include "gmcapi/gmcapi_engine_types.h"
 #include "gmcapi/gmcapi_system_info.h"
 #include "gmcapi/gmcapi_system_info_unstable.h"
