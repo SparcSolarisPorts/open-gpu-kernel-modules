@@ -34,7 +34,9 @@
 #include <sys/vmsystm.h>
 #include "nv-gfxp.h"
 #include <sys/ddi_impldefs.h>
+#if !defined(NV_SOLARIS)
 #include <sys/pci_impl.h>
+#endif
 #include <vm/hat.h>
 #include <vm/as.h>
 #include <vm/seg.h>
@@ -224,6 +226,20 @@ nv_prot_to_maxprot(NvU32 prot)
     return maxprot;
 }
 
+#if defined(NV_SOLARIS)
+/*
+ * User mappings of system memory need gfxp_umem_cookie_init() and
+ * gfxp_map_devmem() on illumos, which Solaris lacks.  The allocation would have
+ * to come from ddi_umem_alloc() for devmap_umem_setup() to accept it.
+ */
+int
+nv_devmap_sysmem(nv_illumos_file_private_t *nvifp, devmap_cookie_t dhp,
+    nv_alloc_mapping_context_t *mmap_context, offset_t off, size_t len,
+    size_t *maplen)
+{
+    return (ENOTSUP);
+}
+#else
 /* Control device: map system memory at mmap context page_index. */
 int
 nv_devmap_sysmem(nv_illumos_file_private_t *nvifp, devmap_cookie_t dhp,
@@ -286,9 +302,14 @@ nv_devmap_sysmem(nv_illumos_file_private_t *nvifp, devmap_cookie_t dhp,
     *maplen = len;
     return (0);
 }
+#endif /* NV_SOLARIS */
 
 /* Find the "reg" register set that describes the BAR at config offset. */
+#if defined(NV_SOLARIS)
+int
+#else
 static int
+#endif
 nv_bar_rnumber(dev_info_t *dip, NvU32 bar_offset, uint_t *rnumber)
 {
     pci_regspec_t *regs;

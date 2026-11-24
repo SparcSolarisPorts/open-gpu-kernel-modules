@@ -78,6 +78,9 @@ nv_os_init(void)
     os_max_page_size = (NvU64)PAGESIZE << 9;        /* 2 MiB */
     os_page_mask = ~((NvU64)PAGEOFFSET);
     os_page_shift = PAGESHIFT;
+#if defined(NV_SOLARIS)
+    nv_sol_vm_init();
+#endif
 }
 
 NvBool
@@ -518,12 +521,31 @@ void* NV_API_CALL os_map_kernel_space(NvU64 start, NvU64 size_bytes, NvU32 mode)
             return NULL;
     }
 
+#if defined(NV_SOLARIS)
+    {
+        void *va = nv_sol_map_bar(start, size_bytes,
+            gfxp_mode == GFXP_MEMORY_WRITECOMBINED);
+
+        if (va == NULL)
+        {
+            nv_printf(NV_DBG_ERRORS,
+                "NVRM: os_map_kernel_space: 0x%llx+0x%llx is not inside a GPU BAR\n",
+                start, size_bytes);
+        }
+        return va;
+    }
+#else
     return gfxp_map_kernel_space(start, (size_t)size_bytes, gfxp_mode);
+#endif
 }
 
 void NV_API_CALL os_unmap_kernel_space(void *addr, NvU64 size_bytes)
 {
+#if defined(NV_SOLARIS)
+    nv_sol_unmap_bar(addr);
+#else
     gfxp_unmap_kernel_space(addr, (size_t)size_bytes);
+#endif
 }
 
 /* x86 caches are coherent with device DMA; there is nothing to flush. */
@@ -820,6 +842,11 @@ NV_STATUS NV_API_CALL os_numa_remove_gpu_memory(void *handle, NvU64 offset,
 NV_STATUS NV_API_CALL os_offline_page_at_address(NvU64 address)
 {
     int err;
+
+#if defined(NV_SOLARIS)
+    /* The page_retire() return codes are not declared in the Solaris headers. */
+    return NV_ERR_NOT_SUPPORTED;
+#endif
 
     nv_printf(NV_DBG_INFO, "NVRM: offlining page at address: 0x%llx\n",
         address);

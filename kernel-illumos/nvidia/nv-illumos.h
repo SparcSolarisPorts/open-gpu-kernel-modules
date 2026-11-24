@@ -51,6 +51,7 @@
 #include <sys/pci.h>
 #include <sys/sunndi.h>
 #include "nv-gfxp.h"
+#include "nv-solaris-compat.h"
 
 /*
  * The NVIDIA headers below expect a freestanding environment and supply their
@@ -455,6 +456,23 @@ int  nv_devmap_devmem(nv_illumos_file_private_t *, devmap_cookie_t,
 void nv_revoke_mappings_locked(nv_illumos_state_t *);
 void nv_alloc_hold(nv_illumos_alloc_t *);
 void nv_alloc_rele(nv_illumos_alloc_t *);
+
+#if defined(NV_SOLARIS)
+/* nvidia_solaris_vm.c */
+void    nv_sol_vm_init(void);
+void    nv_sol_vm_fini(void);
+void    nv_sol_bar_register(nv_illumos_state_t *);
+void    nv_sol_bar_unregister(nv_illumos_state_t *);
+caddr_t nv_sol_map_bar(NvU64 start, NvU64 size, NvBool merging);
+void    nv_sol_unmap_bar(void *addr);
+int     nv_sol_bus_to_cpu(dev_info_t *, NvU64 bus, NvU64 size, NvU64 *cpu);
+
+/* nvidia_mmap.c: "reg" register set number of the BAR at a config offset. */
+int  nv_bar_rnumber(dev_info_t *, NvU32, uint_t *);
+
+/* nvidia_fw.c: read a whole file with kobj; free with kmem_free(*bufp, *sizep). */
+int  nv_sol_read_file(const char *path, void **bufp, size_t *sizep);
+#endif
 
 /* nvidia_pci.c */
 int  nv_pci_map_bars(nv_illumos_state_t *);

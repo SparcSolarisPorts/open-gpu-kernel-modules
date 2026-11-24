@@ -34,7 +34,9 @@
 #include "nv-illumos.h"
 #include "nv-reg.h"
 
+#if !defined(NV_SOLARIS)
 #include <sys/pci_cap.h>
+#endif
 
 const NvBool nv_is_rm_firmware_supported_os = NV_TRUE;
 
@@ -434,6 +436,11 @@ nv_attach_gpu(dev_info_t *dip)
         goto fail_free;
     }
 
+#if defined(NV_SOLARIS)
+    /* RM maps BARs by address, possibly before this device is listed. */
+    nv_sol_bar_register(nvis);
+#endif
+
     nv->handle = nv_pci_handle_for_dip(dip);
     if (nv->handle == NULL)
         goto fail_free;
@@ -576,6 +583,9 @@ fail_private:
 fail_locks:
     nv_lock_destroy_locks(sp, nv);
 fail_free:
+#if defined(NV_SOLARIS)
+    nv_sol_bar_unregister(nvis);
+#endif
     kmem_free(nvis, sizeof (*nvis));
 fail_early:
     pci_config_teardown(&cfg);
@@ -657,6 +667,9 @@ nv_detach_gpu(dev_info_t *dip)
 
     ddi_set_driver_private(dip, NULL);
     pci_config_teardown(&nvis->pci_cfg);
+#if defined(NV_SOLARIS)
+    nv_sol_bar_unregister(nvis);
+#endif
     kmem_free(nvis, sizeof (*nvis));
 
     nv_stack_free(sp);
@@ -834,7 +847,12 @@ _init(void)
     nv_stack_cache = kmem_cache_create("nvidia_stack_cache",
         sizeof (nvidia_stack_t), 16, NULL, NULL, NULL, NULL, NULL, 0);
     if (nv_stack_cache == NULL)
+    {
+#if defined(NV_SOLARIS)
+        nv_sol_vm_fini();
+#endif
         return (ENOMEM);
+    }
 
     mutex_init(&nv_global_lock, NULL, MUTEX_DRIVER, NULL);
     rw_init(&nv_illumos_devices_lock, NULL, RW_DRIVER, NULL);
@@ -876,6 +894,9 @@ fail:
     rw_destroy(&nv_adapter_state_lock);
     mutex_destroy(&nv_global_lock);
     kmem_cache_destroy(nv_stack_cache);
+#if defined(NV_SOLARIS)
+    nv_sol_vm_fini();
+#endif
     return (rc);
 }
 
@@ -903,6 +924,9 @@ _fini(void)
     rw_destroy(&nv_adapter_state_lock);
     mutex_destroy(&nv_global_lock);
     kmem_cache_destroy(nv_stack_cache);
+#if defined(NV_SOLARIS)
+    nv_sol_vm_fini();
+#endif
 
     return (0);
 }

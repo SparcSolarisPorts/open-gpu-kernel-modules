@@ -31,9 +31,29 @@
 
 #include "nv-illumos.h"
 
+#if !defined(NV_SOLARIS)
 #include <sys/pci_cfgacc.h>
+#endif
+#if !defined(NV_SOLARIS)
 #include <sys/pci_cap.h>
+#endif
 #include <sys/pcie.h>
+
+#if defined(NV_SOLARIS)
+/*
+ * Solaris exports pci_cfgacc_*() from misc/pcie but declares them in no
+ * header, and they address a root complex by an illumos-specific handle.  A
+ * device that RM asks for by bus/device/function and that this driver has not
+ * registered itself is therefore not reachable yet: os_pci_init_handle()
+ * returns NULL for it, so these are never called.
+ */
+#define pci_cfgacc_get8(rc, bdf, off)           ((uint8_t)0xff)
+#define pci_cfgacc_get16(rc, bdf, off)          ((uint16_t)0xffff)
+#define pci_cfgacc_get32(rc, bdf, off)          ((uint32_t)0xffffffff)
+#define pci_cfgacc_put8(rc, bdf, off, v)        ((void)0)
+#define pci_cfgacc_put16(rc, bdf, off, v)       ((void)0)
+#define pci_cfgacc_put32(rc, bdf, off, v)       ((void)0)
+#endif
 
 #define NV_PCIE_CFG_MAX_OFFSET      0x1000
 
@@ -248,6 +268,14 @@ void* NV_API_CALL os_pci_init_handle(
 
     if (h == NULL)
     {
+#if defined(NV_SOLARIS)
+        /*
+         * Bus numbers are per root complex on this platform and RM passes
+         * domain 0 for all of them, so a bare bus/device/function does not
+         * identify a function.  Only handles this driver registered work.
+         */
+        return NULL;
+#endif
         /* The PCI topology scan runs during attach.  Walking the device
          * tree here can select a function whose parent nexus is not ready. */
         bdf = PCI_GETBDF(bus, slot, function);
@@ -392,9 +420,19 @@ nv_pci_remove_task(void *arg)
     dev_info_t *pdip = ddi_get_parent(dip);
     int rv;
 
+#if defined(NV_SOLARIS)
+    {
+        int circ;
+
+        ndi_devi_enter(pdip, &circ);
+        rv = ndi_devi_offline(dip, NDI_DEVI_REMOVE);
+        ndi_devi_exit(pdip, circ);
+    }
+#else
     ndi_devi_enter(pdip);
     rv = ndi_devi_offline(dip, NDI_DEVI_REMOVE);
     ndi_devi_exit(pdip);
+#endif
 
     if (rv != NDI_SUCCESS)
     {
@@ -429,8 +467,30 @@ void NV_API_CALL os_pci_remove(void *handle)
 static int
 nv_pci_find_pcie_cap(ddi_acc_handle_t cfg, uint16_t *off)
 {
+#if defined(NV_SOLARIS)
+    /* Walk the capability list; Solaris has no PCI_CAP_LOCATE(). */
+    uint16_t status = pci_config_get16(cfg, PCI_CONF_STAT);
+    uint8_t ptr;
+    int guard = 48;
+
+    if ((status & PCI_STAT_CAP) == 0)
+        return ENOENT;
+
+    ptr = pci_config_get8(cfg, PCI_CONF_CAP_PTR) & 0xfc;
+    while (ptr >= 0x40 && guard-- > 0)
+    {
+        if (pci_config_get8(cfg, ptr + PCI_CAP_ID) == PCI_CAP_ID_PCI_E)
+        {
+            *off = ptr;
+            return 0;
+        }
+        ptr = pci_config_get8(cfg, ptr + PCI_CAP_NEXT_PTR) & 0xfc;
+    }
+    return ENOENT;
+#else
     return (PCI_CAP_LOCATE(cfg, PCI_CAP_ID_PCI_E, off) == DDI_SUCCESS) ?
         0 : ENOENT;
+#endif
 }
 
 /*
@@ -618,6 +678,30 @@ nv_pci_map_bars(nv_illumos_state_t *nvis)
         bar[idx].size = ((NvU64)regs[i].pci_size_hi << 32) |
             regs[i].pci_size_low;
         bar[idx].valid = (bar[idx].size != 0);
+
+#if defined(NV_SOLARIS)
+        /*
+         * "assigned-addresses" holds bus addresses, which differ from CPU
+         * addresses and between root complexes.  A BAR that no window of the
+         * px node covers is dropped instead of being used as it stands.
+         */
+        if (bar[idx].valid)
+        {
+            NvU64 cpu;
+
+            if (nv_sol_bus_to_cpu(nvis->dip, bar[idx].start, bar[idx].size,
+                    &cpu) != 0)
+            {
+                nv_printf(NV_DBG_ERRORS,
+                    "NVRM: BAR at config offset 0x%x (bus 0x%llx, size 0x%llx) "
+                    "is outside the root complex windows\n", off,
+                    bar[idx].start, bar[idx].size);
+                bar[idx].valid = NV_FALSE;
+                continue;
+            }
+            bar[idx].start = cpu;
+        }
+#endif
     }
     ddi_prop_free(regs);
 

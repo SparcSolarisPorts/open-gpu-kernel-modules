@@ -156,6 +156,14 @@ ifeq ($(ISA),sparcv9)
 NVIDIA_SRCS     += nvidia/nvidia_libgcc.c
 endif
 
+ifeq ($(SUNOS_FLAVOR),solaris)
+# sun4v has no ACPI: the ACPI sources need <sys/acpi/acpi.h> and acpica.
+NVIDIA_SRCS     := $(filter-out nvidia/nvidia_acpi.c \
+                   nvidia/nvidia_acpi_display.c, $(NVIDIA_SRCS)) \
+                   nvidia/nvidia_acpi_stub.c \
+                   nvidia/nvidia_solaris_vm.c
+endif
+
 # OS-neutral sources shared with the Linux build.
 NVIDIA_KOPEN_SRCS := \
     nv_uvm_interface.c

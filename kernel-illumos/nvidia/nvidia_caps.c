@@ -435,6 +435,14 @@ int NV_API_CALL os_nv_cap_validate_and_dup_fd(const nv_cap_t *cap, int fd)
     vnode_t *vp;
     int dup_fd;
 
+#if defined(NV_SOLARIS)
+    /*
+     * Duplicating a descriptor needs ufalloc_file() and f_setfd_or(), whose
+     * Solaris signatures differ from illumos.  Only MIG and IMEX use this.
+     */
+    return -1;
+#endif
+
     if (cap == NULL || cap->minor < 0 || nv_ctl_dip == NULL || curproc == &p0)
         return -1;
 

@@ -42,6 +42,19 @@ typedef void *gfxp_fb_softc_ptr_t;
 #define GFXP_MEMORY_UNCACHED        1
 #define GFXP_MEMORY_WRITECOMBINED   2
 
+/*
+ * Kernel mappings of RAM pages, implemented for Solaris in
+ * nvidia_solaris_vm.c.  Only physical addresses of real memory may be passed:
+ * a physical address that is neither memory nor a mapped device is fatal to
+ * touch on SPARC.  BARs are mapped through nv_sol_map_bar() instead.  The
+ * other gfxp_* functions stay undeclared.
+ */
+caddr_t gfxp_alloc_kernel_space(size_t size);
+void    gfxp_free_kernel_space(caddr_t va, size_t size);
+void    gfxp_load_kernel_space(uint64_t pa, size_t size, uint32_t mode,
+            caddr_t va);
+void    gfxp_unload_kernel_space(caddr_t va, size_t size);
+
 #else
 
 #include <sys/gfx_private.h>

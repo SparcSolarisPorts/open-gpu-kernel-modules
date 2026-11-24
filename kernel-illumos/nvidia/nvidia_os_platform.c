@@ -73,6 +73,14 @@ NV_STATUS NV_API_CALL os_get_smbios_header(NvU64 *pSmbsAddr)
     int64_t addr;
     NvU8 *map;
 
+#if defined(NV_SOLARIS)
+    /*
+     * sun4v has no SMBIOS.  The legacy scan below maps the x86 BIOS area at
+     * physical 0xF0000, which is not memory on SPARC.
+     */
+    return NV_ERR_NOT_SUPPORTED;
+#endif
+
     addr = ddi_prop_get_int64(DDI_DEV_T_ANY, ddi_root_node(),
         DDI_PROP_DONTPASS, "smbios-address", 0);
     if (addr != 0)
@@ -260,9 +268,19 @@ NvBool NV_API_CALL os_is_nvswitch_present(void)
 {
     NvBool found = NV_FALSE;
 
+#if defined(NV_SOLARIS)
+    {
+        int circ;
+
+        ndi_devi_enter(ddi_root_node(), &circ);
+        ddi_walk_devs(ddi_get_child(ddi_root_node()), os_nvswitch_walk, &found);
+        ndi_devi_exit(ddi_root_node(), circ);
+    }
+#else
     ndi_devi_enter(ddi_root_node());
     ddi_walk_devs(ddi_get_child(ddi_root_node()), os_nvswitch_walk, &found);
     ndi_devi_exit(ddi_root_node());
+#endif
 
     return found;
 }

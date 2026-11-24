@@ -111,8 +111,17 @@ nv_schedule_bh(nv_illumos_state_t *nvis)
     struct nv_intr_priv_s *ip = nvis->intr_priv;
 
     if (atomic_cas_32(&nvis->bh_pending, 0, 1) == 0)
+    {
+#if defined(NV_SOLARIS)
+        /* Unlike taskq_dispatch_ent(), this can fail; allow a later retry. */
+        if (taskq_dispatch(ip->bh_tq, nvidia_isr_bh, nvis, TQ_NOSLEEP) ==
+            TASKQID_INVALID)
+            atomic_swap_32(&nvis->bh_pending, 0);
+#else
         taskq_dispatch_ent(ip->bh_tq, nvidia_isr_bh, nvis, TQ_NOSLEEP,
             &ip->bh_ent);
+#endif
+    }
 }
 
 static void
@@ -121,8 +130,16 @@ nv_schedule_bh_unlocked(nv_illumos_state_t *nvis)
     struct nv_intr_priv_s *ip = nvis->intr_priv;
 
     if (atomic_cas_32(&nvis->bh_unlocked_pending, 0, 1) == 0)
+    {
+#if defined(NV_SOLARIS)
+        if (taskq_dispatch(ip->bh_unlocked_tq, nvidia_isr_bh_unlocked, nvis,
+            TQ_NOSLEEP) == TASKQID_INVALID)
+            atomic_swap_32(&nvis->bh_unlocked_pending, 0);
+#else
         taskq_dispatch_ent(ip->bh_unlocked_tq, nvidia_isr_bh_unlocked, nvis,
             TQ_NOSLEEP, &ip->bh_unlocked_ent);
+#endif
+    }
 }
 
 static uint_t

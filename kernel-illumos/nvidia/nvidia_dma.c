@@ -34,7 +34,9 @@
 #include <sys/vmsystm.h>
 #include "nv-gfxp.h"
 #include <sys/ddi_impldefs.h>
+#if !defined(NV_SOLARIS)
 #include <sys/pci_impl.h>
+#endif
 #include <vm/hat.h>
 #include <vm/as.h>
 #include <vm/seg.h>
@@ -280,6 +282,15 @@ NV_STATUS NV_API_CALL nv_dma_map_mmio(
         *va = *va + dma_dev->addressable_range.start;
         return NV_OK;
     }
+
+#if defined(NV_SOLARIS)
+    /*
+     * Peer MMIO would be mapped by physical address here, which is fatal for
+     * an address that is not memory or a mapped BAR.  Peer-to-peer between
+     * GPUs is not supported on this port yet.
+     */
+    return NV_ERR_NOT_SUPPORTED;
+#endif
 
     m = kmem_zalloc(sizeof (*m), KM_SLEEP);
     m->dma_dev = dma_dev;

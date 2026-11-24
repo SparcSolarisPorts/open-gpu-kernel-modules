@@ -34,7 +34,9 @@
 #include <sys/vmsystm.h>
 #include "nv-gfxp.h"
 #include <sys/ddi_impldefs.h>
+#if !defined(NV_SOLARIS)
 #include <sys/pci_impl.h>
+#endif
 #include <vm/hat.h>
 #include <vm/as.h>
 #include <vm/seg.h>

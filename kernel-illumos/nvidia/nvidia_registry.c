@@ -32,7 +32,9 @@
 #include "nv-reg.h"
 #include "nv-gpu-info.h"
 
+#if !defined(NV_SOLARIS)
 #include <sys/firmload.h>
+#endif
 
 /* RM key that forces Confidential Computing on; illumos cannot host CC. */
 #define NV_REG_RM_CONFIDENTIAL_COMPUTE  "RmConfidentialCompute"
@@ -341,6 +343,48 @@ nv_parse_per_device_option_string(nvidia_stack_t *sp, nv_state_t *current_nv)
 /*
  * Loads a binary registry value from /kernel/firmware/nvidia/<path>.
  */
+#if defined(NV_SOLARIS)
+static NV_STATUS
+nv_write_binary_registry_file(nvidia_stack_t *sp, nv_state_t *nv,
+    const char *key_name, const char *relative_path)
+{
+    char path[256];
+    void *buf = NULL;
+    size_t size = 0;
+    NV_STATUS status;
+    int err;
+
+    if (strstr(relative_path, "..") != NULL || relative_path[0] == '/')
+    {
+        nv_printf(NV_DBG_ERRORS,
+            "NVRM: NVreg_RegistryBinaryFilePerDevice key \"%s\": invalid path \"%s\"\n",
+            key_name, relative_path);
+        return NV_ERR_INVALID_ARGUMENT;
+    }
+
+    (void) snprintf(path, sizeof (path), "/kernel/firmware/nvidia/%s",
+        relative_path);
+    err = nv_sol_read_file(path, &buf, &size);
+    if (err != 0)
+    {
+        nv_printf(NV_DBG_ERRORS,
+            "NVRM: NVreg_RegistryBinaryFilePerDevice key \"%s\" failed to load "
+            "file \"%s\" (rc=%d)\n", key_name, path, err);
+        return (err == ENOENT) ? NV_ERR_OBJECT_NOT_FOUND : NV_ERR_INVALID_DATA;
+    }
+
+    status = rm_write_registry_binary(sp, nv, key_name, buf, (NvU32)size);
+    if (status != NV_OK)
+    {
+        nv_printf(NV_DBG_ERRORS,
+            "NVRM: NVreg_RegistryBinaryFilePerDevice key \"%s\" failed to "
+            "write registry binary (status=0x%x)\n", key_name, status);
+    }
+
+    kmem_free(buf, size);
+    return status;
+}
+#else /* !NV_SOLARIS */
 static NV_STATUS
 nv_write_binary_registry_file(nvidia_stack_t *sp, nv_state_t *nv,
     const char *key_name, const char *relative_path)
@@ -396,6 +440,7 @@ nv_write_binary_registry_file(nvidia_stack_t *sp, nv_state_t *nv,
     kmem_free(buf, (size_t)size);
     return status;
 }
+#endif /* NV_SOLARIS */
 
 /*
  * Parses NVreg_RegistryBinaryFilePerDevice: "pci=DDDD:BB:DD.F;key=path;..."

@@ -42,7 +42,9 @@
 #include <sys/vmsystm.h>
 #include "nv-gfxp.h"
 #include <sys/ddi_impldefs.h>
+#if !defined(NV_SOLARIS)
 #include <sys/pci_impl.h>
+#endif
 #include <vm/hat.h>
 #include <vm/as.h>
 #include <vm/seg.h>
@@ -374,8 +376,10 @@ fail:
 static void
 nv_alloc_destroy(nv_illumos_alloc_t *at)
 {
+#if !defined(NV_SOLARIS)
     if (at->umem_cookie != NULL)
         gfxp_umem_cookie_destroy(at->umem_cookie);
+#endif
 
     if (at->num_chunks != 0)
         nv_free_dma_chunks(at);

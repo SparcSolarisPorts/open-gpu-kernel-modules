@@ -29,9 +29,13 @@
 #include "nv-console-range.h"
 
 #include <sys/sdt.h>
+#if !defined(NV_SOLARIS)
 #include <sys/smbios.h>
+#endif
 #include <sys/callo.h>
+#if !defined(NV_SOLARIS)
 #include <sys/framebuffer.h>
+#endif
 
 /*
  * RC watchdog: RM's callback runs once a second while it returns NV_OK.
@@ -252,6 +256,13 @@ NvBool NV_API_CALL nv_s2idle_pm_configured(void)
 }
 
 /* SMBIOS chassis types 9 (laptop) and 10 (notebook). */
+#if defined(NV_SOLARIS)
+/* sun4v has no SMBIOS, and the smbios_*() kernel interfaces are absent. */
+NvBool NV_API_CALL nv_is_chassis_notebook(void)
+{
+    return NV_FALSE;
+}
+#else
 NvBool NV_API_CALL nv_is_chassis_notebook(void)
 {
     smbios_struct_t s;
@@ -264,11 +275,20 @@ NvBool NV_API_CALL nv_is_chassis_notebook(void)
 
     return (ch.smbc_type == SMB_CHT_LAPTOP || ch.smbc_type == SMB_CHT_NOTEBOOK);
 }
+#endif /* NV_SOLARIS */
 
 /*
  * RM keeps a boot console working only when it starts at the FB BAR base or
  * 16 MB into the IMEM BAR (RmSetConsolePreservationParams).
  */
+#if defined(NV_SOLARIS)
+/* The SPARC console is not a boot framebuffer inside a GPU BAR. */
+NvBool
+nv_is_boot_console(nv_state_t *nv)
+{
+    return NV_FALSE;
+}
+#else
 NvBool
 nv_is_boot_console(nv_state_t *nv)
 {
@@ -289,6 +309,7 @@ nv_is_boot_console(nv_state_t *nv)
             nv->bars[NV_GPU_BAR_INDEX_IMEM].size, fb_info.paddr,
             fb_info.fb_size, 0x1000000));
 }
+#endif /* NV_SOLARIS */
 
 /*
  * Boot framebuffer (EFI GOP or VESA) that the console draws into, if it
@@ -311,12 +332,14 @@ void NV_API_CALL nv_get_screen_info(
     if (!nv_is_boot_console(nv))
         return;
 
+#if !defined(NV_SOLARIS)
     *pPhysicalAddress = fb_info.paddr;
     *pFbWidth = fb_info.screen.x;
     *pFbHeight = fb_info.screen.y;
     *pFbDepth = fb_info.depth;
     *pFbPitch = fb_info.pitch;
     *pFbSize = fb_info.fb_size;
+#endif
 }
 
 /*
