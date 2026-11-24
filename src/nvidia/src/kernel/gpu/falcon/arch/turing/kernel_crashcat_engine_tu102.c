@@ -52,6 +52,17 @@ void kcrashcatEngineReadDmem_TU102
         NvU32 word = kcrashcatEngineRegRead(pKernelCrashCatEng->pGpu, pKernelCrashCatEng,
                                             NV_PFALCON_FALCON_DMEMD(port));
 #if NVCPU_IS_BIG_ENDIAN
+        // Big-endian bring-up diagnostic: say once that this reader runs.
+        if (i == 0)
+        {
+            static volatile NvU32 nReports;
+
+            if (nReports++ < 2)
+                NV_PRINTF(LEVEL_ERROR, "kcrashcatEngineReadDmem: BE branch, port %u offset 0x%x size 0x%x, "
+                          "first register word 0x%08x\n", port, offset, size, word);
+        }
+#endif
+#if NVCPU_IS_BIG_ENDIAN
         //
         // A DMEM data register read returns the numeric value of the 32-bit word
         // that sits in DMEM in little-endian byte order. Store it as the same

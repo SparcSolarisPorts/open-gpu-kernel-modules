@@ -1448,7 +1448,36 @@ kgspReadEmem_TU102
                  offset | DRF_DEF(_PGSP, _EMEMC, _AINCR, _TRUE));
 
     for (NvU32 idx = 0; idx < size / sizeof(NvU32); idx++)
-        pBuffer[idx] = GPU_REG_RD32(pGpu, NV_PGSP_EMEMD(pKernelGsp->ememPort));
+    {
+        NvU32 word = GPU_REG_RD32(pGpu, NV_PGSP_EMEMD(pKernelGsp->ememPort));
+#if NVCPU_IS_BIG_ENDIAN
+        // Big-endian bring-up diagnostic: say once that this reader runs.
+        if (idx == 0)
+        {
+            static volatile NvU32 nReports;
+
+            if (nReports++ < 2)
+                NV_PRINTF(LEVEL_ERROR, "kgspReadEmem: BE branch, port %u offset 0x%llx size 0x%llx, "
+                          "first register word 0x%08x\n",
+                          pKernelGsp->ememPort, offset, size, word);
+        }
+#endif
+#if NVCPU_IS_BIG_ENDIAN
+        //
+        // An EMEMD register read returns the numeric value of a 32-bit word that
+        // sits in EMEM in little-endian byte order. Store it as the same
+        // little-endian bytes so that pBuf is an image of EMEM on any host (see
+        // kcrashcatEngineReadDmem_TU102).
+        //
+        NvU8 *pBytes = (NvU8 *)&pBuffer[idx];
+        pBytes[0] = (NvU8)word;
+        pBytes[1] = (NvU8)(word >> 8);
+        pBytes[2] = (NvU8)(word >> 16);
+        pBytes[3] = (NvU8)(word >> 24);
+#else
+        pBuffer[idx] = word;
+#endif
+    }
 }
 
 /*!
