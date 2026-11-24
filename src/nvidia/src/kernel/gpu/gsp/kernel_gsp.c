@@ -466,6 +466,108 @@ _kgspCompleteRpcHistoryEntry
     }
 }
 
+#if NVCPU_IS_BIG_ENDIAN
+static const char *_getRpcName(NvU32 id);
+
+//
+// RM_RPC payload byte order.
+//
+// The message queue code converts the RPC header (see message_queue_cpu.c). The
+// payload that follows is a different structure for every message type, and it
+// is read and written by GSP-RM in little-endian byte order. There is no generic
+// description of those structures, so each message type that crosses the queue
+// is converted here by hand, field by field. A type that is not listed is left
+// alone and reported once, so that each run names the next type to add.
+//
+// The conversion runs in place on the staging buffer: before a message is sent
+// (and undone right after), and after a message is received. Reversing the
+// bytes of each field is its own inverse, so one function does both.
+//
+static void
+_kgspRpcReverse(void *pField, NvU32 width)
+{
+    NvU8 *p = (NvU8 *)pField;
+    NvU32 i;
+
+    for (i = 0; i < width / 2; i++)
+    {
+        NvU8 t = p[i];
+        p[i] = p[width - 1 - i];
+        p[width - 1 - i] = t;
+    }
+}
+
+#define KGSP_RPC_REVERSE(field) _kgspRpcReverse(&(field), sizeof(field))
+
+// Name each RPC whose payload is not converted yet, once, so the next run shows what to add.
+static void
+_kgspRpcReportUnconverted(NvU32 function, NvU32 payloadSize)
+{
+    static NvU32 seen[32];
+    static NvU32 nSeen;
+    NvU32 i;
+
+    if (payloadSize == 0)
+        return;
+
+    for (i = 0; (i < nSeen) && (i < NV_ARRAY_ELEMENTS(seen)); i++)
+    {
+        if (seen[i] == function)
+            return;
+    }
+    if (nSeen < NV_ARRAY_ELEMENTS(seen))
+        seen[nSeen++] = function;
+
+    NV_PRINTF(LEVEL_ERROR,
+              "RPC payload byte order NOT converted: function 0x%x (%s), payload %u bytes "
+              "(harmless if it holds only byte-sized fields)\n",
+              function, _getRpcName(function), payloadSize);
+}
+
+// Convert the payload of the RM_RPC message in the staging buffer (the header is in host order).
+static void
+_kgspRpcPayloadSwap(OBJRPC *pRpc)
+{
+    rpc_message_header_v *pHdr = rpcGetVgpuMessageHeader(pRpc);
+    NvU32 payloadSize = (pHdr->length > sizeof(*pHdr)) ? (NvU32)(pHdr->length - sizeof(*pHdr)) : 0;
+
+    switch (pHdr->function)
+    {
+        case NV_VGPU_MSG_FUNCTION_INIT_GSP_TRACE_CRASH_BUFFER:
+        {
+            rpc_init_gsp_trace_crash_buffer_v *p =
+                &rpcGetVgpuMessageData(pRpc)->init_gsp_trace_crash_buffer_v03_00;
+
+            if (payloadSize >= sizeof(*p))
+            {
+                KGSP_RPC_REVERSE(p->pa);
+                KGSP_RPC_REVERSE(p->size);
+            }
+            break;
+        }
+
+        case NV_VGPU_MSG_EVENT_UCODE_LIBOS_PRINT:
+        {
+            // The print buffer that follows is left as the GSP wrote it.
+            rpc_ucode_libos_print_v *p = &rpcGetVgpuMessageData(pRpc)->ucode_libos_print_v;
+
+            if (payloadSize >= sizeof(*p))
+            {
+                KGSP_RPC_REVERSE(p->ucodeEngDesc);
+                KGSP_RPC_REVERSE(p->libosPrintBufSize);
+            }
+            break;
+        }
+
+        default:
+            _kgspRpcReportUnconverted(pHdr->function, payloadSize);
+            break;
+    }
+}
+#else
+#define _kgspRpcPayloadSwap(pRpc) ((void)(pRpc))
+#endif // NVCPU_IS_BIG_ENDIAN
+
 /*!
  * GSP client RM RPC send routine
  */
@@ -503,7 +605,16 @@ NV_STATUS kgspSendRpc_IMPL
         sequence = pGmcHdr->sequence;
     }
 
+    // The payload is converted to the GSP's byte order for the copy into the
+    // queue, and back right after, so RM keeps host-order values in the buffer.
+    if (nvdmType == NVDM_TYPE_RM_RPC)
+        _kgspRpcPayloadSwap(pRpc);
+
     nvStatus = GspMsgQueueSendCommand(pRpc->pMessageQueueInfo, pGpu, nvdmType, size);
+
+    if (nvdmType == NVDM_TYPE_RM_RPC)
+        _kgspRpcPayloadSwap(pRpc);
+
     if (nvStatus != NV_OK)
     {
         if (nvStatus == NV_ERR_TIMEOUT ||
@@ -2069,6 +2180,9 @@ _kgspRpcDrainOneEvent
     if (nvStatus == NV_OK && nvdmType == NVDM_TYPE_RM_RPC)
     {
         rpc_message_header_v *pMsgHdr = rpcGetVgpuMessageHeader(pRpc);
+
+        // The header is host order here; convert the little-endian payload once.
+        _kgspRpcPayloadSwap(pRpc);
 
         if (pMsgHdr->function == expectedFunc &&
             pMsgHdr->sequence == expectedSequence)
