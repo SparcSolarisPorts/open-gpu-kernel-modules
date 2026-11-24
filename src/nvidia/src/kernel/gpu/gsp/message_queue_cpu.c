@@ -221,6 +221,7 @@ GspMsgQueuesInit
     NvP64        lastQueueVa;
     NvLength     lastQueueSize;
     NvU64 flags = MEMDESC_FLAGS_NONE;
+    NvU64 sharedMemPA = 0;
 
     if (*ppMQCollection != NULL)
     {
@@ -312,6 +313,29 @@ GspMsgQueuesInit
                     pMQCollection->pageTableEntryCount,  // count
                     pPageTbl);                  // physical address table
 
+    // Entry 0 is the physical address of the shared memory, which RM keeps.
+    sharedMemPA = pPageTbl[0];
+
+#if NVCPU_IS_BIG_ENDIAN
+    //
+    // GSP-RM reads this page table from system memory in little-endian byte
+    // order, but memdescGetPhysAddrs() stored host-order values. Convert each
+    // entry. RM does not read the table again.
+    //
+    {
+        NvU32 e, k;
+
+        for (e = 0; e < pMQCollection->pageTableEntryCount; e++)
+        {
+            NvU8 *p = (NvU8 *)&pPageTbl[e];
+            NvU64 v = pPageTbl[e];
+
+            for (k = 0; k < 8; k++)
+                p[k] = (NvU8)(v >> (8 * k));   // least significant byte first
+        }
+    }
+#endif
+
     pRmQueueInfo->pCommandQueue = NvP64_VALUE(
         NvP64_PLUS_OFFSET(pVaKernel, pMQCollection->pageTableSize));
 
@@ -329,7 +353,7 @@ GspMsgQueuesInit
     pRmQueueInfo->queueIdx = RPC_TASK_RM_QUEUE_IDX;
 
     *ppMQCollection             = pMQCollection;
-    pMQCollection->sharedMemPA  = pPageTbl[0];
+    pMQCollection->sharedMemPA  = sharedMemPA;
 
 done:
     return nvStatus;

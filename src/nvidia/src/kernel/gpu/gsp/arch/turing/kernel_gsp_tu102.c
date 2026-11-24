@@ -433,8 +433,82 @@ _kgspWprMetaV1SwapByteOrder(GspFwWprMetaV1 *pWprMeta)
     KGSP_WPR_META_SWAP(pWprMeta, verified);
 }
 // END WPR meta byte order
+
+// BEGIN GSP init arguments byte order
+//
+// GSP_ARGUMENTS_CACHED and the LibosMemoryRegionInitArgument array are read by
+// GSP-RM (little-endian) after Booter has started it, so unlike the WPR meta
+// they stay converted once the boot has succeeded. RM still adjusts some fields
+// (flags) between populating them and booting, so they are converted just
+// before Booter Load and converted back only if Booter Load fails, so that a
+// retry starts from host order again. Reversing the bytes of each field is its
+// own inverse.
+//
+#define KGSP_FIELD_SWAP(p, field) \
+    _kgspSwapBytes((NvU8 *) &(p)->field, sizeof((p)->field))
+
+static void
+_kgspGspArgsSwapByteOrder(KernelGsp *pKernelGsp)
+{
+    GSP_ARGUMENTS_CACHED *pArgs = pKernelGsp->pGspArgumentsCached;
+    LibosMemoryRegionInitArgument *pLibos = pKernelGsp->pLibosInitArgumentsCached;
+    MESSAGE_QUEUE_INIT_ARGUMENTS *pMq;
+    NvU32 i;
+
+    if (pArgs != NULL)
+    {
+        pMq = &pArgs->messageQueueInitArguments;
+
+        KGSP_FIELD_SWAP(pArgs, magic);
+        KGSP_FIELD_SWAP(pArgs, size);
+        KGSP_FIELD_SWAP(pArgs, flags);
+
+        KGSP_FIELD_SWAP(pMq, flags);
+        KGSP_FIELD_SWAP(pMq, sharedMemPhysAddr);
+        KGSP_FIELD_SWAP(pMq, cmdQueueOffset);
+        KGSP_FIELD_SWAP(pMq, statQueueOffset);
+        KGSP_FIELD_SWAP(pMq, queueElementHdrSize);
+        KGSP_FIELD_SWAP(pMq, queueElementSizeMin);
+        KGSP_FIELD_SWAP(pMq, queueElementSizeMax);
+        KGSP_FIELD_SWAP(pMq, queueHeaderAlign);
+        KGSP_FIELD_SWAP(pMq, queueElementAlign);
+        KGSP_FIELD_SWAP(pMq, pageTableEntryCount);
+
+        KGSP_FIELD_SWAP(&pArgs->srInitArguments, oldLevel);
+        KGSP_FIELD_SWAP(&pArgs->srInitArguments, flags);
+
+        KGSP_FIELD_SWAP(pArgs, gpuInstance);
+
+        KGSP_FIELD_SWAP(&pArgs->profilerArgs, pa);
+        KGSP_FIELD_SWAP(&pArgs->profilerArgs, size);
+        KGSP_FIELD_SWAP(&pArgs->sysmemHeapArgs, pa);
+        KGSP_FIELD_SWAP(&pArgs->sysmemHeapArgs, size);
+        KGSP_FIELD_SWAP(&pArgs->rmStateMonitorBufferArgs, pa);
+        KGSP_FIELD_SWAP(&pArgs->rmStateMonitorBufferArgs, size);
+        KGSP_FIELD_SWAP(&pArgs->bindataArgs, radix3);
+        KGSP_FIELD_SWAP(&pArgs->bindataArgs, size);
+        KGSP_FIELD_SWAP(&pArgs->vbiosOverrideArgs, pa);
+        KGSP_FIELD_SWAP(&pArgs->vbiosOverrideArgs, size);
+    }
+
+    if (pLibos != NULL)
+    {
+        const NvU32 maxEntries = LIBOS_MEMORY_REGION_INIT_ARGUMENTS_MAX / sizeof(*pLibos);
+
+        // The array ends at the first entry whose kind is NONE (a single byte,
+        // so it reads the same before and after conversion).
+        for (i = 0; (i < maxEntries) && (pLibos[i].kind != LIBOS_MEMORY_REGION_NONE); i++)
+        {
+            KGSP_FIELD_SWAP(&pLibos[i], id8);
+            KGSP_FIELD_SWAP(&pLibos[i], pa);
+            KGSP_FIELD_SWAP(&pLibos[i], size);
+        }
+    }
+}
+// END GSP init arguments byte order
 #else
 #define _kgspWprMetaV1SwapByteOrder(pWprMeta) ((void) (pWprMeta))
+#define _kgspGspArgsSwapByteOrder(pKernelGsp) ((void) (pKernelGsp))
 #endif
 
 /*!
@@ -536,11 +610,22 @@ kgspBootstrap_TU102
     }
 #endif
 
+    //
+    // The GSP reads its init arguments once it runs, so after a successful
+    // Booter Load they stay in little-endian order (_kgspGspArgsSwapByteOrder).
+    // They are converted back only if Booter Load fails.
+    //
+    if (bootMode == KGSP_BOOT_MODE_NORMAL)
+        _kgspGspArgsSwapByteOrder(pKernelGsp);
+
     status = kgspExecuteBooterLoad_HAL(pGpu, pKernelGsp,
                                        _kgspGetBooterLoadArgs(pKernelGsp, bootMode));
 
     if ((bootMode == KGSP_BOOT_MODE_NORMAL) && (pKernelGsp->pWprMetaV1 != NULL))
         _kgspWprMetaV1SwapByteOrder(pKernelGsp->pWprMetaV1);
+
+    if ((status != NV_OK) && (bootMode == KGSP_BOOT_MODE_NORMAL))
+        _kgspGspArgsSwapByteOrder(pKernelGsp);
 
     if (status != NV_OK)
     {

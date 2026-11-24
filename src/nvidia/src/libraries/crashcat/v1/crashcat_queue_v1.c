@@ -105,6 +105,23 @@ CrashCatReport *crashcatQueueConsumeNextReport_V1(CrashCatQueue *pQueue)
 
 #if NVCPU_IS_BIG_ENDIAN
     //
+    // Big-endian bring-up diagnostic: what the queue really holds when RM is
+    // about to decode it. A valid little-endian packet starts with the
+    // signature bytes of NV_CRASHCAT_SIGNATURE in the first two bytes.
+    //
+    {
+        const NvU8 *pRaw = (const NvU8 *)pBuf;
+
+        NV_PRINTF(LEVEL_ERROR, "CrashCat queue: size 0x%x put 0x%x get 0x%x readSize 0x%x, raw bytes: "
+                  "%02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x\n",
+                  size, put, get, readSize,
+                  pRaw[0], pRaw[1], pRaw[2], pRaw[3], pRaw[4], pRaw[5], pRaw[6], pRaw[7],
+                  pRaw[8], pRaw[9], pRaw[10], pRaw[11], pRaw[12], pRaw[13], pRaw[14], pRaw[15]);
+    }
+#endif
+
+#if NVCPU_IS_BIG_ENDIAN
+    //
     // The queue is written in little-endian byte order, and the packet fields
     // are 64-bit words. Decode from a private copy converted to host order.
     // (32-bit I/O state packets pack a 32-bit value and offset into each word
