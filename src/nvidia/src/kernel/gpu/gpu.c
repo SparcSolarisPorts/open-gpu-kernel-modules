@@ -4201,12 +4201,38 @@ gpuStateDestroy_IMPL
     return rmStatus;
 }
 
+//
+// Free the internal clients when gpuStateDestroy will not run, which is the
+// case when RmInitNvDevice fails before NV_INIT_FLAG_GPU_STATE is set. The
+// watchdog client is allocated early in gpuStatePreInit and is normally freed
+// only in gpuStateDestroy; left alive, its subdevice is freed at module unload
+// after the OBJGPU is gone. Safe to call after gpuStateDestroy (the handles
+// are NULL by then).
+//
 void gpuDestroyInternalHandles_IMPL
 (
     OBJGPU *pGpu
 )
 {
     _gpuFreeInternalObjects(pGpu);
+
+    if (pGpu->hInternalWatchdogClient != NV01_NULL_OBJECT)
+    {
+        RM_API *pRmApi = rmapiGetInterface(RMAPI_GPU_LOCK_INTERNAL);
+
+        if (pGpu->pKernelWatchdog != NULL)
+        {
+            pRmApi->Free(pRmApi, pGpu->hInternalWatchdogClient, KERNEL_WATCHDOG_OBJECT_ID);
+            pGpu->pKernelWatchdog = NULL;
+        }
+
+        rmapiutilFreeClientAndDeviceHandles(pRmApi,
+            &pGpu->hInternalWatchdogClient, &pGpu->hInternalWatchdogDevice, &pGpu->hInternalWatchdogSubdevice);
+
+        pGpu->hInternalWatchdogClient = NV01_NULL_OBJECT;
+        pGpu->hInternalWatchdogDevice = NV01_NULL_OBJECT;
+        pGpu->hInternalWatchdogSubdevice = NV01_NULL_OBJECT;
+    }
 }
 //
 // Logic: If arch = requested AND impl = requested --> NV_TRUE

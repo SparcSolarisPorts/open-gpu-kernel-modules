@@ -592,4 +592,13 @@ typedef struct SimAccessBuffer
     volatile NvU32 seq;
 } SimAccessBuffer;
 
+#if NVCPU_IS_BIG_ENDIAN
+/*!
+ * Convert the parameters of an RM control between host byte order and the
+ * GSP's little-endian order, in place (the same call does both directions).
+ * Defined in kernel_gsp.c. Returns NV_FALSE if the layout is not known.
+ */
+NvBool kgspRpcSwapCtrlParams(NvU32 cmd, NvU32 rpcFlags, void *pParams, NvU32 paramsSize);
+#endif
+
 #endif // __vgpu_dev_nv_rpc_h__

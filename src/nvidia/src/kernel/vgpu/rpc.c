@@ -10849,6 +10849,11 @@ NV_STATUS rpcRmApiControl_GSP
     // Issue RPC
     if (large_message_copy)
     {
+#if NVCPU_IS_BIG_ENDIAN
+        // The block is sliced into continuation records below, so the whole of it is
+        // converted here. The reply overwrites the copy, and is converted back below.
+        kgspRpcSwapCtrlParams(cmd, rpc_params->rmapiRpcFlags, rpc_params->params, paramsSize);
+#endif
         status = _issueRpcAndWaitLarge(pGpu, pRpc, total_size, large_message_copy, NV_TRUE);
     }
     else
@@ -10869,6 +10874,15 @@ NV_STATUS rpcRmApiControl_GSP
             status = rpc_params->status;
             goto done;
         }
+
+#if NVCPU_IS_BIG_ENDIAN
+        // A reply that came in continuation records is still in the GSP's byte order
+        // (a reply that fit in one record was converted when it was received).
+        if (large_message_copy && paramsSize != 0)
+        {
+            kgspRpcSwapCtrlParams(cmd, rpc_params->rmapiRpcFlags, rpc_params->params, paramsSize);
+        }
+#endif
 
         if (resCtrlFlags & NVOS54_FLAGS_FINN_SERIALIZED)
         {

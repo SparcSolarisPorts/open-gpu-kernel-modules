@@ -2467,6 +2467,15 @@ void RmShutdownAdapter(
                     rmStatus = gpuStateDestroy(pGpu);
                     NV_ASSERT(rmStatus == NV_OK);
                 }
+                else
+                {
+                    //
+                    // RmInitNvDevice failed before the GPU state was created, so
+                    // gpuStateDestroy does not run. Free the internal clients that
+                    // gpuStatePreInit allocated, or they outlive the OBJGPU.
+                    //
+                    gpuDestroyInternalHandles(pGpu);
+                }
 
                 if (IS_DCE_CLIENT(pGpu))
                 {
