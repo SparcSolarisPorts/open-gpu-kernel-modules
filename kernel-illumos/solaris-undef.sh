@@ -1,19 +1,32 @@
 #!/bin/sh
 #
-# List the symbols that a kernel module needs and that neither the module
-# itself nor the running kernel provides.  modload(1M) reports only the first
-# such symbol; this prints all of them, so they can be fixed in one pass.
+# List the symbols a kernel module needs that neither the module itself nor
+# the kernel modules it depends on provide.  modload(1M) reports only the
+# first such symbol; this prints all of them, so they can be fixed in one pass.
 #
-# Read-only.  Usage: solaris-undef.sh _out/SunOS_sparcv9/nvidia.kmod
+# Two kinds of problem are reported:
+#   - no kernel module exports the symbol: it has to be written or stubbed;
+#   - only a module outside the dependency list exports it: the module needs
+#     another -N<module> at link time, and nothing else.
 #
-# The kernel's symbols come from unix, genunix and every misc module, which
-# is where DDI routines such as ddi_regs_map_setup() and kobj_open_file() live.
-# Solaris nm -p prints "value type name"; type U is undefined.
+# Read-only.
+#
+#   solaris-undef.sh module.kmod [dependency ...]
+#
+# Dependencies are written as they are on the link line without -N, for
+# example misc/pcie.  The default is the list nvidia.kmod links with.
+# unix and genunix are always available.
 
 mod=$1
 if [ -z "$mod" ] || [ ! -f "$mod" ]; then
-    echo "usage: $0 module.kmod" >&2
+    echo "usage: $0 module.kmod [misc/dependency ...]" >&2
     exit 2
+fi
+shift
+if [ $# -gt 0 ]; then
+    deps="$*"
+else
+    deps="misc/pcie misc/sha2 misc/kcf"
 fi
 
 TMP=${TMPDIR:-/tmp}/solaris-undef.$$
@@ -22,26 +35,51 @@ trap 'rm -rf "$TMP"' 0
 trap 'exit 1' 1 2 15
 
 # An undefined symbol has no value, so its line may be "U name" (two fields)
-# or "<blanks> U name"; a defined one is "<value> <type> <name>".  The type is
-# the next-to-last field and is a single letter.
+# or "<value> U name"; a defined global one is "<value> <TYPE> <name>" with an
+# upper-case type letter.  The type is the next-to-last field.
 UNDEF='NF >= 2 && $(NF-1) == "U" { print $NF }'
-DEFINED='NF >= 3 && $(NF-1) ~ /^[A-Za-z]$/ && $(NF-1) != "U" { print $NF }'
+DEFINED='NF >= 3 && $(NF-1) ~ /^[A-TV-Z]$/ { print $NF, m }'
 
-# Names the module needs.
+# Symbols the module needs.
 nm -p "$mod" | awk "$UNDEF" | sort -u > "$TMP/need"
 
-# Names the module defines itself, and the kernel's.
-{
-    nm -p "$mod" | awk "$DEFINED"
+# Who provides what: "symbol module" lines.  The module provides its own.
+nm -p "$mod" | awk -v m=self "$DEFINED" > "$TMP/prov"
 
-    for f in $(find /platform/sun4v/kernel /kernel -type f \
-            \( -name unix -o -name genunix -o -path '*/misc/sparcv9/*' \) \
-            2>/dev/null); do
-        nm -p "$f" 2>/dev/null | awk "$DEFINED"
-    done
-} | sort -u > "$TMP/have"
+for f in $(find /platform/sun4v/kernel /kernel /usr/kernel -type f \
+        \( -name unix -o -name genunix -o -path '*/misc/sparcv9/*' \) \
+        2>/dev/null); do
+    case $f in
+        */misc/sparcv9/*) name=misc/$(basename "$f") ;;
+        *)                name=core ;;
+    esac
+    nm -p "$f" 2>/dev/null | awk -v m="$name" "$DEFINED" >> "$TMP/prov"
+done
 
-echo "needed:      $(wc -l < "$TMP/need" | tr -d ' ')"
-echo "provided:    $(wc -l < "$TMP/have" | tr -d ' ') (module plus kernel)"
-echo "unresolved:"
-comm -23 "$TMP/need" "$TMP/have" | sed 's/^/    /'
+awk -v deps="$deps" '
+    FNR == NR {
+        prov[$1] = ($1 in prov) ? prov[$1] " " $2 : $2
+        next
+    }
+    {
+        n++
+        if (!($1 in prov)) { none[++nn] = $1; next }
+        c = split(prov[$1], mods, " ")
+        ok = 0
+        for (i = 1; i <= c; i++)
+            if (mods[i] == "core" || mods[i] == "self" ||
+                index(" " deps " ", " " mods[i] " ") > 0)
+                ok = 1
+        if (ok) { good++; next }
+        dep[++nd] = $1 "  (" mods[1] ")"
+    }
+    END {
+        printf "needed:      %d\n", n
+        printf "resolved:    %d\n", good
+        printf "no module provides (write or stub these): %d\n", nn
+        for (i = 1; i <= nn; i++) printf "    %s\n", none[i]
+        printf "provided only by a module not in the dependency list (%s): %d\n",
+            deps, nd
+        for (i = 1; i <= nd; i++) printf "    %s\n", dep[i]
+    }
+' "$TMP/prov" "$TMP/need"

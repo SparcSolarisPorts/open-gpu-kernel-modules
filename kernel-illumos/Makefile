@@ -174,8 +174,11 @@ NVIDIA_CFLAGS   := $(CFLAGS_BASE) -Invidia -Icommon/inc -I$(KOPEN_NVIDIA) \
                    -DNV_UVM_ENABLE -DLIBSPDM_CONFIG=\"nvspdm_rmconfig.h\"
 ifeq ($(SUNOS_FLAVOR),solaris)
 # No gfx_private or acpica on Solaris.  Whether misc/sha2 and misc/kcf exist
-# under these names on 11.4 is unchecked.
-NVIDIA_DEPS     := -Nmisc/pcie -Nmisc/sha2 -Nmisc/kcf
+# under these names on 11.4 is unchecked.  Solaris ld rejects undefined
+# symbols unless told otherwise, and a kernel module leaves the kernel's own
+# routines undefined for krtld to resolve at load time; solaris-undef.sh
+# lists the ones that nothing provides.
+NVIDIA_DEPS     := -z nodefs -Nmisc/pcie -Nmisc/sha2 -Nmisc/kcf
 else
 NVIDIA_DEPS     := -Nmisc/gfx_private -Nmisc/acpica -Nmisc/pcie \
                    -Nmisc/sha2 -Nmisc/kcf
