@@ -77,10 +77,26 @@ NV_STATUS nvkvConvertByteOrder(NvU8 *pKV, NvU32 count64, NvBool bSrcBigEndian)
                 break;
 
             case NVKV_OPCODE_SEQ32:
-                // Pairs of 32-bit values are packed into each 64-bit word by shifts.
+                //
+                // The encoder packs pairs of 32-bit values into each 64-bit word by shifts
+                // (data1 | data2 << 32), but nvkvDecode() reads them back through an
+                // NvU32 pointer. The two agree on a little-endian host only.
+                //   - Host to device: the buffer was built by the encoder, so each 64-bit
+                //     word is reversed to give the device its little-endian value.
+                //   - Device to host: the buffer is going to be read by nvkvDecode(), so
+                //     each 32-bit value is reversed in place (data1 first in memory).
+                //
                 dataWords = NV_ALIGN_UP64(valueCount * sizeof(NvU32), sizeof(NvU64)) / sizeof(NvU64);
-                elemWidth = sizeof(NvU64);
-                elemCount = dataWords;
+                if (bSrcBigEndian)
+                {
+                    elemWidth = sizeof(NvU64);
+                    elemCount = dataWords;
+                }
+                else
+                {
+                    elemWidth = sizeof(NvU32);
+                    elemCount = dataWords * 2;
+                }
                 break;
 
             case NVKV_OPCODE_SEQ64:

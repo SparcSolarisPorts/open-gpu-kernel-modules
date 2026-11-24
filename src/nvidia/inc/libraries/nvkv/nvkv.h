@@ -471,8 +471,12 @@ extern NV_STATUS nvkvDecode(NVKVKeyHandler keyHandler, const NvU64 *pKV, const N
  * it as little-endian. On a big-endian host the buffer must be converted before it is sent and
  * after it is received. The conversion walks the instruction stream, because the data is packed
  * differently by each opcode:
- *   - instruction words, SEQ32 data words, SEQ64 values and ARRAY64 values are 64-bit values,
- *     and every byte of each is reversed;
+ *   - instruction words, SEQ64 values and ARRAY64 values are 64-bit values, and every byte of
+ *     each is reversed;
+ *   - SEQ32 data words are built by the encoder as 64-bit values (two 32-bit values per word)
+ *     but read by nvkvDecode() as 32-bit values, so they are reversed per 64-bit word when the
+ *     buffer is big-endian now (sending) and per 32-bit value when it is little-endian now
+ *     (receiving). The conversion of SEQ32 data is therefore not its own inverse;
  *   - ARRAY32 values are reversed per 32-bit element;
  *   - ARRAY8 data (including strings) is a byte sequence and is left alone.
  *

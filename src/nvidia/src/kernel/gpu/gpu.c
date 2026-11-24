@@ -957,6 +957,11 @@ static NV_STATUS _gpuAllocateInternalObjects
         pGpu->hInternalClient = pGSCI->hInternalClient;
         pGpu->hInternalDevice = pGSCI->hInternalDevice;
         pGpu->hInternalSubdevice = pGSCI->hInternalSubdevice;
+#if NVCPU_IS_BIG_ENDIAN
+        // Big-endian bring-up diagnostic: the handles as decoded from the GSP static info.
+        NV_PRINTF(LEVEL_ERROR, "GSP internal handles: client 0x%08x device 0x%08x subdevice 0x%08x\n",
+                  pGpu->hInternalClient, pGpu->hInternalDevice, pGpu->hInternalSubdevice);
+#endif
     }
     else if (IS_DCE_CLIENT(pGpu))
     {
