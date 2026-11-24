@@ -24,6 +24,100 @@
 #include "nvkv/nvkv.h"
 #include "utils/nvprintf.h"
 
+static NvU64 _nvkvLoad64(const NvU8 *p, NvBool bBigEndian)
+{
+    NvU64 v = 0;
+    NvU32 i;
+
+    for (i = 0; i < 8; i++)
+    {
+        const NvU32 shift = bBigEndian ? (8 * (7 - i)) : (8 * i);
+        v |= ((NvU64)p[i]) << shift;
+    }
+
+    return v;
+}
+
+static void _nvkvReverseBytes(NvU8 *p, NvU32 width)
+{
+    NvU32 i;
+
+    for (i = 0; i < width / 2; i++)
+    {
+        NvU8 t = p[i];
+        p[i] = p[width - 1 - i];
+        p[width - 1 - i] = t;
+    }
+}
+
+NV_STATUS nvkvConvertByteOrder(NvU8 *pKV, NvU32 count64, NvBool bSrcBigEndian)
+{
+    NvU64 idx = 0;
+
+    NV_ASSERT_OR_RETURN(count64 == 0 || pKV != NULL, NV_ERR_INVALID_ARGUMENT);
+
+    while (idx < count64)
+    {
+        NvU8 *pInstr = pKV + (idx * sizeof(NvU64));
+        NvU64 kvData = _nvkvLoad64(pInstr, bSrcBigEndian);
+        NvU64 opcode = REF_VAL64(NVKV_OPCODE, kvData);
+        NvU64 valueCount = REF_VAL64(NVKV_COUNT32, kvData);
+        NvU64 dataWords = 0;
+        NvU32 elemWidth = 0;   // 0: leave the data alone
+        NvU64 elemCount = 0;
+        NvU64 i;
+
+        // The instruction word itself is a 64-bit value.
+        _nvkvReverseBytes(pInstr, sizeof(NvU64));
+        idx++;
+
+        switch (opcode)
+        {
+            case NVKV_OPCODE_IMM32:
+                break;
+
+            case NVKV_OPCODE_SEQ32:
+                // Pairs of 32-bit values are packed into each 64-bit word by shifts.
+                dataWords = NV_ALIGN_UP64(valueCount * sizeof(NvU32), sizeof(NvU64)) / sizeof(NvU64);
+                elemWidth = sizeof(NvU64);
+                elemCount = dataWords;
+                break;
+
+            case NVKV_OPCODE_SEQ64:
+            case NVKV_OPCODE_ARRAY64:
+                dataWords = valueCount;
+                elemWidth = sizeof(NvU64);
+                elemCount = valueCount;
+                break;
+
+            case NVKV_OPCODE_ARRAY8:
+                // A byte sequence: the same bytes on any host.
+                dataWords = NV_ALIGN_UP64(valueCount * sizeof(NvU8), sizeof(NvU64)) / sizeof(NvU64);
+                break;
+
+            case NVKV_OPCODE_ARRAY32:
+                // Copied as host 32-bit values, so each element is reversed on its own.
+                dataWords = NV_ALIGN_UP64(valueCount * sizeof(NvU32), sizeof(NvU64)) / sizeof(NvU64);
+                elemWidth = sizeof(NvU32);
+                elemCount = valueCount;
+                break;
+
+            default:
+                return NV_ERR_INVALID_COMMAND;
+        }
+
+        if ((idx + dataWords) > count64)
+            return NV_ERR_OUT_OF_RANGE;
+
+        for (i = 0; i < elemCount; i++)
+            _nvkvReverseBytes(pKV + (idx * sizeof(NvU64)) + (i * elemWidth), elemWidth);
+
+        idx += dataWords;
+    }
+
+    return NV_OK;
+}
+
 NV_STATUS nvkvDecode(NVKVKeyHandler keyHandler, const NvU64 *pKV, const NvU32 maxKVCount, void *const ctx)
 {
     NvU64 kvIndex = 0;

@@ -464,6 +464,29 @@ typedef NvBool (*NVKVKeyHandler)(const NvU64 keyIndex, const NvU64 key, const NV
  */
 extern NV_STATUS nvkvDecode(NVKVKeyHandler keyHandler, const NvU64 *pKV, const NvU32 maxKVCount, void * const ctx);
 
+/**
+ * @brief Convert an NVKV buffer between big-endian and little-endian byte order, in place.
+ *
+ * The encoders above build the buffer from host-order NvU64 values, and the device (GSP) reads
+ * it as little-endian. On a big-endian host the buffer must be converted before it is sent and
+ * after it is received. The conversion walks the instruction stream, because the data is packed
+ * differently by each opcode:
+ *   - instruction words, SEQ32 data words, SEQ64 values and ARRAY64 values are 64-bit values,
+ *     and every byte of each is reversed;
+ *   - ARRAY32 values are reversed per 32-bit element;
+ *   - ARRAY8 data (including strings) is a byte sequence and is left alone.
+ *
+ * @param[in,out] pKV         The buffer, as bytes.
+ * @param[in]     count64     Number of NvU64 words in the buffer.
+ * @param[in]     bSrcBigEndian NV_TRUE if the buffer is big-endian now (and becomes little-endian),
+ *                            NV_FALSE if it is little-endian now (and becomes big-endian). The
+ *                            instruction words are decoded in this order before they are converted.
+ *
+ * @return NV_OK, NV_ERR_OUT_OF_RANGE if an instruction runs past the end of the buffer, or
+ *         NV_ERR_INVALID_COMMAND for an unknown opcode. On error the buffer is partly converted.
+ */
+extern NV_STATUS nvkvConvertByteOrder(NvU8 *pKV, NvU32 count64, NvBool bSrcBigEndian);
+
 typedef struct NVKVDecodeContext {
     NvU64  keyIndex;
     NvU64  key;

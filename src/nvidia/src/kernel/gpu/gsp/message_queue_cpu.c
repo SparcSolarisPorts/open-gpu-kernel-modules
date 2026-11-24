@@ -58,6 +58,84 @@
 
 static void _gspMsgQueueCleanup(MESSAGE_QUEUE_INFO *pMQI);
 
+#if NVCPU_IS_BIG_ENDIAN
+//
+// Byte order of queue messages.
+//
+// GSP-RM reads and writes the queue in little-endian byte order. The staging
+// element (pMQI->pCmdQueueElement) always holds host-order values, because the
+// rest of RM builds and reads its fields directly. On a big-endian host the
+// protocol headers are therefore converted on the copy that is exchanged with
+// the GSP: after the first element is copied into the queue when sending, and
+// right after the first element is copied out of the queue when receiving.
+// Reversing the bytes of each field is its own inverse, so the same functions
+// serve both directions. The payload that follows these headers is NOT
+// converted here (it is command-specific, see the callers).
+// Encrypted queues (confidential compute) are not supported on big-endian hosts.
+//
+static void
+_gspMqReverse(void *pField, NvU32 width)
+{
+    NvU8 *p = (NvU8 *)pField;
+    NvU32 i;
+
+    for (i = 0; i < width / 2; i++)
+    {
+        NvU8 t = p[i];
+        p[i] = p[width - 1 - i];
+        p[width - 1 - i] = t;
+    }
+}
+
+#define GSP_MQ_REVERSE(field) _gspMqReverse(&(field), sizeof(field))
+
+// MCTP / NVDM framing of the first queue element (no-encryption layout).
+static void
+_gspMsgQueueElementHdrSwap(GSP_MSG_QUEUE_ELEMENT *pElem)
+{
+    GSP_MQ_REVERSE(pElem->mctpMagic);
+    GSP_MQ_REVERSE(pElem->mctpPayloadSize);
+    GSP_MQ_REVERSE(pElem->mctpHeader);
+    GSP_MQ_REVERSE(pElem->nvdmHeader);
+    GSP_MQ_REVERSE(pElem->noEncryption.nvdmPayloadSize);
+    GSP_MQ_REVERSE(pElem->noEncryption.reserved);
+}
+
+//
+// The header that starts the payload. GMCAPI_HEADER is an ABI-stable 40-byte
+// layout (ct_assert in gmcapi_impl.c): u32 command, u32 size, u64 sequence,
+// u32 (request.max_response_size or response.status), u32 reserved[5].
+// The offsets are written out so that this file does not need the type.
+//
+static void
+_gspMsgQueuePayloadHdrSwap(NvU8 *pPayload, NvU32 nvdmType)
+{
+    NvU32 off;
+
+    if (nvdmType == NVDM_TYPE_GMCAPI)
+    {
+        _gspMqReverse(pPayload + 0, 4);     // command
+        _gspMqReverse(pPayload + 4, 4);     // size
+        _gspMqReverse(pPayload + 8, 8);     // sequence
+        for (off = 16; off < 40; off += 4)  // union and reserved[5]
+            _gspMqReverse(pPayload + off, 4);
+    }
+    else if (nvdmType == NVDM_TYPE_RM_RPC)
+    {
+        rpc_message_header_v *pHdr = (rpc_message_header_v *)pPayload;
+
+        GSP_MQ_REVERSE(pHdr->header_version);
+        GSP_MQ_REVERSE(pHdr->signature);
+        GSP_MQ_REVERSE(pHdr->length);
+        GSP_MQ_REVERSE(pHdr->function);
+        GSP_MQ_REVERSE(pHdr->rpc_result);
+        GSP_MQ_REVERSE(pHdr->rpc_result_private);
+        GSP_MQ_REVERSE(pHdr->sequence);
+        GSP_MQ_REVERSE(pHdr->u.spare);
+    }
+}
+#endif // NVCPU_IS_BIG_ENDIAN
+
 static void
 _getMsgQueueParams
 (
@@ -632,6 +710,19 @@ NV_STATUS GspMsgQueueSendCommand(MESSAGE_QUEUE_INFO *pMQI, OBJGPU *pGpu, NvU32 n
         portMemCopy(pNextElement, pMQI->queueElementSizeMin,
                     pSrc, pMQI->queueElementSizeMin);
         pSrc += pMQI->queueElementSizeMin;
+
+#if NVCPU_IS_BIG_ENDIAN
+        //
+        // Convert the protocol headers on the copy in the queue only; the
+        // staging element keeps host-order values (see _gspMsgQueueElementHdrSwap).
+        //
+        if ((i == 0) && !pMQI->bEncryptionEnabled)
+        {
+            _gspMsgQueueElementHdrSwap((GSP_MSG_QUEUE_ELEMENT *)pNextElement);
+            _gspMsgQueuePayloadHdrSwap(pNextElement +
+                NV_OFFSETOF(GSP_MSG_QUEUE_ELEMENT, noEncryption.payload), nvdmType);
+        }
+#endif
     }
 
     //
@@ -714,6 +805,12 @@ NV_STATUS GspMsgQueueReceiveStatus(MESSAGE_QUEUE_INFO *pMQI, OBJGPU *pGpu, NvU32
             portMemCopy(pTgt, pMQI->queueElementSizeMin,
                         pNextElement, pMQI->queueElementSizeMin);
             pTgt += pMQI->queueElementSizeMin;
+
+#if NVCPU_IS_BIG_ENDIAN
+            // The queue holds little-endian headers; the staging copy is host order.
+            if ((i == 0) && !pMQI->bEncryptionEnabled)
+                _gspMsgQueueElementHdrSwap(pCQE);
+#endif
 
             if (i == 0)
             {
@@ -812,7 +909,18 @@ NV_STATUS GspMsgQueueReceiveStatus(MESSAGE_QUEUE_INFO *pMQI, OBJGPU *pGpu, NvU32
         }
         else
         {
+#if NVCPU_IS_BIG_ENDIAN
+            // Mark the message as seen in the queue's (little-endian) byte order, so
+            // that a re-read converts back to MCTP_MAGIC_SEEN.
             pFirstElementInSharedMemory->mctpMagic = MCTP_MAGIC_SEEN;
+            GSP_MQ_REVERSE(pFirstElementInSharedMemory->mctpMagic);
+
+            if (!pMQI->bEncryptionEnabled)
+                _gspMsgQueuePayloadHdrSwap((NvU8 *)pCQE +
+                    NV_OFFSETOF(GSP_MSG_QUEUE_ELEMENT, noEncryption.payload), *pNvdmType);
+#else
+            pFirstElementInSharedMemory->mctpMagic = MCTP_MAGIC_SEEN;
+#endif
             portAtomicMemoryFenceStore();
         }
 

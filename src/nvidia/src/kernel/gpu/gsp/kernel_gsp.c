@@ -5325,15 +5325,64 @@ kgspSendInitRpcs_IMPL
 
     threadStateResetTimeout(pGpu);
 
-    status = gmcapiCommand(pGpu, GMCAPI_CMD_GSP_INIT,
-                           pKernelGsp->pEncodedSystemInfo,
-                           sizeof(NvU64) * pKernelGsp->encodedSystemInfoCount,
-                           pKVStaticInfoData, &responseSize);
+    {
+        const NvU64 *pSendInfo = pKernelGsp->pEncodedSystemInfo;
+        NvU64 *pWireInfo = NULL;
+
+#if NVCPU_IS_BIG_ENDIAN
+        //
+        // GSP-RM decodes the NVKV system info as little-endian. Send a converted
+        // copy, so that the host-order original stays valid for a boot retry.
+        //
+        if (pKernelGsp->encodedSystemInfoCount > 0)
+        {
+            pWireInfo = portMemAllocNonPaged(sizeof(NvU64) * pKernelGsp->encodedSystemInfoCount);
+            if (pWireInfo == NULL)
+            {
+                status = NV_ERR_NO_MEMORY;
+                goto done;
+            }
+            portMemCopy(pWireInfo, sizeof(NvU64) * pKernelGsp->encodedSystemInfoCount,
+                        pKernelGsp->pEncodedSystemInfo,
+                        sizeof(NvU64) * pKernelGsp->encodedSystemInfoCount);
+
+            status = nvkvConvertByteOrder((NvU8 *)pWireInfo, pKernelGsp->encodedSystemInfoCount,
+                                          NV_TRUE /* buffer is big-endian now */);
+            if (status != NV_OK)
+            {
+                NV_PRINTF(LEVEL_ERROR, "NVKV byte order conversion failed: 0x%x\n", status);
+                portMemFree(pWireInfo);
+                goto done;
+            }
+            pSendInfo = pWireInfo;
+        }
+#endif
+
+        status = gmcapiCommand(pGpu, GMCAPI_CMD_GSP_INIT,
+                               pSendInfo,
+                               sizeof(NvU64) * pKernelGsp->encodedSystemInfoCount,
+                               pKVStaticInfoData, &responseSize);
+
+        if (pWireInfo != NULL)    // only allocated on big-endian hosts
+            portMemFree(pWireInfo);
+    }
+
     if (status != NV_OK)
     {
         NV_PRINTF(LEVEL_ERROR, "GMCAPI_CMD_GSP_INIT failed: 0x%x\n", status);
         goto done;
     }
+
+#if NVCPU_IS_BIG_ENDIAN
+    // The static info reply is a little-endian NVKV stream.
+    status = nvkvConvertByteOrder((NvU8 *)pKVStaticInfoData, (NvU32)(responseSize / sizeof(NvU64)),
+                                  NV_FALSE /* buffer is little-endian now */);
+    if (status != NV_OK)
+    {
+        NV_PRINTF(LEVEL_ERROR, "NVKV byte order conversion of static info failed: 0x%x\n", status);
+        goto done;
+    }
+#endif
 
     status = _kgspDecodeGspStaticInfo(pGpu, pKVStaticInfoData,
                                       responseSize / sizeof(NvU64));
