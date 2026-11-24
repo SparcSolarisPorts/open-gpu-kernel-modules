@@ -6305,7 +6305,40 @@ kgspPrepareBootBinaryImage_IMPL
     NV_ASSERT_OK_OR_GOTO(status,
                          bindataStorageAcquireData(pBinStorageDesc, (const void**)&pDesc),
                          fail);
+
+    // Hand the copy over now, so that the fail path below releases it.
     pKernelGsp->pGspRmBootUcodeDesc = pDesc;
+
+#if NVCPU_IS_BIG_ENDIAN
+    //
+    // The descriptor is the little-endian byte image of RM_RISCV_UCODE_DESC,
+    // a struct of NvU32 fields only. Convert each word to host order before
+    // any reader looks at it. pDesc is a private copy made by
+    // bindataStorageAcquireData(), so it can be modified in place. The ELF
+    // image written above is consumed as bytes and is not touched.
+    //
+    {
+        NvU8 *pBytes = (NvU8 *) pDesc;
+        NvU32 descSize = bindataGetBufferSize(pBinStorageDesc);
+        NvU32 i;
+
+        if (descSize < sizeof(RM_RISCV_UCODE_DESC))
+        {
+            NV_ASSERT(0);
+            status = NV_ERR_INVALID_DATA;
+            goto fail;
+        }
+
+        for (i = 0; i < sizeof(RM_RISCV_UCODE_DESC); i += sizeof(NvU32))
+        {
+            NvU32 v = ((NvU32) pBytes[i]) |
+                      ((NvU32) pBytes[i + 1] << 8) |
+                      ((NvU32) pBytes[i + 2] << 16) |
+                      ((NvU32) pBytes[i + 3] << 24);
+            portMemCopy(pBytes + i, sizeof(v), &v, sizeof(v));
+        }
+    }
+#endif
 
     return status;
 

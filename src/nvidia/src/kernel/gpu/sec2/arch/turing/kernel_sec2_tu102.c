@@ -127,6 +127,28 @@ s_allocateGenericBlUcode
     NV_ASSERT_OK_OR_GOTO(status,
         bindataWriteToBuffer(pBinDesc, (NvU8 *) pGenericBlUcodeDesc, descSizeAligned), out);
 
+#if NVCPU_IS_BIG_ENDIAN
+    //
+    // The descriptor is the little-endian byte image of a struct that holds
+    // only NvU32 fields (RM_FLCN_BL_DESC). Convert them to host order before
+    // blImgHeader.blCodeSize and the other fields are used below. The image
+    // that follows is consumed as bytes and is left alone.
+    //
+    {
+        NvU8 *pBytes = (NvU8 *) pGenericBlUcodeDesc;
+        NvU32 i;
+
+        for (i = 0; i < sizeof(RM_FLCN_BL_DESC); i += sizeof(NvU32))
+        {
+            NvU32 v = ((NvU32) pBytes[i]) |
+                      ((NvU32) pBytes[i + 1] << 8) |
+                      ((NvU32) pBytes[i + 2] << 16) |
+                      ((NvU32) pBytes[i + 3] << 24);
+            portMemCopy(pBytes + i, sizeof(v), &v, sizeof(v));
+        }
+    }
+#endif
+
     // allocate img
     pBinImg = bindataArchiveGetStorage(pBinArchive, BINDATA_LABEL_UCODE_IMAGE);
     imgSizeAligned = RM_ALIGN_UP(bindataGetBufferSize(pBinImg), FLCN_BLK_ALIGNMENT);

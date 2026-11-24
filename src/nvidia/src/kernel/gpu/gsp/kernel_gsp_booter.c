@@ -125,6 +125,30 @@ s_bindataWriteToFixedSizeBuffer
         return status;
     }
 
+#if NVCPU_IS_BIG_ENDIAN
+    //
+    // The bindata is the little-endian byte image of the firmware tables.
+    // Every caller of this helper reads a struct made only of NvU32 fields
+    // (header, patch location, patch index, patch metadata, signature count),
+    // so convert each 32-bit word to host order. The booter signatures and the
+    // ucode image are consumed as bytes and do not come through here.
+    //
+    NV_ASSERT_OR_RETURN((bufSize % sizeof(NvU32)) == 0, NV_ERR_INVALID_DATA);
+    {
+        NvU8 *pBytes = (NvU8 *) pBuf;
+        NvU32 i;
+
+        for (i = 0; i < bufSize; i += sizeof(NvU32))
+        {
+            NvU32 v = ((NvU32) pBytes[i]) |
+                      ((NvU32) pBytes[i + 1] << 8) |
+                      ((NvU32) pBytes[i + 2] << 16) |
+                      ((NvU32) pBytes[i + 3] << 24);
+            portMemCopy(pBytes + i, sizeof(v), &v, sizeof(v));
+        }
+    }
+#endif
+
     return status;
 }
 
