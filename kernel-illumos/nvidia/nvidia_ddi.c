@@ -282,10 +282,20 @@ static int
 nv_detach_ctl(dev_info_t *dip)
 {
     if (nv_ctl_device.usage_count != 0 || nv_illumos_devices != NULL)
+    {
+        nv_printf(NV_DBG_ERRORS,
+            "NVRM: control node detach refused: usage_count=%llu, GPUs attached=%s\n",
+            (unsigned long long)nv_ctl_device.usage_count,
+            nv_illumos_devices != NULL ? "yes" : "no");
         return (DDI_FAILURE);
+    }
 
     if (nvlink_ctl_detach(dip) != DDI_SUCCESS)
+    {
+        nv_printf(NV_DBG_ERRORS,
+            "NVRM: control node detach refused by nvlink_ctl_detach()\n");
         return (DDI_FAILURE);
+    }
 
     nv_caps_detach();
     ddi_remove_minor_node(dip, NULL);
@@ -602,12 +612,20 @@ nv_detach_gpu(dev_info_t *dip)
     nvidia_stack_t *sp = NULL;
 
     if (nvis == NULL)
+    {
+        nv_printf(NV_DBG_ERRORS,
+            "NVRM: GPU detach refused: no driver state on the node\n");
         return (DDI_FAILURE);
+    }
 
     nv = NV_STATE_PTR(nvis);
 
     if (nv_stack_alloc(&sp) != 0)
+    {
+        nv_printf(NV_DBG_ERRORS,
+            "NVRM: GPU detach refused: cannot allocate a stack\n");
         return (DDI_FAILURE);
+    }
 
     /* NVKMS drops its reference on the GPU here; it must not hold locks. */
     nvidia_modeset_remove(nv->gpu_id);
@@ -616,6 +634,10 @@ nv_detach_gpu(dev_info_t *dip)
     sema_p(&nvis->ldata_lock);
     if (nvis->usage_count != 0 || nvis->console_open_count != 0)
     {
+        nv_printf(NV_DBG_ERRORS,
+            "NVRM: GPU detach refused: usage_count=%llu, console_open_count=%u\n",
+            (unsigned long long)nvis->usage_count,
+            (unsigned)nvis->console_open_count);
         sema_v(&nvis->ldata_lock);
         rw_exit(&nv_illumos_devices_lock);
         nv_stack_free(sp);
