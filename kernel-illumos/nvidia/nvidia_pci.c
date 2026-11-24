@@ -67,6 +67,7 @@ typedef struct nv_pci_handle_s {
     list_node_t         link;
     dev_info_t         *dip;
     ddi_acc_handle_t    cfg;
+    NvU32               domain;
     uint16_t            bdf;
     NvU8                bus;
     NvU8                slot;
@@ -152,6 +153,37 @@ nv_pci_dip_bdf(dev_info_t *dip, NvU8 *bus, NvU8 *slot, NvU8 *func)
     return (DDI_SUCCESS);
 }
 
+/*
+ * PCI domain of a function.  illumos x86 has a single PCI segment, which is
+ * domain 0.  On Solaris sun4v every px root complex has its own bus numbers,
+ * so two functions with the same bus/device/function can both exist.  The
+ * domain is then the root complex's unit address, read as hex: /pci@302 is
+ * domain 0x302.  Returns 0 if no px ancestor is found.
+ */
+NvU32
+nv_pci_dip_domain(dev_info_t *dip)
+{
+#if defined(NV_SOLARIS)
+    dev_info_t *p;
+
+    for (p = ddi_get_parent(dip); p != NULL; p = ddi_get_parent(p))
+    {
+        const char *name = ddi_driver_name(p);
+        const char *addr;
+        unsigned long val;
+
+        if (name == NULL || strcmp(name, "px") != 0)
+            continue;
+
+        addr = ddi_get_name_addr(p);
+        if (addr != NULL && ddi_strtoul(addr, NULL, 16, &val) == 0)
+            return ((NvU32)val);
+        break;
+    }
+#endif
+    return (0);
+}
+
 static NvBool
 nv_pci_is_pci_function(dev_info_t *dip)
 {
@@ -162,7 +194,8 @@ nv_pci_is_pci_function(dev_info_t *dip)
 }
 
 static nv_pci_handle_t *
-nv_pci_handle_create(dev_info_t *dip, NvU8 bus, NvU8 slot, NvU8 func)
+nv_pci_handle_create(dev_info_t *dip, NvU32 domain, NvU8 bus, NvU8 slot,
+    NvU8 func)
 {
     nv_pci_handle_t *h;
 
@@ -174,6 +207,7 @@ nv_pci_handle_create(dev_info_t *dip, NvU8 bus, NvU8 slot, NvU8 func)
     }
 
     h->dip = dip;
+    h->domain = domain;
     h->bdf = PCI_GETBDF(bus, slot, func);
     h->bus = bus;
     h->slot = slot;
@@ -194,17 +228,20 @@ nv_pci_handle_for_dip(dev_info_t *dip)
     nv_pci_handle_t *h;
     nv_pci_handle_t *candidate;
     NvU8 bus, slot, func;
+    NvU32 domain;
     uint16_t bdf;
 
     if (nv_pci_dip_bdf(dip, &bus, &slot, &func) != DDI_SUCCESS)
         return (NULL);
     bdf = PCI_GETBDF(bus, slot, func);
+    domain = nv_pci_dip_domain(dip);
 
     mutex_enter(&nv_pci_handles_lock);
     for (h = list_head(&nv_pci_handles); h != NULL;
          h = list_next(&nv_pci_handles, h))
     {
-        if (h->bdf == bdf && h->dip == dip && h->cfg != NULL)
+        if (h->bdf == bdf && h->domain == domain && h->dip == dip &&
+            h->cfg != NULL)
         {
             mutex_exit(&nv_pci_handles_lock);
             return (h);
@@ -213,7 +250,7 @@ nv_pci_handle_for_dip(dev_info_t *dip)
     mutex_exit(&nv_pci_handles_lock);
 
     NV_PCI_HOLD(dip);
-    candidate = nv_pci_handle_create(dip, bus, slot, func);
+    candidate = nv_pci_handle_create(dip, domain, bus, slot, func);
     if (candidate == NULL)
     {
         NV_PCI_RELE(dip);
@@ -224,7 +261,7 @@ nv_pci_handle_for_dip(dev_info_t *dip)
     for (h = list_head(&nv_pci_handles); h != NULL;
          h = list_next(&nv_pci_handles, h))
     {
-        if (h->bdf == bdf)
+        if (h->bdf == bdf && h->domain == domain)
             break;
     }
     if (h == NULL)
@@ -296,6 +333,34 @@ nv_pci_handle_release(void *handle)
         NV_PCI_RELE(dip);
 }
 
+#if defined(NV_SOLARIS)
+/*
+ * Register the PCI functions above a GPU so that RM's topology scan
+ * (os_pci_init_handle) finds the root port and its bridges.  Walking up with
+ * ddi_get_parent() takes no locks, which is what makes this safe inside the
+ * GPU's attach: every ancestor is already attached.  It stops at the first
+ * node that is not a PCI function, the px root complex.
+ */
+void
+nv_pci_register_ancestors(dev_info_t *dip)
+{
+    dev_info_t *p;
+
+    for (p = ddi_get_parent(dip); p != NULL; p = ddi_get_parent(p))
+    {
+        if (!nv_pci_is_pci_function(p))
+            break;
+
+        if (nv_pci_handle_for_dip(p) == NULL)
+        {
+            nv_printf(NV_DBG_ERRORS,
+                "NVRM: cannot register %s above the GPU as a PCI function\n",
+                ddi_node_name(p));
+        }
+    }
+}
+#endif /* NV_SOLARIS */
+
 void* NV_API_CALL os_pci_init_handle(
     NvU32 domain,
     NvU8  bus,
@@ -310,14 +375,21 @@ void* NV_API_CALL os_pci_init_handle(
     uint16_t bdf;
     uint16_t vendor_id;
 
+#if defined(NV_SOLARIS)
+    /* The domain is the px root complex (see nv_pci_dip_domain()). */
+    if (!nv_may_sleep() || slot >= 32 || function >= 8)
+        return NULL;
+#else
     if (!nv_may_sleep() || domain != 0 || slot >= 32 || function >= 8)
         return NULL;
+#endif
 
     mutex_enter(&nv_pci_handles_lock);
     for (h = list_head(&nv_pci_handles); h != NULL;
          h = list_next(&nv_pci_handles, h))
     {
-        if (h->bus == bus && h->slot == slot && h->func == function)
+        if (h->domain == domain && h->bus == bus && h->slot == slot &&
+            h->func == function)
             break;
     }
     mutex_exit(&nv_pci_handles_lock);
@@ -326,9 +398,11 @@ void* NV_API_CALL os_pci_init_handle(
     {
 #if defined(NV_SOLARIS)
         /*
-         * Bus numbers are per root complex on this platform and RM passes
-         * domain 0 for all of them, so a bare bus/device/function does not
-         * identify a function.  Only handles this driver registered work.
+         * Only functions registered at attach are known: the GPU and the
+         * PCI bridges above it (nv_pci_register_ancestors()).  Searching the
+         * device tree from here could deadlock, because this runs inside the
+         * GPU's attach, where the parent bridge's node lock is held by the
+         * thread that is waiting for this one.
          */
         return NULL;
 #endif
@@ -340,6 +414,7 @@ void* NV_API_CALL os_pci_init_handle(
             return NULL;
 
         new_handle = kmem_zalloc(sizeof (*new_handle), KM_SLEEP);
+        new_handle->domain = domain;
         new_handle->bdf = bdf;
         new_handle->bus = bus;
         new_handle->slot = slot;
@@ -352,7 +427,8 @@ void* NV_API_CALL os_pci_init_handle(
         for (h = list_head(&nv_pci_handles); h != NULL;
              h = list_next(&nv_pci_handles, h))
         {
-            if (h->bus == bus && h->slot == slot && h->func == function)
+            if (h->domain == domain && h->bus == bus && h->slot == slot &&
+                h->func == function)
                 break;
         }
         if (h == NULL)

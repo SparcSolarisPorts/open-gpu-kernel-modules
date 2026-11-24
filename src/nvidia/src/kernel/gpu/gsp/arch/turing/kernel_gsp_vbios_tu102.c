@@ -86,6 +86,29 @@ s_promRead32
 }
 
 /*!
+ * Store a 32-bit register value into memory as 4 bytes in little-endian order.
+ *
+ * A PROM_DATA register read returns four ROM bytes with the byte at the lowest
+ * ROM offset in the least significant position. Storing that NvU32 straight
+ * into memory (or reading it back through a byte view) gives the ROM byte order
+ * only on a little-endian host. Writing the bytes explicitly gives the same
+ * memory image on every host, and on a little-endian host it is identical to
+ * the plain store.
+ */
+static inline void
+s_storeLe32
+(
+    NvU8 *pDst,
+    NvU32 value
+)
+{
+    pDst[0] = (NvU8)(value);
+    pDst[1] = (NvU8)(value >> 8);
+    pDst[2] = (NvU8)(value >> 16);
+    pDst[3] = (NvU8)(value >> 24);
+}
+
+/*!
  * Read unaligned data from PROM (e.g. VBIOS ROM image) using 32-bit accesses.
  *
  * @param[in]   pSrc        RomImgSrc pointer
@@ -152,10 +175,11 @@ s_romImgReadGeneric
     NV_ASSERT(pSrc->pGpu != NULL);
 
     // Read bios image as aligned 32-bit word(s).
-    buf.word[0] = s_promRead32(pSrc->pGpu, offset);
+    s_storeLe32(&buf.byte[0], s_promRead32(pSrc->pGpu, offset));
     if (bReadWord1)
     {
-        buf.word[1] = s_promRead32(pSrc->pGpu, offset + sizeof(NvU32));
+        s_storeLe32(&buf.byte[sizeof(NvU32)],
+                    s_promRead32(pSrc->pGpu, offset + sizeof(NvU32)));
     }
 
     // Combine bytes into number.
@@ -540,7 +564,9 @@ kgspExtractVbiosFromRom_TU102
         biosSizeAligned = biosSize & (~0x3);
         for (i = 0; i < biosSizeAligned; i += 4)
         {
-            pImageDwords[i >> 2] = s_promRead32(pGpu, pciOffset + i);
+            // The image is later used as a byte array, so keep ROM byte order.
+            s_storeLe32(((NvU8 *) pImageDwords) + i,
+                        s_promRead32(pGpu, pciOffset + i));
         }
 
         for (; i < biosSize; i++)

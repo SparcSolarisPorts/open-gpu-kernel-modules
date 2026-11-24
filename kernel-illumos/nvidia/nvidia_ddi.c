@@ -62,6 +62,10 @@ static uint32_t        nv_minor_bitmap;
 extern void nv_pci_handles_init(void);
 extern void nv_pci_handles_fini(void);
 extern void nv_pci_handle_release(void *);
+extern NvU32 nv_pci_dip_domain(dev_info_t *);
+#if defined(NV_SOLARIS)
+extern void nv_pci_register_ancestors(dev_info_t *);
+#endif
 extern void *nv_pci_handle_for_dip(dev_info_t *);
 extern NvBool nv_pci_is_primary_vga(nv_illumos_state_t *);
 extern NV_STATUS nv_parse_per_device_binary_option_string(nvidia_stack_t *,
@@ -447,7 +451,7 @@ nv_attach_gpu(dev_info_t *dip)
     (void) memcpy(nv->cached_gpu_info.vbios_version, "??.??.??.??.??", 15);
 
     nv->os_state = nvis;
-    nv->pci_info.domain = 0;
+    nv->pci_info.domain = nv_pci_dip_domain(dip);
     nv->pci_info.bus = bus;
     nv->pci_info.slot = slot;
     nv->pci_info.function = func;
@@ -473,6 +477,11 @@ nv_attach_gpu(dev_info_t *dip)
     nv->handle = nv_pci_handle_for_dip(dip);
     if (nv->handle == NULL)
         goto fail_free;
+
+#if defined(NV_SOLARIS)
+    /* Let RM's PCI topology scan see the bridges between the GPU and px. */
+    nv_pci_register_ancestors(dip);
+#endif
 
     nvis->dma_dev.dip = dip;
     nvis->dma_dev.nvis = nvis;
