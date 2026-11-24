@@ -281,7 +281,25 @@ nv_attach_ctl(dev_info_t *dip)
 static int
 nv_detach_ctl(dev_info_t *dip)
 {
-    if (nv_ctl_device.usage_count != 0 || nv_illumos_devices != NULL)
+    NvBool gpus_block = (nv_illumos_devices != NULL);
+
+#if defined(NV_SOLARIS)
+    /*
+     * Unloading the module detaches the pseudo node that carries nvidiactl
+     * before the GPU's PCI node, and refusing here made every unload fail
+     * with "Device busy" (seen on the T8-1, with the GPU attached and
+     * unopened).  Nothing in the GPU's own detach path uses the control
+     * node: nv_ctl_dip is read only on the capability-fd paths, which handle
+     * NULL, and nv_caps_dip is checked before use.  So only an open control
+     * node blocks the detach.
+     */
+    if (gpus_block && nv_ctl_device.usage_count == 0)
+        nv_printf(NV_DBG_INFO,
+            "NVRM: control node detaching while a GPU is still attached\n");
+    gpus_block = NV_FALSE;
+#endif
+
+    if (nv_ctl_device.usage_count != 0 || gpus_block)
     {
         nv_printf(NV_DBG_ERRORS,
             "NVRM: control node detach refused: usage_count=%llu, GPUs attached=%s\n",
