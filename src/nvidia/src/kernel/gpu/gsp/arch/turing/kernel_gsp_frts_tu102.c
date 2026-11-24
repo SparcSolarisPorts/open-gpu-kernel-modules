@@ -140,6 +140,39 @@ typedef struct
 
 
 // ---------------------------------------------------------------------------
+// Little-endian access to the FWSEC DMEM image
+//
+// The FWSEC DMEM image is a byte stream that the falcon reads as little-endian.
+// Reading or writing its fields through C struct pointers gives the right
+// result only on a little-endian host (and traps on strict-alignment CPUs when
+// a field is not naturally aligned), so the fields are accessed bytewise at the
+// offsets the structs above describe. On a little-endian host the values are
+// the same as before.
+// ---------------------------------------------------------------------------
+
+static NvU32
+s_dmemLoad32(const NvU8 *p)
+{
+    return (NvU32)p[0] | ((NvU32)p[1] << 8) | ((NvU32)p[2] << 16) | ((NvU32)p[3] << 24);
+}
+
+static void
+s_dmemStore32(NvU8 *p, NvU32 v)
+{
+    p[0] = (NvU8)v;
+    p[1] = (NvU8)(v >> 8);
+    p[2] = (NvU8)(v >> 16);
+    p[3] = (NvU8)(v >> 24);
+}
+
+static void
+s_dmemStore64(NvU8 *p, NvU64 v)
+{
+    s_dmemStore32(p, (NvU32)v);
+    s_dmemStore32(p + 4, (NvU32)(v >> 32));
+}
+
+// ---------------------------------------------------------------------------
 // Functions for preparing and executing FWSEC commands
 // ---------------------------------------------------------------------------
 
@@ -164,9 +197,15 @@ s_vbiosPatchInterfaceData
     const NvU32 interfaceOffset
 )
 {
-    FALCON_APPLICATION_INTERFACE_HEADER_V1 *pIntFaceHdr = NULL;
-    FALCON_APPLICATION_INTERFACE_ENTRY_V1 *pIntFaceEntry = NULL;
-    FALCON_APPLICATION_INTERFACE_DMEM_MAPPER_V3 *pDmemMapper = NULL;
+    // Byte pointers: the structs above give only sizes and field offsets.
+    const NvU8 *pIntFaceHdr = NULL;
+    const NvU8 *pIntFaceEntry = NULL;
+    NvU8 *pDmemMapper = NULL;
+    NvU32 lastEntryDmemOffset = 0;
+    NvU32 entryCount;
+    NvU32 entryId;
+    NvU32 cmdInBufferSize;
+    NvU32 cmdInBufferOffset;
 
     NvBool bSafe;
     NvU32 index;
@@ -179,54 +218,59 @@ s_vbiosPatchInterfaceData
         return NV_ERR_INVALID_OFFSET;
     }
 
-    bSafe = portSafeAddU32(interfaceOffset, sizeof(*pIntFaceHdr), &nextOffset);
+    bSafe = portSafeAddU32(interfaceOffset, sizeof(FALCON_APPLICATION_INTERFACE_HEADER_V1), &nextOffset);
     if (!bSafe || nextOffset > mappedDataSize)
     {
         return NV_ERR_INVALID_OFFSET;
     }
 
-    pIntFaceHdr = (FALCON_APPLICATION_INTERFACE_HEADER_V1 *) (pMappedData + interfaceOffset);
-    if (pIntFaceHdr->entryCount < 2)
+    pIntFaceHdr = pMappedData + interfaceOffset;
+    entryCount = pIntFaceHdr[NV_OFFSETOF(FALCON_APPLICATION_INTERFACE_HEADER_V1, entryCount)];
+    if (entryCount < 2)
     {
         NV_PRINTF(LEVEL_ERROR, "too few interface entires found for FWSEC cmd 0x%x\n", cmd);
         return NV_ERR_INVALID_DATA;
     }
 
     curOffset = nextOffset;
-    for (index = 0; index < pIntFaceHdr->entryCount; index++)
+    for (index = 0; index < entryCount; index++)
     {
         if (curOffset >= mappedDataSize)
         {
             return NV_ERR_INVALID_OFFSET;
         }
 
-        bSafe = portSafeAddU32(curOffset, sizeof(*pIntFaceEntry), &nextOffset);
+        bSafe = portSafeAddU32(curOffset, sizeof(FALCON_APPLICATION_INTERFACE_ENTRY_V1), &nextOffset);
         if (!bSafe || nextOffset > mappedDataSize)
         {
             return NV_ERR_INVALID_OFFSET;
         }
 
-        pIntFaceEntry = (FALCON_APPLICATION_INTERFACE_ENTRY_V1 *) (pMappedData + curOffset);
+        pIntFaceEntry = pMappedData + curOffset;
         curOffset = nextOffset;
 
-        if (pIntFaceEntry->id == FALCON_APPLICATION_INTERFACE_ENTRY_ID_DMEMMAPPER)
+        entryId = s_dmemLoad32(pIntFaceEntry + NV_OFFSETOF(FALCON_APPLICATION_INTERFACE_ENTRY_V1, id));
+        lastEntryDmemOffset =
+            s_dmemLoad32(pIntFaceEntry + NV_OFFSETOF(FALCON_APPLICATION_INTERFACE_ENTRY_V1, dmemOffset));
+
+        if (entryId == FALCON_APPLICATION_INTERFACE_ENTRY_ID_DMEMMAPPER)
         {
             NvU32 dmemMapperMaxOffset;
 
-            if (pIntFaceEntry->dmemOffset >= mappedDataSize)
+            if (lastEntryDmemOffset >= mappedDataSize)
             {
                 return NV_ERR_INVALID_OFFSET;
             }
 
-            bSafe = portSafeAddU32(pIntFaceEntry->dmemOffset, sizeof(*pDmemMapper),
+            bSafe = portSafeAddU32(lastEntryDmemOffset,
+                                   sizeof(FALCON_APPLICATION_INTERFACE_DMEM_MAPPER_V3),
                                    &dmemMapperMaxOffset);
             if (!bSafe || dmemMapperMaxOffset > mappedDataSize)
             {
                 return NV_ERR_INVALID_OFFSET;
             }
 
-            pDmemMapper = (FALCON_APPLICATION_INTERFACE_DMEM_MAPPER_V3 *)
-                                (pMappedData + pIntFaceEntry->dmemOffset);
+            pDmemMapper = pMappedData + lastEntryDmemOffset;
         }
     }
 
@@ -236,25 +280,31 @@ s_vbiosPatchInterfaceData
         return NV_ERR_INVALID_DATA;
     }
 
-    pDmemMapper->init_cmd = cmd;
+    s_dmemStore32(pDmemMapper + NV_OFFSETOF(FALCON_APPLICATION_INTERFACE_DMEM_MAPPER_V3, init_cmd), cmd);
 
-    if (pDmemMapper->cmd_in_buffer_size < cmdBufferSize)
+    cmdInBufferSize =
+        s_dmemLoad32(pDmemMapper + NV_OFFSETOF(FALCON_APPLICATION_INTERFACE_DMEM_MAPPER_V3, cmd_in_buffer_size));
+    cmdInBufferOffset =
+        s_dmemLoad32(pDmemMapper + NV_OFFSETOF(FALCON_APPLICATION_INTERFACE_DMEM_MAPPER_V3, cmd_in_buffer_offset));
+
+    if (cmdInBufferSize < cmdBufferSize)
     {
         NV_PRINTF(LEVEL_ERROR, "insufficient cmd buffer for FWSEC interface cmd 0x%x\n", cmd);
     }
 
-    if (pDmemMapper->cmd_in_buffer_offset >= mappedDataSize)
+    if (cmdInBufferOffset >= mappedDataSize)
     {
         return NV_ERR_INVALID_OFFSET;
     }
 
-    bSafe = portSafeAddU32(pIntFaceEntry->dmemOffset, cmdBufferSize, &nextOffset);
+    // As before, the check uses the dmemOffset of the last entry that was read.
+    bSafe = portSafeAddU32(lastEntryDmemOffset, cmdBufferSize, &nextOffset);
     if (!bSafe || nextOffset > mappedDataSize)
     {
         return NV_ERR_INVALID_OFFSET;
     }
 
-    portMemCopy(pMappedData + pDmemMapper->cmd_in_buffer_offset, cmdBufferSize,
+    portMemCopy(pMappedData + cmdInBufferOffset, cmdBufferSize,
                 pCmdBuffer, cmdBufferSize);
 
     return NV_OK;
@@ -283,8 +333,16 @@ s_prepareForFwsec_TU102
 {
     NV_STATUS status;
 
-    FWSECLIC_READ_VBIOS_DESC readVbiosDesc;
-    FWSECLIC_FRTS_CMD frtsCmd;
+    //
+    // The command is copied into the FWSEC DMEM image, which the falcon reads
+    // as little-endian, so it is built as bytes at the field offsets of
+    // FWSECLIC_FRTS_CMD (a FWSECLIC_READ_VBIOS_DESC at offset 0, then, for
+    // FRTS only, a FWSECLIC_FRTS_REGION_DESC). The buffer is zeroed first,
+    // which also zeroes the structure's tail padding.
+    //
+    NvU8 cmdBytes[sizeof(FWSECLIC_FRTS_CMD)];
+    NvU8 *pReadVbios = cmdBytes;
+    NvU8 *pFrtsRegion = cmdBytes + NV_OFFSETOF(FWSECLIC_FRTS_CMD, frtsRegionDesc);
 
     void *pCmdBuffer;
     NvU32 cmdBufferSize;
@@ -308,34 +366,40 @@ s_prepareForFwsec_TU102
     pPreparedCmd->cmd = cmd;
     pPreparedCmd->frtsOffset = frtsOffset;
 
-    readVbiosDesc.version = 1;
-    readVbiosDesc.size = sizeof(readVbiosDesc);
-    readVbiosDesc.gfwImageOffset = 0;
-    readVbiosDesc.gfwImageSize = 0;
-    readVbiosDesc.flags = FWSECLIC_READ_VBIOS_STRUCT_FLAGS;
+    portMemSet(cmdBytes, 0, sizeof(cmdBytes));
+
+    s_dmemStore32(pReadVbios + NV_OFFSETOF(FWSECLIC_READ_VBIOS_DESC, version), 1);
+    s_dmemStore32(pReadVbios + NV_OFFSETOF(FWSECLIC_READ_VBIOS_DESC, size),
+                  sizeof(FWSECLIC_READ_VBIOS_DESC));
+    s_dmemStore64(pReadVbios + NV_OFFSETOF(FWSECLIC_READ_VBIOS_DESC, gfwImageOffset), 0);
+    s_dmemStore32(pReadVbios + NV_OFFSETOF(FWSECLIC_READ_VBIOS_DESC, gfwImageSize), 0);
+    s_dmemStore32(pReadVbios + NV_OFFSETOF(FWSECLIC_READ_VBIOS_DESC, flags),
+                  FWSECLIC_READ_VBIOS_STRUCT_FLAGS);
 
     if (cmd == FALCON_APPLICATION_INTERFACE_DMEM_MAPPER_V3_CMD_FRTS)
     {
         // FRTS takes an FRTS_CMD, here we build that up
         NvU32 blockSizeIn4K = NV_PGC6_AON_FRTS_INPUT_WPR_SIZE_SECURE_SCRATCH_GROUP_03_0_WPR_SIZE_1MB_IN_4K;
 
-        frtsCmd.frtsRegionDesc.version = 1;
-        frtsCmd.frtsRegionDesc.size = sizeof(frtsCmd.frtsRegionDesc);
-        frtsCmd.frtsRegionDesc.frtsRegionOffset4K = (NvU32) (frtsOffset >> 12);
-        frtsCmd.frtsRegionDesc.frtsRegionSize = blockSizeIn4K;
-        frtsCmd.frtsRegionDesc.frtsRegionMediaType = FWSECLIC_FRTS_REGION_MEDIA_FB;
+        s_dmemStore32(pFrtsRegion + NV_OFFSETOF(FWSECLIC_FRTS_REGION_DESC, version), 1);
+        s_dmemStore32(pFrtsRegion + NV_OFFSETOF(FWSECLIC_FRTS_REGION_DESC, size),
+                      sizeof(FWSECLIC_FRTS_REGION_DESC));
+        s_dmemStore32(pFrtsRegion + NV_OFFSETOF(FWSECLIC_FRTS_REGION_DESC, frtsRegionOffset4K),
+                      (NvU32) (frtsOffset >> 12));
+        s_dmemStore32(pFrtsRegion + NV_OFFSETOF(FWSECLIC_FRTS_REGION_DESC, frtsRegionSize),
+                      blockSizeIn4K);
+        s_dmemStore32(pFrtsRegion + NV_OFFSETOF(FWSECLIC_FRTS_REGION_DESC, frtsRegionMediaType),
+                      FWSECLIC_FRTS_REGION_MEDIA_FB);
 
-        frtsCmd.readVbiosDesc = readVbiosDesc;
-
-        pCmdBuffer = &frtsCmd;
-        cmdBufferSize = sizeof(frtsCmd);
+        pCmdBuffer = cmdBytes;
+        cmdBufferSize = sizeof(FWSECLIC_FRTS_CMD);
 
     }
     else  // i.e. FALCON_APPLICATION_INTERFACE_DMEM_MAPPER_V3_CMD_SB
     {
         // SB takes READ_VBIOS_DESC directly
-        pCmdBuffer = &readVbiosDesc;
-        cmdBufferSize = sizeof(readVbiosDesc);
+        pCmdBuffer = cmdBytes;
+        cmdBufferSize = sizeof(FWSECLIC_READ_VBIOS_DESC);
     }
 
     if (pFwsecUcode->bootType == KGSP_FLCN_UCODE_BOOT_FROM_HS)
