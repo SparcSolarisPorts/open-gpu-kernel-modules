@@ -27,12 +27,15 @@
  * does not have.  Virtual address space comes from heap_arena and is mapped
  * with hat_devload(), as gfx_private does.
  *
- * Endianness: the GPU is little-endian and this CPU is big-endian.  Every
- * mapping made here asks the MMU to byte-swap (HAT_STRUCTURE_LE), so a native
- * 16/32/64-bit load or store sees the numeric value of a little-endian
- * register or structure.  Byte-wise data copied through such a mapping with
- * wider accesses comes out swapped; this is the one place to change if that
- * turns out to be the wrong default (NV_SOL_HAT_ENDIAN).
+ * Endianness: the GPU is little-endian and this CPU is big-endian.  These
+ * mappings are for RAM only (BARs are mapped by nv_sol_map_bar() with a
+ * little-endian access attribute), and RAM mappings are NOT swapped.  Kernel
+ * RM converts every structure that the GPU reads from or writes to system
+ * memory explicitly, and it assumes plain big-endian memory, like the
+ * ddi_dma_mem_alloc() mappings of single-chunk allocations.  The T8-1 self-test
+ * showed that HAT_STRUCTURE_LE swaps 64-bit and 32-bit stores and makes
+ * memcpy() reverse each 8-byte group, and it made multi-chunk allocations
+ * differ from single-chunk ones (NV_SOL_HAT_ENDIAN).
  */
 
 #include "nv-illumos.h"
@@ -49,7 +52,7 @@
 #include <sys/atomic.h>
 #include <sys/systm.h>
 
-#define NV_SOL_HAT_ENDIAN       HAT_STRUCTURE_LE
+#define NV_SOL_HAT_ENDIAN       0       /* no byte swapping */
 
 static uint_t
 nv_sol_hat_attr(uint32_t mode)
@@ -74,13 +77,13 @@ nv_sol_hat_attr(uint32_t mode)
 }
 
 /*
- * One-time diagnostic (sparcv9 bring-up): find out what HAT_STRUCTURE_LE does
- * to RAM.  A private page is mapped a second time with nv_sol_hat_attr(), a
+ * One-time diagnostic (sparcv9 bring-up): show what the RAM mapping does to
+ * stores.  A private page is mapped a second time with nv_sol_hat_attr(), a
  * 64-bit value, a 32-bit value and two memcpy() calls are stored through that
  * mapping, and the page is read back bytewise through its normal kernel
- * mapping.  If the mapping swaps, the 64-bit value reads back as 08 07 .. 01.
- * The memcpy rows show what the kernel memcpy does through the same mapping,
- * which is what portMemCopy() does for firmware data.  Remove once settled.
+ * mapping.  A mapping that does not swap reads back 01 02 .. 08 for the 64-bit
+ * value and 00 01 .. 0f for the first memcpy.  (With HAT_STRUCTURE_LE the T8-1
+ * showed 08 07 .. 01 and 07 06 .. 00.)  Remove once settled.
  */
 static void
 nv_sol_vm_selftest(void)
@@ -111,7 +114,8 @@ nv_sol_vm_selftest(void)
     (void) memcpy(va + 16, src, 16);
     (void) memcpy(va + 32, src, 13);
 
-    cmn_err(CE_NOTE, "nvidia: RAM map self-test (HAT_STRUCTURE_LE), memory bytes:");
+    cmn_err(CE_NOTE, "nvidia: RAM map self-test (attr 0x%x), memory bytes:",
+        (uint_t)NV_SOL_HAT_ENDIAN);
     cmn_err(CE_NOTE, "nvidia:   u64 0x0102030405060708 + u32 0x090a0b0c: "
         "%02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x",
         page[0] & 0xff, page[1] & 0xff, page[2] & 0xff, page[3] & 0xff,
