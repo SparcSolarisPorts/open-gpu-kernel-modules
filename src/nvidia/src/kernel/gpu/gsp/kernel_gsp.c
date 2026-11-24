@@ -6322,14 +6322,21 @@ kgspPrepareBootBinaryImage_IMPL
         NvU32 descSize = bindataGetBufferSize(pBinStorageDesc);
         NvU32 i;
 
-        if (descSize < sizeof(RM_RISCV_UCODE_DESC))
+        //
+        // The generated descriptor is shorter than the struct on older chips
+        // (76 bytes for TU102/GA100, 84 for GA102/AD102, 92 from GB100 on), and
+        // the buffer holds exactly descSize bytes. Convert what is there and
+        // require at least the fields up to monitorCodeOffset (13 words), the
+        // last one any reader uses.
+        //
+        if ((descSize < 13 * sizeof(NvU32)) || ((descSize % sizeof(NvU32)) != 0))
         {
             NV_ASSERT(0);
             status = NV_ERR_INVALID_DATA;
             goto fail;
         }
 
-        for (i = 0; i < sizeof(RM_RISCV_UCODE_DESC); i += sizeof(NvU32))
+        for (i = 0; i < descSize; i += sizeof(NvU32))
         {
             NvU32 v = ((NvU32) pBytes[i]) |
                       ((NvU32) pBytes[i + 1] << 8) |

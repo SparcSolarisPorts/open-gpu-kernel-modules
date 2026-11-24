@@ -129,22 +129,31 @@ s_allocateGenericBlUcode
 
 #if NVCPU_IS_BIG_ENDIAN
     //
-    // The descriptor is the little-endian byte image of a struct that holds
-    // only NvU32 fields (RM_FLCN_BL_DESC). Convert them to host order before
-    // blImgHeader.blCodeSize and the other fields are used below. The image
-    // that follows is consumed as bytes and is left alone.
+    // Unlike the other firmware descriptors, this one is a C struct initializer
+    // in the generated file (COMPLEX_STRUCT: YES), so it is already in host
+    // byte order. On a big-endian host bindataWriteToBuffer() copies
+    // uncompressed data with the byte permutation (i ^ 7), which is right for
+    // the byte-image arrays and wrong for a struct. That permutation is its own
+    // inverse inside an aligned 8-byte group, so applying it again restores the
+    // struct. RM_FLCN_BL_DESC is 24 bytes, three whole groups, and the buffer
+    // is 256-byte aligned. The image that follows is a byte image and is left
+    // alone.
     //
     {
         NvU8 *pBytes = (NvU8 *) pGenericBlUcodeDesc;
-        NvU32 i;
+        NvU32 g;
 
-        for (i = 0; i < sizeof(RM_FLCN_BL_DESC); i += sizeof(NvU32))
+        for (g = 0; g < sizeof(RM_FLCN_BL_DESC); g += 8)
         {
-            NvU32 v = ((NvU32) pBytes[i]) |
-                      ((NvU32) pBytes[i + 1] << 8) |
-                      ((NvU32) pBytes[i + 2] << 16) |
-                      ((NvU32) pBytes[i + 3] << 24);
-            portMemCopy(pBytes + i, sizeof(v), &v, sizeof(v));
+            NvU32 k;
+
+            for (k = 0; k < 4; k++)
+            {
+                NvU8 t = pBytes[g + k];
+
+                pBytes[g + k] = pBytes[g + 7 - k];
+                pBytes[g + 7 - k] = t;
+            }
         }
     }
 #endif
