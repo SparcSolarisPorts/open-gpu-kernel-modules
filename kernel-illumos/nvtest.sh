@@ -3,7 +3,7 @@
 # nvtest.sh: trial-load the NVIDIA modules from /tmp so that a reboot puts
 # the machine back the way it was.
 #
-#   nvtest.sh load [-d outdir] [-t minutes] [-a] [-n]
+#   nvtest.sh load [-d outdir] [-t minutes] [-a] [-n] [-p]
 #   nvtest.sh keep
 #   nvtest.sh revert [-r]
 #   nvtest.sh status
@@ -18,6 +18,10 @@
 #         loaded; -a adds nvidia_modeset, nvidia_i2c and nvidia_uvm.
 #         With -n the driver is registered without the GPU's PCI IDs, so
 #         it loads and runs its init code but is not attached to any GPU.
+#         With -p the staged nvidia.conf also gets NVreg_GpuInitOnProbe=0,
+#         so a later attach maps the BARs and identifies the chip but does
+#         not start the GPU (no GSP boot, no firmware file needed). The
+#         nvidia.conf in the source tree is not changed.
 # bind    After "load -n", adds the PCI IDs with update_drv so the driver
 #         attaches to the GPU. This is the step that touches the hardware.
 # keep    Cancels the watchdog. The modules stay until the next reboot.
@@ -124,12 +128,14 @@ cmd_load() {
     mins=10
     out=$HERE/_out/SunOS_$TAG
     noalias=0
-    while getopts d:t:an o; do
+    noinit=0
+    while getopts d:t:anp o; do
         case $o in
         d) out=$OPTARG ;;
         t) mins=$OPTARG ;;
         a) mods=$ALL_MODS ;;
         n) noalias=1 ;;
+        p) noinit=1 ;;
         *) usage ;;
         esac
     done
@@ -169,6 +175,10 @@ cmd_load() {
     for m in $mods; do
         cp "$out/$m.kmod" "$STAGE/$m" || fail "copy of $m failed"
         cp "$(confsrc "$m")" "$STAGE/$m.conf" || fail "copy of $m.conf failed"
+        if [ $noinit = 1 ] && [ "$m" = nvidia ]; then
+            echo 'NVreg_GpuInitOnProbe=0;' >> "$STAGE/$m.conf" ||
+                fail "cannot edit the staged $m.conf"
+        fi
         for pair in "$STAGE/$m:/kernel/drv/$KISA/$m" "$STAGE/$m.conf:/kernel/drv/$m.conf"; do
             src=${pair%%:*}
             dst=${pair#*:}
@@ -200,6 +210,7 @@ cmd_load() {
         esac || fail "add_drv $m failed; trial removed"
     done
 
+    [ $noinit = 1 ] && echo "nvtest: GPU init at attach is off (NVreg_GpuInitOnProbe=0)"
     if [ $noalias = 1 ]; then
         echo "nvtest: loaded without PCI IDs: $mods (no GPU is attached)"
         echo "nvtest: check it with: modinfo | grep nvidia"

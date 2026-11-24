@@ -83,3 +83,10 @@ awk -v deps="$deps" '
         for (i = 1; i <= nd; i++) printf "    %s\n", dep[i]
     }
 ' "$TMP/prov" "$TMP/need"
+
+# The search covers unix, genunix and misc modules only.  Some kernel routines
+# live elsewhere (bcopy, bzero, copyin and copyout are undefined in unix and
+# genunix on the T8-1 and still resolve), so a name listed above is a lead, not
+# a verdict: modload is the real test.
+echo "note: symbols can be provided by kernel files this script does not search;"
+echo "      a successful modload is the proof that all of them resolve."
