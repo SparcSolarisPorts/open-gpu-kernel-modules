@@ -48,8 +48,27 @@ void kcrashcatEngineReadDmem_TU102
 
     NvU32 *pWordBuf = (NvU32 *)pBuf;
     for (NvU32 i = 0; i < (size >> 2); i++)
-        pWordBuf[i] = kcrashcatEngineRegRead(pKernelCrashCatEng->pGpu, pKernelCrashCatEng,
-                                             NV_PFALCON_FALCON_DMEMD(port));
+    {
+        NvU32 word = kcrashcatEngineRegRead(pKernelCrashCatEng->pGpu, pKernelCrashCatEng,
+                                            NV_PFALCON_FALCON_DMEMD(port));
+#if NVCPU_IS_BIG_ENDIAN
+        //
+        // A DMEM data register read returns the numeric value of the 32-bit word
+        // that sits in DMEM in little-endian byte order. Store it as the same
+        // little-endian bytes, so that the buffer is an image of DMEM on any host
+        // (a native store would put the bytes in big-endian order, and the
+        // CrashCat decoder, which treats the buffer as little-endian, would
+        // reject a valid packet header).
+        //
+        NvU8 *pBytes = (NvU8 *)&pWordBuf[i];
+        pBytes[0] = (NvU8)word;
+        pBytes[1] = (NvU8)(word >> 8);
+        pBytes[2] = (NvU8)(word >> 16);
+        pBytes[3] = (NvU8)(word >> 24);
+#else
+        pWordBuf[i] = word;
+#endif
+    }
 }
 
 NvU32 kcrashcatEngineGetWFL0Offset_TU102(KernelCrashCatEngine *pKernelCrashCatEng)
