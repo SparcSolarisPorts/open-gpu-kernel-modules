@@ -6808,6 +6808,32 @@ error_ret:
     return status;
 }
 
+//
+// The GSP firmware container is a little-endian ELF file. Its fields are read
+// byte by byte so the result does not depend on the host's byte order, and so
+// that no access is misaligned: casting the buffer to the ELF structs and
+// reading their fields works only on a little-endian host, and traps on SPARC
+// when a header is not naturally aligned. On a little-endian host the result
+// is identical.
+//
+static inline NvU16
+_kgspElfRead16(const NvU8 *p)
+{
+    return (NvU16)((NvU16)p[0] | ((NvU16)p[1] << 8));
+}
+
+static inline NvU32
+_kgspElfRead32(const NvU8 *p)
+{
+    return (NvU32)p[0] | ((NvU32)p[1] << 8) | ((NvU32)p[2] << 16) | ((NvU32)p[3] << 24);
+}
+
+static inline NvU64
+_kgspElfRead64(const NvU8 *p)
+{
+    return (NvU64)_kgspElfRead32(p) | ((NvU64)_kgspElfRead32(p + 4) << 32);
+}
+
 static NV_STATUS
 _kgspFwContainerGetSection
 (
@@ -6821,8 +6847,15 @@ _kgspFwContainerGetSection
 )
 {
     const NvU8 *pGspBuf = pElfData;
-    const LibosElf64Header *pElfHeader;
-    const LibosElf64SectionHeader *pElfSectionHeader;
+    const NvU8 *pElfHeader;          // Elf64_Ehdr, 64 bytes, read bytewise
+    const NvU8 *pElfSectionHeader;   // Elf64_Shdr, 64 bytes, read bytewise
+    NvU64 elfShOff;
+    NvU16 elfShEntSize;
+    NvU16 elfShNum;
+    NvU16 elfShStrNdx;
+    NvU32 secName;
+    NvU64 secOffset;
+    NvU64 secSize;
     NvU64 elfSectionHeaderTableLength;
     NvU64 elfSectionHeaderMaxIdx;
     NvU64 elfSectionNamesTableOffset;
@@ -6844,50 +6877,61 @@ _kgspFwContainerGetSection
 
     sectionNameLength = portStringLength(pSectionName);
 
-    pElfHeader = (const LibosElf64Header*) pGspBuf;
+    pElfHeader = pGspBuf;
 
     // Check for the elf identifier at the beginning of the file
-    NV_CHECK_OR_RETURN(LEVEL_ERROR, *(NvU32*)&pElfHeader->ident == elfMagicNumber, NV_ERR_INVALID_DATA);
+    NV_CHECK_OR_RETURN(LEVEL_ERROR, _kgspElfRead32(pElfHeader + 0) == elfMagicNumber, NV_ERR_INVALID_DATA);
     // Make sure the data is formatted as little endian
-    NV_CHECK_OR_RETURN(LEVEL_ERROR, pElfHeader->ident[5] == elfLittleEndian, NV_ERR_INVALID_DATA);
+    NV_CHECK_OR_RETURN(LEVEL_ERROR, pElfHeader[5] == elfLittleEndian, NV_ERR_INVALID_DATA);
     // Check the class type, only ELFCLASS64 is supported
-    NV_CHECK_OR_RETURN(LEVEL_ERROR, pElfHeader->ident[4] == elfClass64, NV_ERR_INVALID_DATA);
+    NV_CHECK_OR_RETURN(LEVEL_ERROR, pElfHeader[4] == elfClass64, NV_ERR_INVALID_DATA);
+
+    // Elf64_Ehdr field offsets: shoff 40, shentsize 58, shnum 60, shstrndx 62
+    elfShOff     = _kgspElfRead64(pElfHeader + 40);
+    elfShEntSize = _kgspElfRead16(pElfHeader + 58);
+    elfShNum     = _kgspElfRead16(pElfHeader + 60);
+    elfShStrNdx  = _kgspElfRead16(pElfHeader + 62);
 
     // Make sure that the elf section header table is valid
-    NV_CHECK_OR_RETURN(LEVEL_ERROR, pElfHeader->shentsize == sizeof(LibosElf64SectionHeader), NV_ERR_INVALID_DATA);
-    NV_CHECK_OR_RETURN(LEVEL_ERROR, portSafeMulU64(pElfHeader->shentsize, pElfHeader->shnum, &elfSectionHeaderTableLength), NV_ERR_INVALID_DATA);
-    NV_CHECK_OR_RETURN(LEVEL_ERROR, portSafeAddU64(pElfHeader->shoff, elfSectionHeaderTableLength - 1, &elfSectionHeaderMaxIdx), NV_ERR_INVALID_DATA);
+    NV_CHECK_OR_RETURN(LEVEL_ERROR, elfShEntSize == sizeof(LibosElf64SectionHeader), NV_ERR_INVALID_DATA);
+    NV_CHECK_OR_RETURN(LEVEL_ERROR, portSafeMulU64(elfShEntSize, elfShNum, &elfSectionHeaderTableLength), NV_ERR_INVALID_DATA);
+    NV_CHECK_OR_RETURN(LEVEL_ERROR, portSafeAddU64(elfShOff, elfSectionHeaderTableLength - 1, &elfSectionHeaderMaxIdx), NV_ERR_INVALID_DATA);
     NV_CHECK_OR_RETURN(LEVEL_ERROR, elfDataSize >= elfSectionHeaderMaxIdx, NV_ERR_INVALID_DATA);
-    NV_CHECK_OR_RETURN(LEVEL_ERROR, pElfHeader->shstrndx <= pElfHeader->shnum, NV_ERR_INVALID_DATA);
+    NV_CHECK_OR_RETURN(LEVEL_ERROR, elfShStrNdx <= elfShNum, NV_ERR_INVALID_DATA);
 
     // Get the offset and size of the table that holds the section names and make sure they are valid
-    pElfSectionHeader = (const LibosElf64SectionHeader*) &pGspBuf[pElfHeader->shoff + (pElfHeader->shstrndx * pElfHeader->shentsize)];
-    elfSectionNamesTableOffset = pElfSectionHeader->offset;
-    elfSectionNamesTableSize = pElfSectionHeader->size;
+    // Elf64_Shdr field offsets: name 0, offset 24, size 32
+    pElfSectionHeader = &pGspBuf[elfShOff + ((NvU64)elfShStrNdx * elfShEntSize)];
+    elfSectionNamesTableOffset = _kgspElfRead64(pElfSectionHeader + 24);
+    elfSectionNamesTableSize = _kgspElfRead64(pElfSectionHeader + 32);
     NV_CHECK_OR_RETURN(LEVEL_ERROR, portSafeAddU64(elfSectionNamesTableOffset, elfSectionNamesTableSize - 1, &elfSectionNamesTableMaxIdx), NV_ERR_INVALID_DATA);
     NV_CHECK_OR_RETURN(LEVEL_ERROR, elfDataSize >= elfSectionNamesTableMaxIdx, NV_ERR_INVALID_DATA);
 
     // Iterate through all of the section headers to find the signatures
-    pElfSectionHeader = (const LibosElf64SectionHeader*) &pGspBuf[elfSectionHeaderMaxIdx + 1 - sizeof(*pElfSectionHeader)];
+    pElfSectionHeader = &pGspBuf[elfSectionHeaderMaxIdx + 1 - elfShEntSize];
 
-    for (idx = pElfHeader->shnum - 1; idx >= 0; idx--, pElfSectionHeader--)
+    for (idx = (NvS16)elfShNum - 1; idx >= 0; idx--, pElfSectionHeader -= elfShEntSize)
     {
         NvU64 currentSectionNameMaxLength;
         NvU64 elfSectionMaxIdx;
 
+        secName   = _kgspElfRead32(pElfSectionHeader + 0);
+        secOffset = _kgspElfRead64(pElfSectionHeader + 24);
+        secSize   = _kgspElfRead64(pElfSectionHeader + 32);
+
         // Make sure the header name index fits within the section names table
-        NV_CHECK_OR_RETURN(LEVEL_ERROR, elfSectionNamesTableSize - 1 >= pElfSectionHeader->name, NV_ERR_INVALID_DATA);
-        currentSectionNameMaxLength = elfSectionNamesTableSize - pElfSectionHeader->name - 1;
-        pCurrentSectionName = (const char *) &pGspBuf[elfSectionNamesTableOffset + pElfSectionHeader->name];
+        NV_CHECK_OR_RETURN(LEVEL_ERROR, elfSectionNamesTableSize - 1 >= secName, NV_ERR_INVALID_DATA);
+        currentSectionNameMaxLength = elfSectionNamesTableSize - secName - 1;
+        pCurrentSectionName = (const char *) &pGspBuf[elfSectionNamesTableOffset + secName];
 
         // Make sure the elf section size and offset are valid
-        if (pElfSectionHeader->size > 0)
+        if (secSize > 0)
         {
-            NV_CHECK_OR_RETURN(LEVEL_ERROR, portSafeAddU64(pElfSectionHeader->offset, pElfSectionHeader->size - 1, &elfSectionMaxIdx), NV_ERR_INVALID_DATA);
+            NV_CHECK_OR_RETURN(LEVEL_ERROR, portSafeAddU64(secOffset, secSize - 1, &elfSectionMaxIdx), NV_ERR_INVALID_DATA);
         }
         else
         {
-            elfSectionMaxIdx = pElfSectionHeader->offset;
+            elfSectionMaxIdx = secOffset;
         }
         NV_CHECK_OR_RETURN(LEVEL_ERROR, elfDataSize >= elfSectionMaxIdx, NV_ERR_INVALID_DATA);
 
@@ -6896,8 +6940,8 @@ _kgspFwContainerGetSection
             (portStringCompare(pCurrentSectionName, pSectionName, sectionNameLength) == 0) &&
             (pCurrentSectionName[sectionNameLength] == '\0'))
         {
-            *ppSectionData = &pGspBuf[pElfSectionHeader->offset];
-            *pSectionSize = pElfSectionHeader->size;
+            *ppSectionData = &pGspBuf[secOffset];
+            *pSectionSize = secSize;
 
             return NV_OK;
         }
