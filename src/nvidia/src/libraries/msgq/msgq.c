@@ -55,6 +55,78 @@ msgqSetBackendRw(msgqHandle handle, msgqFcnBackendRw fcn, void *pArg)
 
 /*
  *
+ * Queue header byte order
+ *
+ * The queue headers are shared with the GSP, which is little-endian. They are
+ * converted field by field, so the result does not depend on the host byte
+ * order. On a little-endian host the bytes are identical to a plain struct copy.
+ *
+ */
+
+static void
+_msgqPutLe16(NvU8 *p, NvU16 v)
+{
+    p[0] = (NvU8)v;
+    p[1] = (NvU8)(v >> 8);
+}
+
+static void
+_msgqPutLe32(NvU8 *p, NvU32 v)
+{
+    p[0] = (NvU8)v;
+    p[1] = (NvU8)(v >> 8);
+    p[2] = (NvU8)(v >> 16);
+    p[3] = (NvU8)(v >> 24);
+}
+
+static NvU16
+_msgqGetLe16(const volatile NvU8 *p)
+{
+    return (NvU16)((NvU16)p[0] | ((NvU16)p[1] << 8));
+}
+
+static NvU32
+_msgqGetLe32(const volatile NvU8 *p)
+{
+    return (NvU32)p[0] | ((NvU32)p[1] << 8) | ((NvU32)p[2] << 16) | ((NvU32)p[3] << 24);
+}
+
+// Host order header -> the bytes the GSP reads (sizeof(msgqTxHeader) bytes).
+static void
+_msgqHdrToWire(NvU8 *pDst, const msgqTxHeader *pSrc)
+{
+    NvU32 i;
+
+    portMemSet(pDst, 0, sizeof(msgqTxHeader));
+    _msgqPutLe16(pDst + NV_OFFSETOF(msgqTxHeader, versionMajor), pSrc->versionMajor);
+    _msgqPutLe16(pDst + NV_OFFSETOF(msgqTxHeader, versionMinor), pSrc->versionMinor);
+    _msgqPutLe32(pDst + NV_OFFSETOF(msgqTxHeader, size),         pSrc->size);
+    _msgqPutLe32(pDst + NV_OFFSETOF(msgqTxHeader, msgSize),      pSrc->msgSize);
+    _msgqPutLe32(pDst + NV_OFFSETOF(msgqTxHeader, msgCount),     pSrc->msgCount);
+    _msgqPutLe32(pDst + NV_OFFSETOF(msgqTxHeader, entryOff),     pSrc->entryOff);
+    for (i = 0; i < NV_ARRAY_ELEMENTS(pSrc->reserved); i++)
+        _msgqPutLe32(pDst + NV_OFFSETOF(msgqTxHeader, reserved) + (4 * i), pSrc->reserved[i]);
+}
+
+// The bytes the GSP wrote -> host order header.
+static void
+_msgqHdrFromWire(msgqTxHeader *pDst, const volatile NvU8 *pSrc)
+{
+    NvU32 i;
+
+    portMemSet(pDst, 0, sizeof(*pDst));
+    pDst->versionMajor = _msgqGetLe16(pSrc + NV_OFFSETOF(msgqTxHeader, versionMajor));
+    pDst->versionMinor = _msgqGetLe16(pSrc + NV_OFFSETOF(msgqTxHeader, versionMinor));
+    pDst->size         = _msgqGetLe32(pSrc + NV_OFFSETOF(msgqTxHeader, size));
+    pDst->msgSize      = _msgqGetLe32(pSrc + NV_OFFSETOF(msgqTxHeader, msgSize));
+    pDst->msgCount     = _msgqGetLe32(pSrc + NV_OFFSETOF(msgqTxHeader, msgCount));
+    pDst->entryOff     = _msgqGetLe32(pSrc + NV_OFFSETOF(msgqTxHeader, entryOff));
+    for (i = 0; i < NV_ARRAY_ELEMENTS(pDst->reserved); i++)
+        pDst->reserved[i] = _msgqGetLe32(pSrc + NV_OFFSETOF(msgqTxHeader, reserved) + (4 * i));
+}
+
+/*
+ *
  * Init and linking code
  *
  */
@@ -156,10 +228,14 @@ msgqTxCreate
     // write shared buffer (backend)
     pTx = pQueue->pOurTxHdr;
 
+    // The GSP reads the header in little-endian byte order.
+    NvU8 txWire[sizeof(msgqTxHeader)];
+    _msgqHdrToWire(txWire, &pQueue->tx);
+
     // Indirect access to backend
     if (pQueue->fcnBackendRw != NULL)
     {
-        status = pQueue->fcnBackendRw(pTx, &pQueue->tx, sizeof *pTx,
+        status = pQueue->fcnBackendRw(pTx, txWire, sizeof *pTx,
                                       FCN_FLAG_BACKEND_ACCESS_WRITE | FCN_FLAG_BACKEND_QUEUE_TX,
                                       pQueue->fcnBackendRwArg);
         if (status != 0)
@@ -169,7 +245,7 @@ msgqTxCreate
     }
     else
     {
-        portMemCopy(pTx, sizeof(*pTx), &pQueue->tx, sizeof(pQueue->tx));
+        portMemCopy(pTx, sizeof(*pTx), txWire, sizeof(txWire));
     }
 
     portAtomicMemoryFenceStore();
@@ -220,11 +296,13 @@ msgqRxLink
 
     pQueue->pTheirTxHdr = (msgqTxHeader*)pBackingStore;
 
-    // copy their metadata
+    // copy their metadata, which the GSP wrote in little-endian byte order
+    NvU8 rxWire[sizeof(msgqTxHeader)];
+
     if (pQueue->fcnBackendRw != NULL)
     {
-        status = pQueue->fcnBackendRw(&pQueue->rx, (const void *)pQueue->pTheirTxHdr,
-                                      sizeof pQueue->rx,
+        status = pQueue->fcnBackendRw(rxWire, (const void *)pQueue->pTheirTxHdr,
+                                      sizeof rxWire,
                                       FCN_FLAG_BACKEND_ACCESS_READ | FCN_FLAG_BACKEND_QUEUE_RX,
                                       pQueue->fcnBackendRwArg);
         if (status != 0)
@@ -234,8 +312,9 @@ msgqRxLink
     }
     else
     {
-        portMemCopy(&pQueue->rx, sizeof(pQueue->rx), (const void *)pQueue->pTheirTxHdr, sizeof(*pQueue->pTheirTxHdr));
+        portMemCopy(rxWire, sizeof(rxWire), (const void *)pQueue->pTheirTxHdr, sizeof(*pQueue->pTheirTxHdr));
     }
+    _msgqHdrFromWire(&pQueue->rx, rxWire);
 
     if (size < (pQueue->rx.entryOff + msgSize))
     {

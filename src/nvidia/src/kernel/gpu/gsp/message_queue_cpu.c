@@ -413,6 +413,22 @@ NV_STATUS GspStatusQueueInit(OBJGPU *pGpu, MESSAGE_QUEUE_INFO **ppMQI)
         NV_PRINTF(LEVEL_ERROR,
             "msgqRxLink failed: %d, nvStatus 0x%08x, retries: %d\n",
             nRet, nvStatus, nRetries);
+#if NVCPU_IS_BIG_ENDIAN
+        //
+        // Big-endian bring-up diagnostic: the raw bytes of the status queue
+        // header, to tell "GSP has not written it" (all zero) from "written in
+        // little-endian order". Expect 02 00 00 00 (version 2.0) first.
+        //
+        {
+            const NvU8 *pB = (const NvU8 *)(*ppMQI)->pStatusQueue;
+
+            NV_PRINTF(LEVEL_ERROR, "status queue size 0x%x msgSize 0x%x, header bytes: "
+                      "%02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x\n",
+                      (*ppMQI)->statusQueueSize, (*ppMQI)->queueElementSizeMin,
+                      pB[0], pB[1], pB[2], pB[3], pB[4], pB[5], pB[6], pB[7],
+                      pB[8], pB[9], pB[10], pB[11], pB[12], pB[13], pB[14], pB[15]);
+        }
+#endif
         _gspMsgQueueCleanup(*ppMQI);
     }
 

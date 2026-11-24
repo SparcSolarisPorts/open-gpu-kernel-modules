@@ -103,6 +103,44 @@ CrashCatReport *crashcatQueueConsumeNextReport_V1(CrashCatQueue *pQueue)
                     pQueue->pMapping, postWrapSize);
     }
 
+#if NVCPU_IS_BIG_ENDIAN
+    //
+    // The queue is written in little-endian byte order, and the packet fields
+    // are 64-bit words. Decode from a private copy converted to host order.
+    // (32-bit I/O state packets pack a 32-bit value and offset into each word
+    // and still need their own handling.)
+    //
+    {
+        NvU8 *pCopy = portMemAllocNonPaged(readSize);
+        const NvU8 *pSrc8 = (const NvU8 *)pBuf;
+        NvU32 i;
+        NvU32 k;
+
+        if (pCopy == NULL)
+        {
+            if (bAllocated)
+                portMemFree(pBuf);
+            return NULL;
+        }
+
+        for (i = 0; (i + 8) <= readSize; i += 8)
+        {
+            NvU64 w = 0;
+
+            for (k = 0; k < 8; k++)
+                w |= ((NvU64)pSrc8[i + k]) << (8 * k);
+            *(NvU64 *)(pCopy + i) = w;
+        }
+        for (; i < readSize; i++)
+            pCopy[i] = pSrc8[i];
+
+        if (bAllocated)
+            portMemFree(pBuf);
+        pBuf = pCopy;
+        bAllocated = NV_TRUE;
+    }
+#endif
+
     //
     // To create the CrashCatReport object, we pass the implementer signature as a halspec arg.
     // The implementer signature location is technically report-version-specific, so we need a
