@@ -528,6 +528,12 @@ kgspExtractVbiosFromRom_TU102
 
     if (!IS_VALID_PCI_ROM_SIG(romSig))
     {
+        // Show what the PROM window returned, to tell an unreadable ROM
+        // (all ones or zeros) from a byte-order problem.
+        NV_PRINTF(LEVEL_ERROR,
+                  "ROM signature read 0x%04x at base 0x%x; first PROM dwords 0x%08x 0x%08x\n",
+                  romSig, src.baseOffset,
+                  s_promRead32(pGpu, 0), s_promRead32(pGpu, 4));
         NV_PRINTF(LEVEL_ERROR, "did not find valid ROM signature\n");
         status = NV_ERR_INVALID_DATA;
         goto out;
