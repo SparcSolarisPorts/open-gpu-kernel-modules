@@ -99,6 +99,8 @@
 #include "class/cl0000.h"  // NV0000_ALLOC_PARAMETERS
 #include "class/cl0080.h"  // NV0080_ALLOC_PARAMETERS
 #include "class/cl2080.h"  // NV2080_ALLOC_PARAMETERS
+#include "ctrl/ctrl2080/ctrl2080gpu.h"       // NV2080_CTRL_GPU_GET_CONSTRUCTED_FALCON_INFO_PARAMS
+#include "ctrl/ctrl2080/ctrl2080internal.h"  // NV2080_CTRL_INTERNAL_GPU_GET_USER_REGISTER_ACCESS_MAP_PARAMS
 #include "gmcapi/gmcapi_engine_types.h"
 #include "gmcapi/gmcapi_system_info.h"
 #include "gmcapi/gmcapi_system_info_unstable.h"
@@ -736,6 +738,43 @@ _kgspRpcSwapRmControl(OBJRPC *pRpc, NvBool bToWire)
     }
 
     // Raw (not serialized) parameters: each command needs its own conversion.
+    switch (cmd)
+    {
+        case NV2080_CTRL_CMD_INTERNAL_GPU_GET_USER_REGISTER_ACCESS_MAP:
+        {
+            // Three 32-bit fields around two byte arrays (the arrays stay as they are).
+            NV2080_CTRL_INTERNAL_GPU_GET_USER_REGISTER_ACCESS_MAP_PARAMS *q =
+                (NV2080_CTRL_INTERNAL_GPU_GET_USER_REGISTER_ACCESS_MAP_PARAMS *)pParams;
+
+            if (paramsSize < sizeof(*q))
+                break;
+
+            KGSP_RPC_REVERSE(q->userRegisterAccessMapSize);
+            KGSP_RPC_REVERSE(q->compressedSize);
+            KGSP_RPC_REVERSE(q->profilingRangesSize);
+            return;
+        }
+
+        case NV2080_CTRL_CMD_GPU_GET_CONSTRUCTED_FALCON_INFO:
+        {
+            // Every member is a 32-bit value (the count, then 64 entries of five).
+            NV2080_CTRL_GPU_GET_CONSTRUCTED_FALCON_INFO_PARAMS *q =
+                (NV2080_CTRL_GPU_GET_CONSTRUCTED_FALCON_INFO_PARAMS *)pParams;
+            NvU32 *pWords = (NvU32 *)q;
+            NvU32 i;
+
+            if (paramsSize < sizeof(*q))
+                break;
+
+            for (i = 0; i < sizeof(*q) / sizeof(NvU32); i++)
+                KGSP_RPC_REVERSE(pWords[i]);
+            return;
+        }
+
+        default:
+            break;
+    }
+
     _kgspRpcReportUnconvertedParams("control", cmd, paramsSize);
 }
 
