@@ -514,6 +514,28 @@ kgspBootstrap_TU102
     if ((bootMode == KGSP_BOOT_MODE_NORMAL) && (pKernelGsp->pWprMetaV1 != NULL))
         _kgspWprMetaV1SwapByteOrder(pKernelGsp->pWprMetaV1);
 
+#if NVCPU_IS_BIG_ENDIAN
+    //
+    // Diagnostic for big-endian bring-up: show the bytes Booter will read.
+    // Byte loads see the memory image whatever byte swapping the mapping does.
+    // Little-endian magic 0xdc3aae21371a60b3 reads b3 60 1a 37 21 ae 3a dc.
+    //
+    if ((bootMode == KGSP_BOOT_MODE_NORMAL) && (pKernelGsp->pWprMetaV1 != NULL))
+    {
+        const NvU8 *pB = (const NvU8 *)pKernelGsp->pWprMetaV1;
+
+        NV_PRINTF(LEVEL_ERROR, "Booter Load arg 0x%llx, WPR meta bytes 0-15:  "
+                  "%02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x\n",
+                  _kgspGetBooterLoadArgs(pKernelGsp, bootMode),
+                  pB[0], pB[1], pB[2], pB[3], pB[4], pB[5], pB[6], pB[7],
+                  pB[8], pB[9], pB[10], pB[11], pB[12], pB[13], pB[14], pB[15]);
+        NV_PRINTF(LEVEL_ERROR, "WPR meta bytes 16-31: "
+                  "%02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x\n",
+                  pB[16], pB[17], pB[18], pB[19], pB[20], pB[21], pB[22], pB[23],
+                  pB[24], pB[25], pB[26], pB[27], pB[28], pB[29], pB[30], pB[31]);
+    }
+#endif
+
     status = kgspExecuteBooterLoad_HAL(pGpu, pKernelGsp,
                                        _kgspGetBooterLoadArgs(pKernelGsp, bootMode));
 

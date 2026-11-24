@@ -44,6 +44,10 @@
 #include <vm/hat.h>
 #include <vm/as.h>
 #include <vm/seg_kmem.h>
+#include <sys/cmn_err.h>
+#include <sys/kmem.h>
+#include <sys/atomic.h>
+#include <sys/systm.h>
 
 #define NV_SOL_HAT_ENDIAN       HAT_STRUCTURE_LE
 
@@ -69,6 +73,68 @@ nv_sol_hat_attr(uint32_t mode)
     return attr;
 }
 
+/*
+ * One-time diagnostic (sparcv9 bring-up): find out what HAT_STRUCTURE_LE does
+ * to RAM.  A private page is mapped a second time with nv_sol_hat_attr(), a
+ * 64-bit value, a 32-bit value and two memcpy() calls are stored through that
+ * mapping, and the page is read back bytewise through its normal kernel
+ * mapping.  If the mapping swaps, the 64-bit value reads back as 08 07 .. 01.
+ * The memcpy rows show what the kernel memcpy does through the same mapping,
+ * which is what portMemCopy() does for firmware data.  Remove once settled.
+ */
+static void
+nv_sol_vm_selftest(void)
+{
+    static volatile uint32_t done;
+    uint8_t src[16];
+    caddr_t buf, page, va;
+    pfn_t pfn;
+    int i;
+
+    if (atomic_cas_32(&done, 0, 1) != 0)
+        return;
+
+    buf = kmem_zalloc(2 * MMU_PAGESIZE, KM_SLEEP);
+    page = (caddr_t)(((uintptr_t)buf + MMU_PAGESIZE - 1) &
+        ~((uintptr_t)MMU_PAGESIZE - 1));
+    pfn = hat_getpfnum(kas.a_hat, page);
+    va = (caddr_t)vmem_alloc(heap_arena, MMU_PAGESIZE, VM_SLEEP);
+
+    hat_devload(kas.a_hat, va, MMU_PAGESIZE, pfn,
+        nv_sol_hat_attr(GFXP_MEMORY_CACHED), HAT_LOAD_LOCK | HAT_LOAD_NOCONSIST);
+
+    for (i = 0; i < 16; i++)
+        src[i] = (uint8_t)i;
+
+    *(volatile uint64_t *)(void *)va = 0x0102030405060708ULL;
+    *(volatile uint32_t *)(void *)(va + 8) = 0x090a0b0cU;
+    (void) memcpy(va + 16, src, 16);
+    (void) memcpy(va + 32, src, 13);
+
+    cmn_err(CE_NOTE, "nvidia: RAM map self-test (HAT_STRUCTURE_LE), memory bytes:");
+    cmn_err(CE_NOTE, "nvidia:   u64 0x0102030405060708 + u32 0x090a0b0c: "
+        "%02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x",
+        page[0] & 0xff, page[1] & 0xff, page[2] & 0xff, page[3] & 0xff,
+        page[4] & 0xff, page[5] & 0xff, page[6] & 0xff, page[7] & 0xff,
+        page[8] & 0xff, page[9] & 0xff, page[10] & 0xff, page[11] & 0xff);
+    cmn_err(CE_NOTE, "nvidia:   memcpy of 00..0f, 16 bytes: "
+        "%02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x",
+        page[16] & 0xff, page[17] & 0xff, page[18] & 0xff, page[19] & 0xff,
+        page[20] & 0xff, page[21] & 0xff, page[22] & 0xff, page[23] & 0xff,
+        page[24] & 0xff, page[25] & 0xff, page[26] & 0xff, page[27] & 0xff,
+        page[28] & 0xff, page[29] & 0xff, page[30] & 0xff, page[31] & 0xff);
+    cmn_err(CE_NOTE, "nvidia:   memcpy of 00..0c, 13 bytes: "
+        "%02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x",
+        page[32] & 0xff, page[33] & 0xff, page[34] & 0xff, page[35] & 0xff,
+        page[36] & 0xff, page[37] & 0xff, page[38] & 0xff, page[39] & 0xff,
+        page[40] & 0xff, page[41] & 0xff, page[42] & 0xff, page[43] & 0xff,
+        page[44] & 0xff, page[45] & 0xff, page[46] & 0xff, page[47] & 0xff);
+
+    hat_unload(kas.a_hat, va, MMU_PAGESIZE, HAT_UNLOAD_UNLOCK);
+    vmem_free(heap_arena, va, MMU_PAGESIZE);
+    kmem_free(buf, 2 * MMU_PAGESIZE);
+}
+
 caddr_t
 gfxp_alloc_kernel_space(size_t size)
 {
@@ -85,6 +151,8 @@ gfxp_free_kernel_space(caddr_t va, size_t size)
 void
 gfxp_load_kernel_space(uint64_t pa, size_t size, uint32_t mode, caddr_t va)
 {
+    nv_sol_vm_selftest();
+
     /*
      * The pages belong to the DDI allocator that handed them out, so do not
      * add this mapping to their mapping lists (HAT_LOAD_NOCONSIST).
