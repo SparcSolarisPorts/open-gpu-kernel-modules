@@ -140,6 +140,12 @@ ifeq ($(TARGET_OS),SunOS)
   ifneq ($(filter default file,$(origin OBJCOPY)),)
     OBJCOPY           := gobjcopy
   endif
+  # make predefines CC as "cc", so the "CC ?= gcc" above never applies, and
+  # Solaris has no cc unless Studio is installed. Only the built-in default
+  # is replaced; CC from the environment or the command line wins.
+  ifeq ($(origin CC),default)
+    CC                := gcc
+  endif
 endif
 
 ifndef TARGET_ARCH
