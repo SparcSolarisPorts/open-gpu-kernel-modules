@@ -366,6 +366,77 @@ _kgspGetBooterLoadArgs
     return 0;
 }
 
+#if NVCPU_IS_BIG_ENDIAN
+// BEGIN WPR meta byte order
+//
+// Booter reads GspFwWprMetaV1 from system memory by DMA, and the falcon reads
+// it as little-endian. RM fills the struct in host order and reads fields back
+// afterwards (frtsOffset, fbSize, gspFwWprEnd and others), so on a big-endian
+// host the bytes of every field are reversed just before Booter Load and
+// reversed back right after it. Reversing the bytes of each field is its own
+// inverse, so one function does both. Byte arrays (reserved1) are not fields
+// in this sense and are left alone.
+//
+static void
+_kgspSwapBytes(NvU8 *p, NvU32 width)
+{
+    NvU32 i;
+
+    for (i = 0; i < width / 2; i++)
+    {
+        NvU8 t = p[i];
+
+        p[i] = p[width - 1 - i];
+        p[width - 1 - i] = t;
+    }
+}
+
+#define KGSP_WPR_META_SWAP(pMeta, field) \
+    _kgspSwapBytes((NvU8 *) &(pMeta)->field, sizeof((pMeta)->field))
+
+static void
+_kgspWprMetaV1SwapByteOrder(GspFwWprMetaV1 *pWprMeta)
+{
+    KGSP_WPR_META_SWAP(pWprMeta, magic);
+    KGSP_WPR_META_SWAP(pWprMeta, revision);
+    KGSP_WPR_META_SWAP(pWprMeta, sysmemAddrOfRadix3Elf);
+    KGSP_WPR_META_SWAP(pWprMeta, sizeOfRadix3Elf);
+    KGSP_WPR_META_SWAP(pWprMeta, sysmemAddrOfBootloader);
+    KGSP_WPR_META_SWAP(pWprMeta, sizeOfBootloader);
+    KGSP_WPR_META_SWAP(pWprMeta, bootloaderCodeOffset);
+    KGSP_WPR_META_SWAP(pWprMeta, bootloaderDataOffset);
+    KGSP_WPR_META_SWAP(pWprMeta, bootloaderManifestOffset);
+    KGSP_WPR_META_SWAP(pWprMeta, sysmemAddrOfSignature);
+    KGSP_WPR_META_SWAP(pWprMeta, sizeOfSignature);
+    KGSP_WPR_META_SWAP(pWprMeta, gspFwRsvdStart);
+    KGSP_WPR_META_SWAP(pWprMeta, nonWprHeapOffset);
+    KGSP_WPR_META_SWAP(pWprMeta, nonWprHeapSize);
+    KGSP_WPR_META_SWAP(pWprMeta, gspFwWprStart);
+    KGSP_WPR_META_SWAP(pWprMeta, gspFwHeapOffset);
+    KGSP_WPR_META_SWAP(pWprMeta, gspFwHeapSize);
+    KGSP_WPR_META_SWAP(pWprMeta, gspFwOffset);
+    KGSP_WPR_META_SWAP(pWprMeta, bootBinOffset);
+    KGSP_WPR_META_SWAP(pWprMeta, frtsOffset);
+    KGSP_WPR_META_SWAP(pWprMeta, frtsSize);
+    KGSP_WPR_META_SWAP(pWprMeta, gspFwWprEnd);
+    KGSP_WPR_META_SWAP(pWprMeta, fbSize);
+    KGSP_WPR_META_SWAP(pWprMeta, vgaWorkspaceOffset);
+    KGSP_WPR_META_SWAP(pWprMeta, vgaWorkspaceSize);
+    KGSP_WPR_META_SWAP(pWprMeta, bootCount);
+    KGSP_WPR_META_SWAP(pWprMeta, sysmemAddrOfCrashReportQueue);
+    KGSP_WPR_META_SWAP(pWprMeta, sizeOfCrashReportQueue);
+    KGSP_WPR_META_SWAP(pWprMeta, reserved2);
+    KGSP_WPR_META_SWAP(pWprMeta, gspFwHeapVfPartitionCount);
+    KGSP_WPR_META_SWAP(pWprMeta, flags);
+    KGSP_WPR_META_SWAP(pWprMeta, pagingConfig);
+    KGSP_WPR_META_SWAP(pWprMeta, reserved3);
+    KGSP_WPR_META_SWAP(pWprMeta, verified);
+}
+// END WPR meta byte order
+#else
+#define _kgspWprMetaV1SwapByteOrder(pWprMeta) ((void) (pWprMeta))
+#endif
+
 /*!
  * Boot GSP-RM.
  *
@@ -433,8 +504,22 @@ kgspBootstrap_TU102
     }
 
     // Execute Booter Load
+    //
+    // For a normal boot Booter is given the address of the WPR metadata, which
+    // it reads in device (little-endian) byte order. Put the struct in that
+    // order for the duration of Booter Load only, whatever its outcome.
+    // (Suspend/resume metadata is not converted: that path is not supported
+    // on big-endian hosts yet.)
+    //
+    if ((bootMode == KGSP_BOOT_MODE_NORMAL) && (pKernelGsp->pWprMetaV1 != NULL))
+        _kgspWprMetaV1SwapByteOrder(pKernelGsp->pWprMetaV1);
+
     status = kgspExecuteBooterLoad_HAL(pGpu, pKernelGsp,
                                        _kgspGetBooterLoadArgs(pKernelGsp, bootMode));
+
+    if ((bootMode == KGSP_BOOT_MODE_NORMAL) && (pKernelGsp->pWprMetaV1 != NULL))
+        _kgspWprMetaV1SwapByteOrder(pKernelGsp->pWprMetaV1);
+
     if (status != NV_OK)
     {
         NV_PRINTF(LEVEL_ERROR, "failed to execute Booter Load (ucode for initial boot): 0x%x\n", status);
