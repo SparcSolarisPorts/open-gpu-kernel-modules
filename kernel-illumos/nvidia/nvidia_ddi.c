@@ -61,6 +61,7 @@ static uint32_t        nv_minor_bitmap;
 
 extern void nv_pci_handles_init(void);
 extern void nv_pci_handles_fini(void);
+extern void nv_pci_handle_release(void *);
 extern void *nv_pci_handle_for_dip(dev_info_t *);
 extern NvBool nv_pci_is_primary_vga(nv_illumos_state_t *);
 extern NV_STATUS nv_parse_per_device_binary_option_string(nvidia_stack_t *,
@@ -701,6 +702,10 @@ nv_detach_gpu(dev_info_t *dip)
 
     rm_i2c_remove_adapters(sp, nv);
     rm_free_private_state(sp, nv);
+
+    /* RM is done with the GPU: drop the device-tree references of its handle. */
+    nv_pci_handle_release(nv->handle);
+    nv->handle = NULL;
 
     nv_lock_destroy_locks(sp, nv);
     list_destroy(&nvis->open_files);

@@ -88,6 +88,23 @@ nv_pci_handles_init(void)
     nv_pci_handles_ready = NV_TRUE;
 }
 
+/*
+ * The handle of an attached GPU used to keep a hold on the GPU's devinfo node
+ * until module unload, which runs after the node must already be gone.  On
+ * illumos the hold is kept and released by nv_pci_handle_release() when the
+ * GPU detaches.  On Solaris it is not taken at all: the node cannot go away
+ * between attach and detach, and nv_pci_handle_release() clears the handle at
+ * detach, so the hold bought nothing and a held node may keep the driver from
+ * unloading (unconfirmed).  See nv_pci_handle_release().
+ */
+#if defined(NV_SOLARIS)
+#define NV_PCI_HOLD(dip)    ((void)(dip))
+#define NV_PCI_RELE(dip)    ((void)(dip))
+#else
+#define NV_PCI_HOLD(dip)    ndi_hold_devi(dip)
+#define NV_PCI_RELE(dip)    ndi_rele_devi(dip)
+#endif
+
 void
 nv_pci_handles_fini(void)
 {
@@ -101,7 +118,7 @@ nv_pci_handles_fini(void)
         if (h->cfg != NULL)
             pci_config_teardown(&h->cfg);
         if (h->dip != NULL)
-            ndi_rele_devi(h->dip);
+            NV_PCI_RELE(h->dip);
         kmem_free(h, sizeof (*h));
     }
 
@@ -195,11 +212,11 @@ nv_pci_handle_for_dip(dev_info_t *dip)
     }
     mutex_exit(&nv_pci_handles_lock);
 
-    ndi_hold_devi(dip);
+    NV_PCI_HOLD(dip);
     candidate = nv_pci_handle_create(dip, bus, slot, func);
     if (candidate == NULL)
     {
-        ndi_rele_devi(dip);
+        NV_PCI_RELE(dip);
         return (NULL);
     }
 
@@ -239,11 +256,44 @@ nv_pci_handle_for_dip(dev_info_t *dip)
         if (candidate->cfg != NULL)
             pci_config_teardown(&candidate->cfg);
         if (candidate->dip != NULL)
-            ndi_rele_devi(candidate->dip);
+            NV_PCI_RELE(candidate->dip);
         kmem_free(candidate, sizeof (*candidate));
     }
 
     return (h);
+}
+
+/*
+ * Called when a GPU detaches, after RM has released its state for it.  RM
+ * keeps the handle pointer for the life of the module and never frees it, so
+ * the structure stays allocated; what goes is the part that points into the
+ * device tree (the config-space access handle and the node).  A later
+ * os_pci_*() call on it falls back to the bus/device/function path, the same
+ * state as a handle that was never attached to a node, and a re-attach of the
+ * same function fills it in again (see nv_pci_handle_for_dip()).
+ */
+void
+nv_pci_handle_release(void *handle)
+{
+    nv_pci_handle_t *h = handle;
+    ddi_acc_handle_t cfg;
+    dev_info_t *dip;
+
+    if (h == NULL)
+        return;
+
+    mutex_enter(&nv_pci_handles_lock);
+    cfg = h->cfg;
+    dip = h->dip;
+    h->cfg = NULL;
+    membar_producer();
+    h->dip = NULL;
+    mutex_exit(&nv_pci_handles_lock);
+
+    if (cfg != NULL)
+        pci_config_teardown(&cfg);
+    if (dip != NULL)
+        NV_PCI_RELE(dip);
 }
 
 void* NV_API_CALL os_pci_init_handle(

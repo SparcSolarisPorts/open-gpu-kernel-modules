@@ -62,6 +62,17 @@ const ddi_device_acc_attr_t nv_sysmem_acc_attr = {
 uint_t
 nv_cache_to_iomem(NvU32 cache_type)
 {
+#if defined(NV_SOLARIS)
+    /*
+     * <sys/ddidmareq.h> on Solaris 11.4 says that on SPARC only
+     * IOMEM_DATA_CACHED is accepted, and other values make the allocation
+     * fail.  DMA on sun4v is cache coherent, so the memory is correct as
+     * cached whatever attribute RM asked for.  (The sentence in the header was
+     * only seen cut off in a grep; the next run's log shows if this is wrong.)
+     */
+    (void) cache_type;
+    return IOMEM_DATA_CACHED;
+#else
     switch (cache_type)
     {
         case NV_MEMORY_CACHED:
@@ -74,6 +85,7 @@ nv_cache_to_iomem(NvU32 cache_type)
         default:
             return IOMEM_DATA_UNCACHED;
     }
+#endif /* NV_SOLARIS */
 }
 
 static uint32_t
@@ -327,12 +339,33 @@ nv_alloc_dma_chunks(nv_state_t *nv, nv_illumos_alloc_t *at, NvU64 chunk_size)
 
         if (ddi_dma_alloc_handle(at->dip, &attr, waitfp, NULL,
                 &c->dma_handle) != DDI_SUCCESS)
+        {
+            c->dma_handle = NULL;
+            nv_printf(NV_DBG_ERRORS,
+                "NVRM: ddi_dma_alloc_handle failed: limit=0x%llx align=0x%llx "
+                "sgllen=%d\n", (unsigned long long)limit,
+                (unsigned long long)align, sgllen);
             goto fail;
+        }
 
         if (ddi_dma_mem_alloc(c->dma_handle, (size_t)len, &nv_sysmem_acc_attr,
                 flags, waitfp, NULL, &c->kva, &real_len,
                 &c->acc_handle) != DDI_SUCCESS)
+        {
+            /*
+             * A failed ddi_dma_mem_alloc() leaves nothing to free, and the
+             * handle it was given is not valid.  Freeing it panicked the
+             * kernel ("kfreea: bad free 0") on the T8-1.
+             */
+            c->acc_handle = NULL;
+            c->kva = NULL;
+            nv_printf(NV_DBG_ERRORS,
+                "NVRM: ddi_dma_mem_alloc failed: len=0x%llx flags=0x%x "
+                "limit=0x%llx align=0x%llx sgllen=%d cache_type=%u\n",
+                (unsigned long long)len, flags, (unsigned long long)limit,
+                (unsigned long long)align, sgllen, at->cache_type);
             goto fail;
+        }
 
         c->len = (size_t)len;
 
