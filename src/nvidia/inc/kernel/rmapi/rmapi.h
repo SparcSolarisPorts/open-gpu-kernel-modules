@@ -281,6 +281,7 @@ void rmapiDelPendingClients(void);
 void rmapiDelPendingDevices(NvU32 gpuMask);
 void rmapiReportLeakedDevices(NvU32 gpuMask);
 void rmapiReportInternalLeakedDevices(NvU32 gpuMask);
+void rmapiFreeInternalLeakedClients(NvU32 gpuMask);
 
 //
 // Given a value, retrieves an array of client handles corresponding to clients

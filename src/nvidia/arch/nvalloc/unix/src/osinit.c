@@ -2475,6 +2475,12 @@ void RmShutdownAdapter(
                     // gpuStatePreInit allocated, or they outlive the OBJGPU.
                     //
                     gpuDestroyInternalHandles(pGpu);
+
+                    //
+                    // gpuStateInit has no rollback, so engines that initialized
+                    // before the failing one still hold internal clients.
+                    //
+                    rmapiFreeInternalLeakedClients(NVBIT(gpuInstance));
                 }
 
                 if (IS_DCE_CLIENT(pGpu))

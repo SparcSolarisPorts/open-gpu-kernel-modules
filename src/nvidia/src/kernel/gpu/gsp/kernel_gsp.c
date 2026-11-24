@@ -97,6 +97,8 @@
 #include "rmgspseq.h" // full GspLoadExec*Params definitions (the event payload byte order conversion needs them)
 #include "rmapi/rmapi.h"   // RMAPI_RPC_FLAGS_* (RM_RPC payload byte order conversion)
 #include "class/cl0000.h"  // NV0000_ALLOC_PARAMETERS
+#include "class/cl0005.h"  // NV0005_ALLOC_PARAMETERS
+#include "nvos.h"          // NV01_EVENT_KERNEL_CALLBACK_EX
 #include "class/cl0080.h"  // NV0080_ALLOC_PARAMETERS
 #include "class/cl2080.h"  // NV2080_ALLOC_PARAMETERS
 #include "ctrl/ctrl2080/ctrl2080gpu.h"       // NV2080_CTRL_GPU_GET_CONSTRUCTED_FALCON_INFO_PARAMS
@@ -681,6 +683,23 @@ _kgspRpcSwapRmAlloc(OBJRPC *pRpc, NvBool bToWire)
                 break;
 
             KGSP_RPC_REVERSE(q->subDeviceId);
+            return;
+        }
+
+        case NV01_EVENT_KERNEL_CALLBACK_EX:
+        {
+            // Four 32-bit handles and indexes, then the 64-bit callback pointer, which the
+            // GSP only stores and hands back.
+            NV0005_ALLOC_PARAMETERS *q = (NV0005_ALLOC_PARAMETERS *)pParams;
+
+            if (paramsSize < sizeof(*q))
+                break;
+
+            KGSP_RPC_REVERSE(q->hParentClient);
+            KGSP_RPC_REVERSE(q->hSrcResource);
+            KGSP_RPC_REVERSE(q->hClass);
+            KGSP_RPC_REVERSE(q->notifyIndex);
+            KGSP_RPC_REVERSE(q->data);
             return;
         }
 

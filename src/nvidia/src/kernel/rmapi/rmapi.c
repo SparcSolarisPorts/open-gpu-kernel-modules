@@ -950,6 +950,63 @@ rmapiReportInternalLeakedDevices
     }
 }
 
+//
+// Free every internal client that still owns a Device on one of the GPUs in
+// gpuMask. Used when GPU initialization failed part way: gpuStateInit has no
+// rollback, so engines that had already initialized leave their internal
+// clients behind, and those clients would otherwise be freed at module unload
+// after the OBJGPU is gone.
+//
+void
+rmapiFreeInternalLeakedClients
+(
+    NvU32 gpuMask
+)
+{
+    RM_API *pRmApi = rmapiGetInterface(RMAPI_GPU_LOCK_INTERNAL);
+    NvU32   attempts;
+
+    for (attempts = 0; attempts < 64; attempts++)
+    {
+        RmClient **ppClient = serverutilGetFirstClientUnderLock();
+        NvHandle   hLeaked  = NV01_NULL_OBJECT;
+
+        // Find one leaked client, then free it and look again, since freeing changes the list.
+        while ((ppClient != NULL) && (hLeaked == NV01_NULL_OBJECT))
+        {
+            RsClient *pRsClient = staticCast(*ppClient, RsClient);
+
+            if (serverIsClientInternal(&g_resServ, pRsClient->hClient))
+            {
+                RS_ITERATOR it = clientRefIter(pRsClient, NULL, classId(Device), RS_ITERATE_CHILDREN, NV_TRUE);
+
+                while (clientRefIterNext(pRsClient, &it))
+                {
+                    Device *pDevice = dynamicCast(it.pResourceRef->pResource, Device);
+
+                    if ((pDevice != NULL) &&
+                        ((gpuMask & NVBIT(gpuGetInstance(GPU_RES_GET_GPU(pDevice)))) != 0))
+                    {
+                        hLeaked = pRsClient->hClient;
+                        break;
+                    }
+                }
+            }
+
+            if (hLeaked == NV01_NULL_OBJECT)
+                ppClient = serverutilGetNextClientUnderLock(ppClient);
+        }
+
+        if (hLeaked == NV01_NULL_OBJECT)
+            return;
+
+        NV_PRINTF(LEVEL_ERROR, "Freeing internal client 0x%x left by a failed GPU init\n", hLeaked);
+
+        if (pRmApi->Free(pRmApi, hLeaked, hLeaked) != NV_OK)
+            return;
+    }
+}
+
 void
 rmapiReportLeakedDevices
 (
