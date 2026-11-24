@@ -230,6 +230,7 @@ nvidia_ioctl(dev_t dev, int cmd, intptr_t arg, int mode, cred_t *credp,
             return (ENOTTY);
     }
 
+#if !defined(NV_SOLARIS)
     if (nvifp->kind == NV_NODE_GPU && nvifp->nvis->console_fb != NULL)
     {
         switch (cmd)
@@ -257,6 +258,7 @@ nvidia_ioctl(dev_t dev, int cmd, intptr_t arg, int mode, cred_t *credp,
                 return (status);
         }
     }
+#endif /* !NV_SOLARIS */
 
     if (nvifp->console_only)
     {

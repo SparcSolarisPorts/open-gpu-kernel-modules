@@ -50,7 +50,7 @@
 #include <sys/ddidevmap.h>
 #include <sys/pci.h>
 #include <sys/sunndi.h>
-#include <sys/gfx_private.h>
+#include "nv-gfxp.h"
 
 /*
  * The NVIDIA headers below expect a freestanding environment and supply their

@@ -45,7 +45,7 @@
 #include <sys/uio.h>
 #include <sys/lgrp.h>
 #include <vm/page.h>
-#include <sys/gfx_private.h>
+#include "nv-gfxp.h"
 #include <sys/disp.h>
 
 /* PAGESIZE is a variable for DDI drivers; nv_os_init() sets these. */

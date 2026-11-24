@@ -34,7 +34,7 @@
 #include <sys/uio.h>
 #include <sys/file.h>
 #include <sys/sunndi.h>
-#include <sys/gfx_private.h>
+#include "nv-gfxp.h"
 
 static NvBool os_verify_checksum(const NvU8 *pMappedAddr, NvU32 length)
 {

@@ -317,6 +317,14 @@ nv_console_attach(nv_illumos_state_t *nvis)
 {
     gfxp_fb_softc_ptr_t fb;
 
+#if defined(NV_SOLARIS)
+    /*
+     * Solaris has no gfxp_fb framebuffer console helpers, and the console of
+     * a SPARC system is not on the GPU.  nvis->console_fb stays NULL.
+     */
+    (void) fb;
+    return;
+#else
     if (!nv_is_boot_console(NV_STATE_PTR(nvis)))
         return;
 
@@ -331,6 +339,7 @@ nv_console_attach(nv_illumos_state_t *nvis)
 
     membar_producer();
     nvis->console_fb = fb;
+#endif /* NV_SOLARIS */
 }
 
 static void
@@ -339,8 +348,10 @@ nv_console_detach(nv_illumos_state_t *nvis)
     if (nvis->console_fb == NULL)
         return;
 
+#if !defined(NV_SOLARIS)
     (void) gfxp_fb_detach(nvis->dip, DDI_DETACH, nvis->console_fb);
     gfxp_fb_softc_free(nvis->console_fb);
+#endif
     nvis->console_fb = NULL;
 }
 

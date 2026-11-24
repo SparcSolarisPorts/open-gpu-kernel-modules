@@ -32,7 +32,7 @@
 
 #include <sys/vmem.h>
 #include <sys/vmsystm.h>
-#include <sys/gfx_private.h>
+#include "nv-gfxp.h"
 #include <sys/ddi_impldefs.h>
 #include <sys/pci_impl.h>
 #include <vm/hat.h>

@@ -51,6 +51,23 @@
 #include "library/cryptlib.h"
 #include "nvspdm_cryptlib_extensions.h"
 
+#if defined(NV_SOLARIS)
+/*
+ * Solaris declares CK_AES_GCM_PARAMS only in the userland header
+ * <security/pkcs11t.h>.  The kernel AES-GCM provider reads the same PKCS#11
+ * layout from cm_param, so it is declared here.  The field names and order
+ * are the standard ones; compare with /usr/include/security/pkcs11t.h.
+ */
+typedef struct CK_AES_GCM_PARAMS {
+    uchar_t *pIv;
+    ulong_t  ulIvLen;
+    ulong_t  ulIvBits;
+    uchar_t *pAAD;
+    ulong_t  ulAADLen;
+    ulong_t  ulTagBits;
+} CK_AES_GCM_PARAMS;
+#endif
+
 #define NV_SHA_MAX_DIGEST       SHA384_DIGEST_LENGTH
 #define NV_SHA_MAX_BLOCK        SHA512_HMAC_BLOCK_SIZE
 

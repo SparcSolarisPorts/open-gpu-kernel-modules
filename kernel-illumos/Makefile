@@ -69,6 +69,11 @@ ifeq ($(ISA),sparcv9)
 # Oracle's documented flags for 64-bit SPARC drivers: V9, medlow code model,
 # no FPU, non-PIC.
 ARCH_CFLAGS     := -mcpu=v9 -mcmodel=medlow -mno-fpu -fno-pic
+# Solaris gcc does not predefine __illumos__.  The shared kernel-open sources
+# (nv_uvm_interface.c, nv_uvm_interface.h, uvm_mmu.c) use it to select this
+# kernel interface layer instead of the Linux one.  NV_SOLARIS marks the
+# places in this layer where Solaris 11.4 differs from illumos.
+ARCH_CFLAGS     += -D__illumos__ -DNV_SOLARIS
 else
 ARCH_CFLAGS     := -mcmodel=kernel -mno-red-zone -mno-mmx -mno-sse \
                    -msave-args -fno-asynchronous-unwind-tables \
@@ -145,6 +150,11 @@ NVIDIA_SRCS     := \
     nvidia/nvidia_pm.c \
     nvidia/nvidia_registry.c \
     nvidia/nvidia_umem.c
+
+ifeq ($(ISA),sparcv9)
+# libgcc's __clzdi2 and __ctzdi2, which SPARC V9 needs and a module cannot link.
+NVIDIA_SRCS     += nvidia/nvidia_libgcc.c
+endif
 
 # OS-neutral sources shared with the Linux build.
 NVIDIA_KOPEN_SRCS := \
