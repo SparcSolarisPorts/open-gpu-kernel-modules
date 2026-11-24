@@ -53,6 +53,12 @@
 #define pci_cfgacc_put8(rc, bdf, off, v)        ((void)0)
 #define pci_cfgacc_put16(rc, bdf, off, v)       ((void)0)
 #define pci_cfgacc_put32(rc, bdf, off, v)       ((void)0)
+
+/* bus/device/function packed as a PCI requester ID, as illumos sys/pci.h does. */
+#ifndef PCI_GETBDF
+#define PCI_GETBDF(b, d, f) \
+    ((uint16_t)((((b) & 0xff) << 8) | (((d) & 0x1f) << 3) | ((f) & 0x7)))
+#endif
 #endif
 
 #define NV_PCIE_CFG_MAX_OFFSET      0x1000

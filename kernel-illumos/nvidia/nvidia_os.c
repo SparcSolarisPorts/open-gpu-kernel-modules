@@ -846,8 +846,7 @@ NV_STATUS NV_API_CALL os_offline_page_at_address(NvU64 address)
 #if defined(NV_SOLARIS)
     /* The page_retire() return codes are not declared in the Solaris headers. */
     return NV_ERR_NOT_SUPPORTED;
-#endif
-
+#else
     nv_printf(NV_DBG_INFO, "NVRM: offlining page at address: 0x%llx\n",
         address);
 
@@ -861,6 +860,7 @@ NV_STATUS NV_API_CALL os_offline_page_at_address(NvU64 address)
     }
 
     return NV_OK;
+#endif /* NV_SOLARIS */
 }
 
 /*

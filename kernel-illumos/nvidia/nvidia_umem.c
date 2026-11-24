@@ -43,6 +43,15 @@
 #include <vm/seg_kmem.h>
 #include <vm/page.h>
 
+/* Solaris keeps the address-space lock as an explicit argument. */
+#if defined(NV_SOLARIS)
+#define NV_AS_LOCK_ENTER(as, type)  AS_LOCK_ENTER((as), &(as)->a_lock, (type))
+#define NV_AS_LOCK_EXIT(as)         AS_LOCK_EXIT((as), &(as)->a_lock)
+#else
+#define NV_AS_LOCK_ENTER(as, type)  AS_LOCK_ENTER((as), (type))
+#define NV_AS_LOCK_EXIT(as)         AS_LOCK_EXIT((as))
+#endif
+
 /*
  * User memory pinning.  umem_lockmemory(DDI_UMEMLOCK_LONGTERM) keeps the
  * pages locked beyond the ioctl and enforces locked-memory resource
@@ -190,7 +199,7 @@ NV_STATUS NV_API_CALL os_lookup_user_io_memory(
     if (os_alloc_mem((void **)&ptes, page_count * sizeof (NvU64)) != NV_OK)
         return NV_ERR_NO_MEMORY;
 
-    AS_LOCK_ENTER(as, RW_READER);
+    NV_AS_LOCK_ENTER(as, RW_READER);
 
     seg = as_segat(as, start);
     if (seg == NULL || seg->s_ops != &segdev_ops ||
@@ -223,7 +232,7 @@ NV_STATUS NV_API_CALL os_lookup_user_io_memory(
     }
 
 done:
-    AS_LOCK_EXIT(as);
+    NV_AS_LOCK_EXIT(as);
 
     if (status != NV_OK)
         os_free_mem(ptes);
@@ -385,6 +394,18 @@ NV_STATUS NV_API_CALL nv_get_num_phys_pages(void *pAllocPrivate, NvU32 *pNumPage
 NV_STATUS NV_API_CALL nv_get_phys_pages(void *pAllocPrivate, void *pPages,
     NvU32 *pNumPages)
 {
+#if defined(NV_SOLARIS)
+    /*
+     * page_numtopp_nolock() is neither exported nor declared on Solaris 11.4.
+     * RM asks for page_t pointers only on behalf of nvidia-uvm, which this
+     * port does not build.
+     */
+    if (pNumPages == NULL)
+        return NV_ERR_INVALID_ARGUMENT;
+
+    *pNumPages = 0;
+    return NV_ERR_NOT_SUPPORTED;
+#else
     nv_illumos_alloc_t *at = pAllocPrivate;
     page_t **pages = pPages;
     NvU32 i, count;
@@ -398,4 +419,5 @@ NV_STATUS NV_API_CALL nv_get_phys_pages(void *pAllocPrivate, void *pPages,
 
     *pNumPages = count;
     return NV_OK;
+#endif /* NV_SOLARIS */
 }

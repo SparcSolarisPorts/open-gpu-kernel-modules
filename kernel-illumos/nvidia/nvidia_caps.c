@@ -441,8 +441,7 @@ int NV_API_CALL os_nv_cap_validate_and_dup_fd(const nv_cap_t *cap, int fd)
      * Solaris signatures differ from illumos.  Only MIG and IMEX use this.
      */
     return -1;
-#endif
-
+#else
     if (cap == NULL || cap->minor < 0 || nv_ctl_dip == NULL || curproc == &p0)
         return -1;
 
@@ -476,6 +475,7 @@ int NV_API_CALL os_nv_cap_validate_and_dup_fd(const nv_cap_t *cap, int fd)
     releasef(fd);
 
     return dup_fd;
+#endif /* NV_SOLARIS */
 }
 
 /*

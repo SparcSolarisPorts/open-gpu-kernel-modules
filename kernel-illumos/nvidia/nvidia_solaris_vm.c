@@ -85,8 +85,12 @@ gfxp_free_kernel_space(caddr_t va, size_t size)
 void
 gfxp_load_kernel_space(uint64_t pa, size_t size, uint32_t mode, caddr_t va)
 {
+    /*
+     * The pages belong to the DDI allocator that handed them out, so do not
+     * add this mapping to their mapping lists (HAT_LOAD_NOCONSIST).
+     */
     hat_devload(kas.a_hat, va, size, (pfn_t)mmu_btop(pa),
-        nv_sol_hat_attr(mode), HAT_LOAD_LOCK);
+        nv_sol_hat_attr(mode), HAT_LOAD_LOCK | HAT_LOAD_NOCONSIST);
 }
 
 void
@@ -124,7 +128,13 @@ nv_sol_bus_to_cpu(dev_info_t *dip, NvU64 bus, NvU64 size, NvU64 *cpu)
             "ranges", &cells, &nints) != DDI_PROP_SUCCESS)
         return -1;
 
-    rc = nv_px_ranges_translate(cells, nints, bus, size, cpu);
+    {
+        uint64_t translated = 0;     /* NvU64 and uint64_t differ on LP64 */
+
+        rc = nv_px_ranges_translate(cells, nints, bus, size, &translated);
+        if (rc == 0)
+            *cpu = translated;
+    }
     ddi_prop_free(cells);
     return rc;
 }
