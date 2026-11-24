@@ -1942,6 +1942,97 @@ _kgspRpcGspEventHandleFecsBufferError
     fecsHandleFecsLoggingError(pGpu, pErrorReport->grIdx, pErrorReport->errorType);
 }
 
+#if NVCPU_IS_BIG_ENDIAN
+//
+// GMCAPI event payloads.
+//
+// GSP-RM writes the parameters of a GSP->CPU event in little-endian byte order
+// (the header was already converted by the message queue code). The handlers use
+// them as host values (DMA addresses, sizes), so each event type is converted
+// here, once, before it is dispatched. Reversing the bytes of each field is
+// enough: none of these structures has packed or byte-array members.
+//
+static void
+_kgspEventReverse(void *pField, NvU32 width)
+{
+    NvU8 *p = (NvU8 *)pField;
+    NvU32 i;
+
+    for (i = 0; i < width / 2; i++)
+    {
+        NvU8 t = p[i];
+        p[i] = p[width - 1 - i];
+        p[width - 1 - i] = t;
+    }
+}
+
+#define KGSP_EVENT_REVERSE(field) _kgspEventReverse(&(field), sizeof(field))
+
+static void
+_kgspGmcEventPayloadToHost(NvU32 cmd, void *pData, NvU32 size)
+{
+    NvU32 i;
+
+    switch (cmd)
+    {
+        case GMCAPI_CMD_EXEC_HS_BINARY:
+        {
+            GspLoadExecHsBinaryParams *p = (GspLoadExecHsBinaryParams *)pData;
+
+            if (size < sizeof(*p))
+                break;
+
+            KGSP_EVENT_REVERSE(p->imemPhysAddr);
+            KGSP_EVENT_REVERSE(p->dmemPhysAddr);
+            for (i = 0; i < NV_ARRAY_ELEMENTS(p->reserved64); i++)
+                KGSP_EVENT_REVERSE(p->reserved64[i]);
+            KGSP_EVENT_REVERSE(p->ucodeImemVA);
+            KGSP_EVENT_REVERSE(p->ucodeImemPA);
+            KGSP_EVENT_REVERSE(p->ucodeImemSize);
+            KGSP_EVENT_REVERSE(p->ucodeDmemVA);
+            KGSP_EVENT_REVERSE(p->ucodeDmemPA);
+            KGSP_EVENT_REVERSE(p->ucodeDmemSize);
+            KGSP_EVENT_REVERSE(p->hsSigDmemAddr);
+            KGSP_EVENT_REVERSE(p->engineIdMask);
+            KGSP_EVENT_REVERSE(p->ucodeId);
+            for (i = 0; i < NV_ARRAY_ELEMENTS(p->reserved32); i++)
+                KGSP_EVENT_REVERSE(p->reserved32[i]);
+            break;
+        }
+
+        case GMCAPI_CMD_EXEC_GENERIC_BOOTLOADER:
+        {
+            //
+            // Every member (including the 64-bit values, which are pairs of
+            // NvU32 lo/hi in RM_FLCN_U64) is a 32-bit word.
+            //
+            NvU32 *pWords = (NvU32 *)pData;
+
+            if (size < sizeof(GspLoadExecGenericBootloaderParams))
+                break;
+
+            for (i = 0; i < sizeof(GspLoadExecGenericBootloaderParams) / sizeof(NvU32); i++)
+                KGSP_EVENT_REVERSE(pWords[i]);
+            break;
+        }
+
+        case GMCAPI_CMD_GSP_RESUME_DONE:
+        {
+            GmcApiGspResumeDoneParams *p = (GmcApiGspResumeDoneParams *)pData;
+
+            if (size >= sizeof(*p))
+                KGSP_EVENT_REVERSE(p->flags);
+            break;
+        }
+
+        default:
+            break;
+    }
+}
+#else
+#define _kgspGmcEventPayloadToHost(cmd, pData, size) ((void)0)
+#endif
+
 /*!
  * Handle a single RPC event from GSP unless the event is [an RPC return for] expectedFunc,
  * or there are no events available in the buffer.
@@ -2003,6 +2094,7 @@ _kgspRpcDrainOneEvent
 
         NV_PRINTF(LEVEL_INFO, "Received GMCAPI event 0x%08x with %u bytes\n", cmd, pGmcHdr->size);
         _kgspAddRpcHistoryEntry(pRpc, pRpc->rpcEventHistory, &pRpc->rpcEventHistoryCurrent, cmd, pGmcHdr->sequence);
+        _kgspGmcEventPayloadToHost(cmd, pGmcHdr->data, pGmcHdr->size);
         nvStatus = gmcapiCommand(pGpu, cmd, pGmcHdr->data, pGmcHdr->size, NULL, NULL);
         if (nvStatus != NV_OK)
         {
