@@ -146,6 +146,11 @@ ifeq ($(TARGET_OS),SunOS)
   ifeq ($(origin CC),default)
     CC                := gcc
   endif
+  # The same applies to CXX: the gmake on Solaris predefines it as the Studio
+  # C++ driver "CC", which rejects the gcc options and the -std=gnu++11 flag.
+  ifeq ($(origin CXX),default)
+    CXX               := g++
+  endif
 endif
 
 ifndef TARGET_ARCH

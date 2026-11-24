@@ -49,6 +49,29 @@ static const NvU8 *_bindataGetBindataPtr(const BINDATA_STORAGE_PVT *pBinStorageP
     return pBinStoragePvt->pData;
 }
 
+#if defined(NV_BINDATA_BE_SWAP)
+//
+// Copy `size` bytes of a generated bindata image into pDst.
+//
+// The generated arrays are 8-byte aligned NvU64 constants and the stored image
+// is their little-endian serialization. On a big-endian host the bytes of each
+// word sit in reverse order, so image byte i is at offset (i ^ 7). The array
+// holds a whole number of words, so the offsets stay inside it even for the
+// last, partly used word.
+//
+// BEGIN bindata big-endian copy
+static void _bindataCopyImage(NvU8 *pDst, const NvU8 *pSrc, NvU32 size)
+{
+    NvU32 i;
+
+    for (i = 0; i < size; i++)
+    {
+        pDst[i] = pSrc[i ^ 7];
+    }
+}
+// END bindata big-endian copy
+#endif
+
 /*!
  * Retrieve data from Bindata storage and write it to the given memory buffer.  When
  * file overriding feature is enabled and the file exists in the target directory,
@@ -84,11 +107,22 @@ bindataWriteToBuffer
 
     if (pBinStoragePvt->flags & BINDATA_FLAG_COMPRESSED)
     {
-        if ((nBytesInflated = utilGzGetData(pData,
-                                            bufferSize,
-                                            0,
-                                            bufferSize,
-                                            pBuffer)) != bufferSize)
+#if defined(NV_BINDATA_BE_SWAP)
+        //
+        // Rebuild the little-endian byte stream the inflater expects. The copy
+        // covers whole 8-byte words, which the generated array always holds.
+        //
+        NvU32  imageSize = (pBinStoragePvt->compressedSize + 7) & ~7U;
+        NvU8  *pImage    = portMemAllocNonPaged(imageSize);
+
+        NV_ASSERT_OR_RETURN(pImage != NULL, NV_ERR_NO_MEMORY);
+        _bindataCopyImage(pImage, pData, imageSize);
+        nBytesInflated = utilGzGetData(pImage, bufferSize, 0, bufferSize, pBuffer);
+        portMemFree(pImage);
+#else
+        nBytesInflated = utilGzGetData(pData, bufferSize, 0, bufferSize, pBuffer);
+#endif
+        if (nBytesInflated != bufferSize)
         {
             NV_PRINTF(LEVEL_ERROR,
                       "failed to get inflated data, got %u bytes, expecting %u\n",
@@ -99,7 +133,11 @@ bindataWriteToBuffer
     }
     else
     {
+#if defined(NV_BINDATA_BE_SWAP)
+        _bindataCopyImage(pBuffer, pData, bufferSize);
+#else
         portMemCopy(pBuffer, bufferSize, pData, bufferSize);
+#endif
     }
 
     return NV_OK;

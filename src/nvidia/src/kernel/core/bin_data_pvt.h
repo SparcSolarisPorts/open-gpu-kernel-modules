@@ -57,6 +57,19 @@
 #define BINDATA_FLAG_EXTERNAL        0x04 // Only relevant if GR-3428 is enabled
 #define BINDATA_FLAG_EXTERNAL_VMWARE 0x08 // GR-3428: Merge with the above
 #define BINDATA_FLAG_HEAP_ALLOCATED  0x10
+
+//
+// The generated data files store each blob as an array of NvU64 constants whose
+// little-endian serialization is the byte image (inflate input, or the plain
+// bytes of an uncompressed blob). A big-endian host holds each 8-byte group
+// reversed in memory, so bindataWriteToBuffer() rebuilds the image on read.
+// Defining this macro tells the generated files that the host is handled; they
+// stop with an #error on a big-endian host where it is not defined.
+//
+#if NVCPU_IS_BIG_ENDIAN
+#define NV_BINDATA_BE_SWAP 1
+#endif
+
 typedef struct
 {
     NvU32           actualSize;         // size of (uncompressed) pData
