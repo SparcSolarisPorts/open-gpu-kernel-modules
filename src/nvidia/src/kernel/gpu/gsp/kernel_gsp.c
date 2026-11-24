@@ -95,6 +95,10 @@
 #include "kernel/core/gmcapi_impl.h"
 #include "gmcapi/gmcapi_gsp.h"
 #include "rmgspseq.h" // full GspLoadExec*Params definitions (the event payload byte order conversion needs them)
+#include "rmapi/rmapi.h"   // RMAPI_RPC_FLAGS_* (RM_RPC payload byte order conversion)
+#include "class/cl0000.h"  // NV0000_ALLOC_PARAMETERS
+#include "class/cl0080.h"  // NV0080_ALLOC_PARAMETERS
+#include "class/cl2080.h"  // NV2080_ALLOC_PARAMETERS
 #include "gmcapi/gmcapi_engine_types.h"
 #include "gmcapi/gmcapi_system_info.h"
 #include "gmcapi/gmcapi_system_info_unstable.h"
@@ -524,9 +528,222 @@ _kgspRpcReportUnconverted(NvU32 function, NvU32 payloadSize)
               function, _getRpcName(function), payloadSize);
 }
 
-// Convert the payload of the RM_RPC message in the staging buffer (the header is in host order).
+// Name an allocation class or control command whose parameters are not converted, once.
 static void
-_kgspRpcPayloadSwap(OBJRPC *pRpc)
+_kgspRpcReportUnconvertedParams(const char *kind, NvU32 key, NvU32 size)
+{
+    static NvU64 seen[64];
+    static NvU32 nSeen;
+    NvU64 id = 14695981039346656037ULL;   // 64-bit FNV-1a of the whole kind string
+    const char *pc;
+    NvU32 i;
+
+    for (pc = kind; *pc != '\0'; pc++)
+        id = (id ^ (NvU64)(NvU8)*pc) * 1099511628211ULL;
+    id ^= ((NvU64)key << 1);
+
+    for (i = 0; (i < nSeen) && (i < NV_ARRAY_ELEMENTS(seen)); i++)
+    {
+        if (seen[i] == id)
+            return;
+    }
+    if (nSeen < NV_ARRAY_ELEMENTS(seen))
+        seen[nSeen++] = id;
+
+    NV_PRINTF(LEVEL_ERROR,
+              "RPC %s parameters byte order NOT converted: 0x%x, %u bytes\n",
+              kind, key, size);
+}
+
+//
+// A FINN-serialized parameter blob is a stream of 64-bit words that the
+// serializer stores as native values (finn_write_buffer in g_finn_rm_api.c), so
+// reversing each 64-bit word turns it into the little-endian stream the GSP
+// reads. The checksum is computed on the numeric values and does not change.
+//
+static NvBool
+_kgspRpcSwapSerialized(NvU8 *pParams, NvU32 paramsSize)
+{
+    NvU32 off;
+
+    if ((paramsSize % sizeof(NvU64)) != 0)
+        return NV_FALSE;
+
+    for (off = 0; off < paramsSize; off += sizeof(NvU64))
+        _kgspRpcReverse(pParams + off, sizeof(NvU64));
+
+    return NV_TRUE;
+}
+
+// Bytes available for parameters after the fixed part of a message of size fixedSize.
+static NvU32
+_kgspRpcParamRoom(OBJRPC *pRpc, NvU32 fixedSize)
+{
+    const NvU32 used = sizeof(rpc_message_header_v) + fixedSize;
+
+    return (pRpc->maxRpcSize > used) ? (NvU32)(pRpc->maxRpcSize - used) : 0;
+}
+
+// GSP_RM_ALLOC: a fixed header, then the class-specific parameters.
+static void
+_kgspRpcSwapRmAlloc(OBJRPC *pRpc, NvBool bToWire)
+{
+    rpc_gsp_rm_alloc_v *p = &rpcGetVgpuMessageData(pRpc)->gsp_rm_alloc_v03_00;
+    NvU8 *pParams = (NvU8 *)p->params;
+    NvU32 hClass = 0, paramsSize = 0, flags = 0;
+
+    // The fields that describe the parameters are read in host order.
+    if (bToWire)
+    {
+        hClass = p->hClass;
+        paramsSize = p->paramsSize;
+        flags = p->flags;
+    }
+
+    KGSP_RPC_REVERSE(p->hClient);
+    KGSP_RPC_REVERSE(p->hParent);
+    KGSP_RPC_REVERSE(p->hObject);
+    KGSP_RPC_REVERSE(p->hClass);
+    KGSP_RPC_REVERSE(p->status);
+    KGSP_RPC_REVERSE(p->paramsSize);
+    KGSP_RPC_REVERSE(p->flags);
+
+    if (!bToWire)
+    {
+        hClass = p->hClass;
+        paramsSize = p->paramsSize;
+        flags = p->flags;
+    }
+
+    if (paramsSize == 0)
+        return;
+
+    if (paramsSize > _kgspRpcParamRoom(pRpc, sizeof(*p)))
+    {
+        _kgspRpcReportUnconvertedParams("alloc (too large)", hClass, paramsSize);
+        return;
+    }
+
+    if (flags & RMAPI_RPC_FLAGS_SERIALIZED)
+    {
+        if (!_kgspRpcSwapSerialized(pParams, paramsSize))
+            _kgspRpcReportUnconvertedParams("alloc (serialized, odd size)", hClass, paramsSize);
+        return;
+    }
+
+    switch (hClass)
+    {
+        case NV01_ROOT:
+        {
+            NV0000_ALLOC_PARAMETERS *q = (NV0000_ALLOC_PARAMETERS *)pParams;
+
+            if (paramsSize < sizeof(*q))
+                break;
+
+            KGSP_RPC_REVERSE(q->hClient);
+            KGSP_RPC_REVERSE(q->processID);
+            // processName is a byte string and stays as it is.
+            KGSP_RPC_REVERSE(q->pOsPidInfo);
+            return;
+        }
+
+        case NV01_DEVICE_0:
+        {
+            NV0080_ALLOC_PARAMETERS *q = (NV0080_ALLOC_PARAMETERS *)pParams;
+
+            if (paramsSize < sizeof(*q))
+                break;
+
+            KGSP_RPC_REVERSE(q->deviceId);
+            KGSP_RPC_REVERSE(q->hClientShare);
+            KGSP_RPC_REVERSE(q->hTargetClient);
+            KGSP_RPC_REVERSE(q->hTargetDevice);
+            KGSP_RPC_REVERSE(q->flags);
+            KGSP_RPC_REVERSE(q->vaSpaceSize);
+            KGSP_RPC_REVERSE(q->vaStartInternal);
+            KGSP_RPC_REVERSE(q->vaLimitInternal);
+            KGSP_RPC_REVERSE(q->vaMode);
+            return;
+        }
+
+        case NV20_SUBDEVICE_0:
+        {
+            NV2080_ALLOC_PARAMETERS *q = (NV2080_ALLOC_PARAMETERS *)pParams;
+
+            if (paramsSize < sizeof(*q))
+                break;
+
+            KGSP_RPC_REVERSE(q->subDeviceId);
+            return;
+        }
+
+        default:
+            break;
+    }
+
+    // Raw (not serialized) parameters of any other class: not converted yet.
+    _kgspRpcReportUnconvertedParams("alloc", hClass, paramsSize);
+}
+
+// GSP_RM_CONTROL: a fixed header, then the command's parameters.
+static void
+_kgspRpcSwapRmControl(OBJRPC *pRpc, NvBool bToWire)
+{
+    rpc_gsp_rm_control_v *p = &rpcGetVgpuMessageData(pRpc)->gsp_rm_control_v03_00;
+    NvU8 *pParams = (NvU8 *)p->params;
+    NvU32 cmd = 0, paramsSize = 0, rpcFlags = 0;
+
+    // The fields that describe the parameters are read in host order.
+    if (bToWire)
+    {
+        cmd = p->cmd;
+        paramsSize = p->paramsSize;
+        rpcFlags = p->rmapiRpcFlags;
+    }
+
+    KGSP_RPC_REVERSE(p->hClient);
+    KGSP_RPC_REVERSE(p->hObject);
+    KGSP_RPC_REVERSE(p->cmd);
+    KGSP_RPC_REVERSE(p->status);
+    KGSP_RPC_REVERSE(p->paramsSize);
+    KGSP_RPC_REVERSE(p->rmapiRpcFlags);
+    KGSP_RPC_REVERSE(p->rmctrlFlags);
+    KGSP_RPC_REVERSE(p->rmctrlAccessRight);
+    KGSP_RPC_REVERSE(p->reserved0);
+
+    if (!bToWire)
+    {
+        cmd = p->cmd;
+        paramsSize = p->paramsSize;
+        rpcFlags = p->rmapiRpcFlags;
+    }
+
+    if (paramsSize == 0)
+        return;
+
+    if (paramsSize > _kgspRpcParamRoom(pRpc, sizeof(*p)))
+    {
+        // Large parameter blocks travel in continuation records, which are not converted.
+        _kgspRpcReportUnconvertedParams("control (too large)", cmd, paramsSize);
+        return;
+    }
+
+    if (rpcFlags & RMAPI_RPC_FLAGS_SERIALIZED)
+    {
+        if (!_kgspRpcSwapSerialized(pParams, paramsSize))
+            _kgspRpcReportUnconvertedParams("control (serialized, odd size)", cmd, paramsSize);
+        return;
+    }
+
+    // Raw (not serialized) parameters: each command needs its own conversion.
+    _kgspRpcReportUnconvertedParams("control", cmd, paramsSize);
+}
+
+// Convert the payload of the RM_RPC message in the staging buffer (the header is in host order).
+// bToWire: NV_TRUE converts host order to the GSP's order (the fields that describe the
+// parameters are read before they are converted); NV_FALSE converts back (they are read after).
+static void
+_kgspRpcPayloadSwap(OBJRPC *pRpc, NvBool bToWire)
 {
     rpc_message_header_v *pHdr = rpcGetVgpuMessageHeader(pRpc);
     NvU32 payloadSize = (pHdr->length > sizeof(*pHdr)) ? (NvU32)(pHdr->length - sizeof(*pHdr)) : 0;
@@ -559,13 +776,23 @@ _kgspRpcPayloadSwap(OBJRPC *pRpc)
             break;
         }
 
+        case NV_VGPU_MSG_FUNCTION_GSP_RM_ALLOC:
+            if (payloadSize >= sizeof(rpc_gsp_rm_alloc_v))
+                _kgspRpcSwapRmAlloc(pRpc, bToWire);
+            break;
+
+        case NV_VGPU_MSG_FUNCTION_GSP_RM_CONTROL:
+            if (payloadSize >= sizeof(rpc_gsp_rm_control_v))
+                _kgspRpcSwapRmControl(pRpc, bToWire);
+            break;
+
         default:
             _kgspRpcReportUnconverted(pHdr->function, payloadSize);
             break;
     }
 }
 #else
-#define _kgspRpcPayloadSwap(pRpc) ((void)(pRpc))
+#define _kgspRpcPayloadSwap(pRpc, bToWire) ((void)(pRpc), (void)(bToWire))
 #endif // NVCPU_IS_BIG_ENDIAN
 
 /*!
@@ -608,12 +835,12 @@ NV_STATUS kgspSendRpc_IMPL
     // The payload is converted to the GSP's byte order for the copy into the
     // queue, and back right after, so RM keeps host-order values in the buffer.
     if (nvdmType == NVDM_TYPE_RM_RPC)
-        _kgspRpcPayloadSwap(pRpc);
+        _kgspRpcPayloadSwap(pRpc, NV_TRUE);
 
     nvStatus = GspMsgQueueSendCommand(pRpc->pMessageQueueInfo, pGpu, nvdmType, size);
 
     if (nvdmType == NVDM_TYPE_RM_RPC)
-        _kgspRpcPayloadSwap(pRpc);
+        _kgspRpcPayloadSwap(pRpc, NV_FALSE);
 
     if (nvStatus != NV_OK)
     {
@@ -2182,7 +2409,7 @@ _kgspRpcDrainOneEvent
         rpc_message_header_v *pMsgHdr = rpcGetVgpuMessageHeader(pRpc);
 
         // The header is host order here; convert the little-endian payload once.
-        _kgspRpcPayloadSwap(pRpc);
+        _kgspRpcPayloadSwap(pRpc, NV_FALSE);
 
         if (pMsgHdr->function == expectedFunc &&
             pMsgHdr->sequence == expectedSequence)
