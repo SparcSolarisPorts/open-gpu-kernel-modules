@@ -3,10 +3,11 @@
 # nvtest.sh: trial-load the NVIDIA modules from /tmp so that a reboot puts
 # the machine back the way it was.
 #
-#   nvtest.sh load [-d outdir] [-t minutes] [-a]
+#   nvtest.sh load [-d outdir] [-t minutes] [-a] [-n]
 #   nvtest.sh keep
 #   nvtest.sh revert [-r]
 #   nvtest.sh status
+#   nvtest.sh bind [-d outdir]
 #
 # load    Copies the built modules and .conf files to /tmp/nvtest and
 #         lofs-mounts each one over its normal /kernel/drv path, so the
@@ -15,6 +16,10 @@
 #         reboots after -t minutes (default 10) unless you run "keep", and
 #         registers the drivers with add_drv. By default only "nvidia" is
 #         loaded; -a adds nvidia_modeset, nvidia_i2c and nvidia_uvm.
+#         With -n the driver is registered without the GPU's PCI IDs, so
+#         it loads and runs its init code but is not attached to any GPU.
+# bind    After "load -n", adds the PCI IDs with update_drv so the driver
+#         attaches to the GPU. This is the step that touches the hardware.
 # keep    Cancels the watchdog. The modules stay until the next reboot.
 # revert  Removes the drivers, unmounts and deletes the staged files.
 #         With -r it reboots afterwards. Safe to run again after a reset.
@@ -43,7 +48,7 @@ ALL_MODS="nvidia nvidia_modeset nvidia_i2c nvidia_uvm"
 
 die() { echo "nvtest: $*" >&2; exit 1; }
 warn() { echo "nvtest: warning: $*" >&2; }
-usage() { sed -n '6,9p' "$SELF" | sed 's/^# \{0,1\}//' >&2; exit 2; }
+usage() { sed -n '6,10p' "$SELF" | sed 's/^# \{0,1\}//' >&2; exit 2; }
 need_root() { [ "$(id -u)" = 0 ] || die "run as root"; }
 
 [ "$(uname -s)" = SunOS ] || die "this script is for SunOS only"
@@ -118,11 +123,13 @@ cmd_load() {
     mods=nvidia
     mins=10
     out=$HERE/_out/SunOS_$TAG
-    while getopts d:t:a o; do
+    noalias=0
+    while getopts d:t:an o; do
         case $o in
         d) out=$OPTARG ;;
         t) mins=$OPTARG ;;
         a) mods=$ALL_MODS ;;
+        n) noalias=1 ;;
         *) usage ;;
         esac
     done
@@ -182,13 +189,24 @@ cmd_load() {
     aliases=$(tr '\n' ' ' < "$out/nvidia.aliases")
     for m in $mods; do
         case $m in
-        nvidia)     add_drv -m '* 0666 root sys' -i "$aliases" nvidia ;;
+        nvidia)
+            if [ $noalias = 1 ]; then
+                add_drv -m '* 0666 root sys' nvidia
+            else
+                add_drv -m '* 0666 root sys' -i "$aliases" nvidia
+            fi ;;
         nvidia_i2c) add_drv nvidia_i2c ;;
         *)          add_drv -m '* 0666 root sys' "$m" ;;
         esac || fail "add_drv $m failed; trial removed"
     done
 
-    echo "nvtest: loaded: $mods"
+    if [ $noalias = 1 ]; then
+        echo "nvtest: loaded without PCI IDs: $mods (no GPU is attached)"
+        echo "nvtest: check it with: modinfo | grep nvidia"
+        echo "nvtest: to attach the GPU run: $SELF bind"
+    else
+        echo "nvtest: loaded: $mods"
+    fi
     echo "nvtest: pre-trial /etc copies: $bk"
     echo "nvtest: the machine reverts and reboots in $mins minutes unless you run:"
     echo "        $SELF keep"
@@ -223,6 +241,24 @@ cmd_revert() {
     exit $((1 - rc))
 }
 
+cmd_bind() {
+    need_root
+    out=$HERE/_out/SunOS_$TAG
+    while getopts d: o; do
+        case $o in
+        d) out=$OPTARG ;;
+        *) usage ;;
+        esac
+    done
+    [ -f "$STATE/active" ] || die "no trial is active; run load -n first"
+    grep "^nvidia " /etc/name_to_major >/dev/null 2>&1 || die "nvidia is not registered"
+    [ -f "$out/nvidia.aliases" ] || die "missing $out/nvidia.aliases"
+
+    aliases=$(tr '\n' ' ' < "$out/nvidia.aliases")
+    update_drv -a -i "$aliases" nvidia || die "update_drv failed; run revert"
+    echo "nvtest: PCI IDs added; the driver attaches to the GPU now"
+}
+
 cmd_status() {
     if [ -f "$STATE/active" ]; then
         echo "trial active since: $(cat "$STATE/active")"
@@ -247,6 +283,7 @@ case $cmd in
 load)   cmd_load "$@" ;;
 keep)   cmd_keep ;;
 revert) cmd_revert "$@" ;;
+bind)   cmd_bind "$@" ;;
 status) cmd_status ;;
 *)      usage ;;
 esac
