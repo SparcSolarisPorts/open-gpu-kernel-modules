@@ -106,6 +106,24 @@ rm_alloc(int fd, NvHandle hClient, NvHandle hParent, NvHandle hNew,
     return (a.status == NV_OK ? 0 : -1);
 }
 
+/* Like rm_control() but prints nothing and does not count a failure. */
+static int
+rm_control_quiet(int fd, NvHandle hClient, NvHandle hObject, NvU32 cmd,
+    void *params, NvU32 size)
+{
+    NVOS54_PARAMETERS c;
+
+    memset(&c, 0, sizeof (c));
+    c.hClient = hClient;
+    c.hObject = hObject;
+    c.cmd = cmd;
+    c.params = NV_PTR_TO_NvP64(params);
+    c.paramsSize = size;
+    if (ioctl(fd, (int)NVP_IOWR(NV_ESC_RM_CONTROL, sizeof (c)), &c) != 0)
+        return (-1);
+    return (c.status == NV_OK ? 0 : -1);
+}
+
 /*
  * Stage 3: display. Allocate NV04_DISPLAY_COMMON (what nvidia_modeset does
  * first) and ask how many heads the GPU has, which display devices the
@@ -190,6 +208,32 @@ stage3(int fd, NvHandle hClient)
             NV0073_CTRL_CMD_SYSTEM_GET_CONNECT_STATE, &one, sizeof (one),
             "  connect state") == 0)
             printf("    %s\n", one.displayMask ? "CONNECTED" : "not connected");
+    }
+
+    /*
+     * Poll the whole mask for a while. An adapter may only assert hotplug
+     * some time after the GPU comes up, and this leaves time to plug one in.
+     */
+    {
+        NvU32 last = 0xffffffffU;
+        int sec;
+
+        printf("  polling connect state for 15 s (plug in now if needed)\n");
+        for (sec = 0; sec < 15; sec++) {
+            memset(&conn, 0, sizeof (conn));
+            conn.displayMask = sup.displayMask;
+            if (rm_control_quiet(fd, hClient, NVP_H_DISPLAY,
+                NV0073_CTRL_CMD_SYSTEM_GET_CONNECT_STATE, &conn,
+                sizeof (conn)) != 0)
+                break;
+            if (conn.displayMask != last) {
+                printf("  t+%2d s: connected mask 0x%08x\n", sec,
+                    (unsigned int)conn.displayMask);
+                last = conn.displayMask;
+            }
+            sleep(1);
+        }
+        printf("  final connected mask 0x%08x\n", (unsigned int)last);
     }
 }
 
