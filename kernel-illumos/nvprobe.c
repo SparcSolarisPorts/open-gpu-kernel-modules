@@ -2,7 +2,9 @@
  * nvprobe: smallest useful user-space client of the RM ioctl path of the
  * illumos/Solaris nvidia driver. It opens /dev/nvidiactl and makes the calls
  * every RM client makes first: version query, root client allocation, GPU id
- * queries, free. It does not attach or initialise a GPU.
+ * queries. Stage 2 then attaches the GPU, allocates a device and a subdevice
+ * (both go through the GSP) and reads the GPU UUID. Finally it frees the
+ * client, which frees everything below it.
  *
  * Build (from the top of the repository, on the target):
  *
@@ -31,7 +33,13 @@
 #include <nv-ioctl.h>
 #include <nv_escape.h>
 #include <class/cl0000.h>
+#include <class/cl0080.h>
+#include <class/cl2080.h>
 #include <ctrl/ctrl0000/ctrl0000gpu.h>
+#include <ctrl/ctrl2080/ctrl2080gpu.h>
+
+#define NVP_H_DEVICE    0xde000001U
+#define NVP_H_SUBDEVICE 0xde000002U
 
 /* Same layout as the driver's NV_IOC_* macros (and Linux _IOWR). */
 #define NVP_IOWR(nr, size)                                          \
@@ -71,6 +79,79 @@ rm_control(int fd, NvHandle hClient, NvHandle hObject, NvU32 cmd,
     if (c.status != NV_OK)
         nfail++;
     return (c.status == NV_OK ? 0 : -1);
+}
+
+static int
+rm_alloc(int fd, NvHandle hClient, NvHandle hParent, NvHandle hNew,
+    NvU32 hClass, void *params, NvU32 size, const char *what)
+{
+    NVOS21_PARAMETERS a;
+
+    memset(&a, 0, sizeof (a));
+    a.hRoot = hClient;
+    a.hObjectParent = hParent;
+    a.hObjectNew = hNew;
+    a.hClass = hClass;
+    a.pAllocParms = NV_PTR_TO_NvP64(params);
+    a.paramsSize = size;
+    if (rm_ioctl_call(fd, NV_ESC_RM_ALLOC, &a, sizeof (a), what) != 0)
+        return (-1);
+    printf("%-26s rm status 0x%08x\n", what, (unsigned int)a.status);
+    if (a.status != NV_OK)
+        nfail++;
+    return (a.status == NV_OK ? 0 : -1);
+}
+
+/*
+ * Stage 2: attach the GPU for this client, allocate a device and a
+ * subdevice (both are forwarded to the GSP) and read the GPU UUID.
+ */
+static void
+stage2(int fd, NvHandle hClient, NvU32 gpuId)
+{
+    NV0000_CTRL_GPU_ATTACH_IDS_PARAMS at;
+    NV0080_ALLOC_PARAMETERS dev;
+    NV2080_ALLOC_PARAMETERS sub;
+    NV2080_CTRL_GPU_GET_GID_INFO_PARAMS gid;
+    unsigned int i;
+
+    memset(&at, 0, sizeof (at));
+    at.gpuIds[0] = gpuId;
+    for (i = 1; i < NV0000_CTRL_GPU_MAX_PROBED_GPUS; i++)
+        at.gpuIds[i] = NV0000_CTRL_GPU_INVALID_ID;
+    if (rm_control(fd, hClient, hClient, NV0000_CTRL_CMD_GPU_ATTACH_IDS,
+        &at, sizeof (at), "attach gpu id") != 0) {
+        printf("  failedId 0x%08x\n", (unsigned int)at.failedId);
+        return;
+    }
+
+    memset(&dev, 0, sizeof (dev));
+    dev.deviceId = 0;
+    if (rm_alloc(fd, hClient, hClient, NVP_H_DEVICE, NV01_DEVICE_0,
+        &dev, sizeof (dev), "alloc device") != 0)
+        return;
+
+    memset(&sub, 0, sizeof (sub));
+    sub.subDeviceId = 0;
+    if (rm_alloc(fd, hClient, NVP_H_DEVICE, NVP_H_SUBDEVICE, NV20_SUBDEVICE_0,
+        &sub, sizeof (sub), "alloc subdevice") != 0)
+        return;
+
+    memset(&gid, 0, sizeof (gid));
+    gid.index = 0;
+    gid.flags = NV2080_GPU_CMD_GPU_GET_GID_FLAGS_FORMAT_BINARY |
+        NV2080_GPU_CMD_GPU_GET_GID_FLAGS_TYPE_SHA1;
+    if (rm_control(fd, hClient, NVP_H_SUBDEVICE,
+        NV2080_CTRL_CMD_GPU_GET_GID_INFO, &gid, sizeof (gid),
+        "get gpu uuid") == 0) {
+        printf("  uuid length %u: GPU-", (unsigned int)gid.length);
+        for (i = 0; i < gid.length && i < sizeof (gid.data); i++) {
+            if (i == 4 || i == 6 || i == 8 || i == 10)
+                printf("-");
+            printf("%02x", gid.data[i]);
+        }
+        printf("\n");
+    }
 }
 
 int
@@ -143,6 +224,9 @@ main(void)
             printf("  attached gpu id 0x%08x\n", (unsigned int)att.gpuIds[i]);
         }
     }
+
+    if (probed.gpuIds[0] != NV0000_CTRL_GPU_INVALID_ID)
+        stage2(fd, hClient, probed.gpuIds[0]);
 
     memset(&f, 0, sizeof (f));
     f.hRoot = hClient;
