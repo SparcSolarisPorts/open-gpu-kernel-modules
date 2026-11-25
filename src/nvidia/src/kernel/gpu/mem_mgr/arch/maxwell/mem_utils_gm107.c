@@ -1007,6 +1007,7 @@ _memUtilsAllocateUserD
     RM_API                      *pRmApi = rmapiGetInterface(RMAPI_GPU_LOCK_INTERNAL);
     NV_MEMORY_ALLOCATION_PARAMS  memAllocParams;
     NvU32                        userdMemClass = NV01_MEMORY_LOCAL_USER;
+    NvU32                        userdSize;
 
     // Ensure that call is not made with lock held
     NV_ASSERT_OR_RETURN(!rmGpuLockIsOwner(), NV_ERR_INVALID_LOCK_STATE);
@@ -1014,7 +1015,12 @@ _memUtilsAllocateUserD
     portMemSet(&memAllocParams, 0, sizeof(memAllocParams));
 
     memAllocParams.owner = HEAP_OWNER_RM_CLIENT_GENERIC;
-    kfifoGetUserdSizeAlign_HAL(pKernelFifo, (NvU32 *)&memAllocParams.size, NULL);
+    //
+    // size is an NvU64; writing an NvU32 through a cast pointer to it only
+    // sets the low half on little-endian hosts. Use a local and widen.
+    //
+    kfifoGetUserdSizeAlign_HAL(pKernelFifo, &userdSize, NULL);
+    memAllocParams.size = userdSize;
     memAllocParams.type  = NVOS32_TYPE_IMAGE;
     memAllocParams.internalflags = NVOS32_ALLOC_INTERNAL_FLAGS_SKIP_SCRUB;
 

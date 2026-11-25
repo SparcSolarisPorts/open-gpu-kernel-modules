@@ -955,7 +955,11 @@ kchannelConstruct_IMPL
     }
     else
     {
-        kfifoGetUserdSizeAlign_HAL(pKernelFifo, (NvU32*)&pKernelChannel->userdLength, NULL);
+        // userdLength is an NvU64; do not write an NvU32 through a cast pointer (big-endian)
+        NvU32 userdSize32;
+
+        kfifoGetUserdSizeAlign_HAL(pKernelFifo, &userdSize32, NULL);
+        pKernelChannel->userdLength = userdSize32;
     }
 
     // Set GPU accounting
