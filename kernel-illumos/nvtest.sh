@@ -3,7 +3,7 @@
 # nvtest.sh: trial-load the NVIDIA modules from /tmp so that a reboot puts
 # the machine back the way it was.
 #
-#   nvtest.sh load [-d outdir] [-t minutes] [-a] [-n] [-p]
+#   nvtest.sh load [-d outdir] [-t minutes] [-a] [-m] [-n] [-p]
 #   nvtest.sh keep
 #   nvtest.sh revert [-r]
 #   nvtest.sh status
@@ -15,7 +15,8 @@
 #         the root filesystem. Then it arms a watchdog that reverts and
 #         reboots after -t minutes (default 10) unless you run "keep", and
 #         registers the drivers with add_drv. By default only "nvidia" is
-#         loaded; -a adds nvidia_modeset, nvidia_i2c and nvidia_uvm.
+#         loaded; -a adds nvidia_modeset, nvidia_i2c and nvidia_uvm, -m
+#         adds only nvidia_modeset (the one Solaris/sparcv9 builds).
 #         With -n the driver is registered without the GPU's PCI IDs, so
 #         it loads and runs its init code but is not attached to any GPU.
 #         With -p the staged nvidia.conf also gets NVreg_GpuInitOnProbe=0,
@@ -129,11 +130,12 @@ cmd_load() {
     out=$HERE/_out/SunOS_$TAG
     noalias=0
     noinit=0
-    while getopts d:t:anp o; do
+    while getopts d:t:amnp o; do
         case $o in
         d) out=$OPTARG ;;
         t) mins=$OPTARG ;;
         a) mods=$ALL_MODS ;;
+        m) mods="nvidia nvidia_modeset" ;;
         n) noalias=1 ;;
         p) noinit=1 ;;
         *) usage ;;
