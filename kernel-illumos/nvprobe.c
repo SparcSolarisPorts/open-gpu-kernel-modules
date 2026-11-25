@@ -158,6 +158,7 @@ int
 main(void)
 {
     int fd;
+    int gpufd = -1;
     nv_ioctl_rm_api_version_t ver;
     NV0000_ALLOC_PARAMETERS ap;
     NVOS21_PARAMETERS a;
@@ -225,8 +226,21 @@ main(void)
         }
     }
 
-    if (probed.gpuIds[0] != NV0000_CTRL_GPU_INVALID_ID)
-        stage2(fd, hClient, probed.gpuIds[0]);
+    if (probed.gpuIds[0] != NV0000_CTRL_GPU_INVALID_ID) {
+        /*
+         * RM only lets a process allocate a device if the process holds the
+         * GPU node open (osIsGpuAccessible). Keep it open until the client
+         * is freed.
+         */
+        gpufd = open("/dev/nvidia0", O_RDWR);
+        if (gpufd < 0) {
+            perror("open /dev/nvidia0");
+            nfail++;
+        } else {
+            printf("opened /dev/nvidia0 (fd %d)\n", gpufd);
+            stage2(fd, hClient, probed.gpuIds[0]);
+        }
+    }
 
     memset(&f, 0, sizeof (f));
     f.hRoot = hClient;
@@ -240,6 +254,8 @@ main(void)
             nfail++;
     }
 
+    if (gpufd >= 0)
+        close(gpufd);
     close(fd);
     printf("done, %d failure(s)\n", nfail);
     return (nfail != 0);
