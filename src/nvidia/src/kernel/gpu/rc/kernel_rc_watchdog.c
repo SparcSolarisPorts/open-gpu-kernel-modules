@@ -121,6 +121,32 @@
 
 #define SUBDEVICE_MASK_ALL DRF_MASK(NV906F_DMA_SET_SUBDEVICE_MASK_VALUE)
 
+#if NVCPU_IS_BIG_ENDIAN
+//
+// The GPU reads the watchdog push buffer and GPFIFO entries as little-endian
+// dwords. When that buffer is system memory (everything except the registry
+// override that selects video memory) it is plain host RAM, so a dword stored
+// as a number must be byte-swapped. Video memory goes through a byte-swapping
+// BAR mapping, where a numeric store is already correct.
+//
+static NvU32
+_watchdogGpuWord(OBJGPU *pGpu, NvU32 value)
+{
+    if (DRF_VAL(_REG_STR_RM, _INST_LOC_4, _CHANNEL_PUSHBUFFER, pGpu->instLocOverrides4) !=
+        NV_REG_STR_RM_INST_LOC_4_CHANNEL_PUSHBUFFER_VID)
+    {
+        return NV_BYTESWAP32(value);
+    }
+    return value;
+}
+
+// The push buffer macros come from a generated header; route their stores through the swap.
+#undef  PUSH_DATA
+#define PUSH_DATA(Data) MEM_WR32(ptr++, _watchdogGpuWord(pGpu, (Data)))
+#else
+#define _watchdogGpuWord(pGpu, value) (value)
+#endif
+
 NV_STATUS
 krcWatchdogChangeState_IMPL
 (
@@ -1535,8 +1561,8 @@ _watchdogInitPushbuffer
         NvU32 *pGpEntry = (NvU32 *)(
             pWatchdogChannelInfo->pCpuAddr +
             WATCHDOG_GPFIFO_OFFSET(pWatchdogChannelInfo->pbBytes));
-        MEM_WR32(&pGpEntry[0], pWatchdogChannelInfo->gpEntry0[0]);
-        MEM_WR32(&pGpEntry[1], pWatchdogChannelInfo->gpEntry0[1]);
+        MEM_WR32(&pGpEntry[0], _watchdogGpuWord(pGpu, pWatchdogChannelInfo->gpEntry0[0]));
+        MEM_WR32(&pGpEntry[1], _watchdogGpuWord(pGpu, pWatchdogChannelInfo->gpEntry0[1]));
     }
 
     // Flush the WRC buffer using fence operation before updating gp_put
@@ -1613,8 +1639,8 @@ krcWatchdogWriteNotifierToGpfifo_IMPL
             pWatchdogChannelInfo->pCpuAddr +
             WATCHDOG_GPFIFO_OFFSET(pWatchdogChannelInfo->pbBytes) +
             (GPPut * NV906F_GP_ENTRY__SIZE));
-        MEM_WR32(&pGpEntry[0], pWatchdogChannelInfo->gpEntry1[0]);
-        MEM_WR32(&pGpEntry[1], pWatchdogChannelInfo->gpEntry1[1]);
+        MEM_WR32(&pGpEntry[0], _watchdogGpuWord(pGpu, pWatchdogChannelInfo->gpEntry1[0]));
+        MEM_WR32(&pGpEntry[1], _watchdogGpuWord(pGpu, pWatchdogChannelInfo->gpEntry1[1]));
     }
 
     //

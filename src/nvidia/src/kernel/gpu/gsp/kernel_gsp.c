@@ -100,6 +100,7 @@
 #include "class/cl0005.h"  // NV0005_ALLOC_PARAMETERS
 #include "class/cl90f1.h"  // FERMI_VASPACE_A
 #include "class/cl0070.h"  // NV01_MEMORY_VIRTUAL, NV_MEMORY_VIRTUAL_ALLOCATION_PARAMS
+#include "class/cl90cd.h"  // NV_EVENT_BUFFER, NV_EVENT_BUFFER_ALLOC_PARAMETERS
 #include "alloc/alloc_channel.h"  // NV_CHANNEL_ALLOC_PARAMS
 #include "class/cl906f.h"  // GF100_CHANNEL_GPFIFO and the later GPFIFO channel classes
 #include "class/cla06f.h"
@@ -830,6 +831,33 @@ _kgspRpcSwapRmAlloc(OBJRPC *pRpc, NvBool bToWire)
 
             KGSP_RPC_REVERSE(q->version);
             KGSP_RPC_REVERSE(q->engineType);
+            return;
+        }
+
+        case NV_EVENT_BUFFER:
+        {
+            // NV_EVENT_BUFFER_ALLOC_PARAMETERS (cl90cd.h): 64-bit user addresses and handle,
+            // 32-bit sizes, thresholds, handles and flags. The addresses are only stored and
+            // returned, so they are converted as plain 64-bit values.
+            NV_EVENT_BUFFER_ALLOC_PARAMETERS *q = (NV_EVENT_BUFFER_ALLOC_PARAMETERS *)pParams;
+
+            if (paramsSize < sizeof(*q))
+                break;
+
+            KGSP_RPC_REVERSE(q->bufferHeader);
+            KGSP_RPC_REVERSE(q->recordBuffer);
+            KGSP_RPC_REVERSE(q->recordSize);
+            KGSP_RPC_REVERSE(q->recordCount);
+            KGSP_RPC_REVERSE(q->vardataBuffer);
+            KGSP_RPC_REVERSE(q->vardataBufferSize);
+            KGSP_RPC_REVERSE(q->recordsFreeThreshold);
+            KGSP_RPC_REVERSE(q->notificationHandle);
+            KGSP_RPC_REVERSE(q->vardataFreeThreshold);
+            KGSP_RPC_REVERSE(q->hSubDevice);
+            KGSP_RPC_REVERSE(q->flags);
+            KGSP_RPC_REVERSE(q->hBufferHeader);
+            KGSP_RPC_REVERSE(q->hRecordBuffer);
+            KGSP_RPC_REVERSE(q->hVardataBuffer);
             return;
         }
 
