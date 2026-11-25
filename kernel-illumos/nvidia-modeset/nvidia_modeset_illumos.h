@@ -42,6 +42,16 @@
 #include <sys/ioccom.h>
 #include <sys/ddi.h>
 #include <sys/sunddi.h>
+#include <sys/poll.h>
+
+/*
+ * Edge-triggered polling is an illumos extension; Solaris 11.4 has no
+ * POLLET, so chpoll(9E) treats every request as level-triggered there.
+ * Same fallback as kernel-illumos/nvidia/nv-solaris-compat.h.
+ */
+#ifndef POLLET
+#define POLLET 0
+#endif
 
 #include "nv-modeset-interface.h"
 #include "nvidia-modeset-os-interface.h"
