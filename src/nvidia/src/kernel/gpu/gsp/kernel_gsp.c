@@ -838,6 +838,20 @@ _kgspRpcPayloadSwap(OBJRPC *pRpc, NvBool bToWire)
                 _kgspRpcSwapRmControl(pRpc, bToWire);
             break;
 
+        case NV_VGPU_MSG_FUNCTION_UPDATE_BAR_PDE:
+        {
+            // UpdateBarPde: 32-bit bar type, then two 64-bit values (the PDE and its level shift).
+            rpc_update_bar_pde_v *p = &rpcGetVgpuMessageData(pRpc)->update_bar_pde_v15_00;
+
+            if (payloadSize >= sizeof(*p))
+            {
+                KGSP_RPC_REVERSE(p->info.barType);
+                KGSP_RPC_REVERSE(p->info.entryValue);
+                KGSP_RPC_REVERSE(p->info.entryLevelShift);
+            }
+            break;
+        }
+
         case NV_VGPU_MSG_FUNCTION_FREE:
         {
             // NVOS00_PARAMETERS: four 32-bit fields (hRoot, hObjectParent, hObjectOld, status).
