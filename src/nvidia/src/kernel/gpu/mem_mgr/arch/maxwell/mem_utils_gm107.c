@@ -712,6 +712,14 @@ memmgrMemUtilsChannelInitialize_GM107
 
     pChannel->pbGpuVA = mapDmaParams.dmaOffset;
 
+#if NVCPU_IS_BIG_ENDIAN
+    // Diagnostic for the SPARC port: this Map's status is overwritten below without a check.
+    NV_PRINTF(LEVEL_ERROR,
+              "BE diag: CE pushbuffer map status 0x%x pbGpuVA 0x%llx length 0x%llx pbSize 0x%llx startFbOffset 0x%llx\n",
+              rmStatus, pChannel->pbGpuVA, (NvU64)size,
+              (NvU64)pChannel->channelPbSize, (NvU64)pChannel->startFbOffset);
+#endif
+
     // map the error notifier
     portMemSet(&mapDmaParams, 0, sizeof(mapDmaParams));
     mapDmaParams.hClient   = hClient;

@@ -783,7 +783,7 @@ _gmmuWalkCBUpdatePde
     {
         static NvU32 nPdeDiag;
 
-        if (nPdeDiag < 24)
+        if (nPdeDiag < 400)
         {
             NvU8             rb[8] = {0};
             TRANSFER_SURFACE src   = {0};
@@ -796,15 +796,15 @@ _gmmuWalkCBUpdatePde
                                      NV_MIN(pLevelFmt->entrySize, (NvU32)sizeof(rb)),
                                      TRANSFER_FLAGS_NONE);
             NV_PRINTF(LEVEL_ERROR,
-                      "BE diag: PDE idx %u entrySize %u space %d pa 0x%llx wrote %02x %02x %02x %02x %02x %02x %02x %02x "
-                      "read(%x) %02x %02x %02x %02x %02x %02x %02x %02x\n",
+                      "BE diag: PDE #%u tbl 0x%llx idx %u sz %u w %02x%02x%02x%02x%02x%02x%02x%02x "
+                      "r(%x) %02x%02x%02x%02x%02x%02x%02x%02x%s\n",
+                      nPdeDiag, memdescGetPhysAddr(src.pMemDesc, AT_GPU, 0),
                       entryIndex, (NvU32)pLevelFmt->entrySize,
-                      (int)memdescGetAddressSpace(src.pMemDesc),
-                      memdescGetPhysAddr(src.pMemDesc, AT_GPU, 0),
                       entry.v8[0], entry.v8[1], entry.v8[2], entry.v8[3],
                       entry.v8[4], entry.v8[5], entry.v8[6], entry.v8[7],
                       (NvU32)rdStatus,
-                      rb[0], rb[1], rb[2], rb[3], rb[4], rb[5], rb[6], rb[7]);
+                      rb[0], rb[1], rb[2], rb[3], rb[4], rb[5], rb[6], rb[7],
+                      portMemCmp(entry.v8, rb, NV_MIN(pLevelFmt->entrySize, (NvU32)sizeof(rb))) ? " MISMATCH" : "");
         }
     }
 #endif
