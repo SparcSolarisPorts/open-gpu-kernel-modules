@@ -10004,6 +10004,156 @@ _kgspCtrlSwap_NV90F1_CTRL_VASPACE_GET_VAS_HEAP_INFO_PARAMS(NV90F1_CTRL_VASPACE_G
     KGSP_RPC_REVERSE((*p).numFreeBlocks);
 }
 
+static void
+_kgspCtrlSwap_NV906F_CTRL_CMD_GET_DEFER_RC_STATE_PARAMS(NV906F_CTRL_CMD_GET_DEFER_RC_STATE_PARAMS *p)
+{
+    (void)p;
+}
+
+static void
+_kgspCtrlSwap_NV906F_CTRL_GET_MMU_FAULT_INFO_PARAMS(NV906F_CTRL_GET_MMU_FAULT_INFO_PARAMS *p)
+{
+    NvU32 i0;
+
+    KGSP_RPC_REVERSE((*p).addrHi);
+    KGSP_RPC_REVERSE((*p).addrLo);
+    KGSP_RPC_REVERSE((*p).faultType);
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).shaderProgramVA); i0++)
+    {
+        KGSP_RPC_REVERSE((*p).shaderProgramVA[i0]);
+    }
+}
+
+static void
+_kgspCtrlSwap_NVA06F_CTRL_GPFIFO_SCHEDULE_PARAMS(NVA06F_CTRL_GPFIFO_SCHEDULE_PARAMS *p)
+{
+    (void)p;
+}
+
+static void
+_kgspCtrlSwap_NVA06F_CTRL_BIND_PARAMS(NVA06F_CTRL_BIND_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).engineType);
+}
+
+static void
+_kgspCtrlSwap_NVA06F_CTRL_SET_ERROR_NOTIFIER_PARAMS(NVA06F_CTRL_SET_ERROR_NOTIFIER_PARAMS *p)
+{
+    (void)p;
+}
+
+static void
+_kgspCtrlSwap_NVA06F_CTRL_SET_INTERLEAVE_LEVEL_PARAMS(NVA06F_CTRL_SET_INTERLEAVE_LEVEL_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).channelInterleaveLevel);
+}
+
+static void
+_kgspCtrlSwap_NVA06F_CTRL_GET_INTERLEAVE_LEVEL_PARAMS(NVA06F_CTRL_GET_INTERLEAVE_LEVEL_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).channelInterleaveLevel);
+}
+
+static void
+_kgspCtrlSwap_NVA06F_CTRL_RESTART_RUNLIST_PARAMS(NVA06F_CTRL_RESTART_RUNLIST_PARAMS *p)
+{
+    (void)p;
+}
+
+static void
+_kgspCtrlSwap_NVA06F_CTRL_STOP_CHANNEL_PARAMS(NVA06F_CTRL_STOP_CHANNEL_PARAMS *p)
+{
+    (void)p;
+}
+
+static void
+_kgspCtrlSwap_NVA06F_CTRL_GET_CONTEXT_ID_PARAMS(NVA06F_CTRL_GET_CONTEXT_ID_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).contextId);
+}
+
+static void
+_kgspCtrlSwap_NVA06F_CTRL_INTERNAL_STOP_CHANNEL_PARAMS(NVA06F_CTRL_INTERNAL_STOP_CHANNEL_PARAMS *p)
+{
+    (void)p;
+}
+
+static void
+_kgspCtrlSwap_NVB06F_CTRL_GET_ENGINE_CTX_SIZE_PARAMS(NVB06F_CTRL_GET_ENGINE_CTX_SIZE_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).engineID);
+    KGSP_RPC_REVERSE((*p).size);
+}
+
+static void
+_kgspCtrlSwap_NVB06F_CTRL_GET_ENGINE_CTX_STATE_PARAMS(NVB06F_CTRL_GET_ENGINE_CTX_STATE_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).engineID);
+    KGSP_RPC_REVERSE((*p).hObject);
+    KGSP_RPC_REVERSE((*p).engineCtxState);
+}
+
+static void
+_kgspCtrlSwap_NVB06F_CTRL_GET_CHANNEL_HW_STATE_PARAMS(NVB06F_CTRL_GET_CHANNEL_HW_STATE_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).state);
+}
+
+static void
+_kgspCtrlSwap_NVB06F_CTRL_SET_CHANNEL_HW_STATE_PARAMS(NVB06F_CTRL_SET_CHANNEL_HW_STATE_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).state);
+}
+
+static void
+_kgspCtrlSwap_NVB06F_CTRL_SAVE_ENGINE_CTX_DATA_PARAMS(NVB06F_CTRL_SAVE_ENGINE_CTX_DATA_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).engineID);
+    KGSP_RPC_REVERSE((*p).size);
+}
+
+static void
+_kgspCtrlSwap_NVB06F_CTRL_RESTORE_ENGINE_CTX_DATA_PARAMS(NVB06F_CTRL_RESTORE_ENGINE_CTX_DATA_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).engineID);
+    KGSP_RPC_REVERSE((*p).size);
+}
+
+static void
+_kgspCtrlSwap_NVB06F_CTRL_CMD_RESTORE_ENGINE_CTX_DATA_FINN_PARAMS(NVB06F_CTRL_CMD_RESTORE_ENGINE_CTX_DATA_FINN_PARAMS *p)
+{
+    _kgspCtrlSwap_NVB06F_CTRL_RESTORE_ENGINE_CTX_DATA_PARAMS(&(*p).params);
+}
+
+static void
+_kgspCtrlSwap_NVC36F_CTRL_CMD_GPFIFO_GET_WORK_SUBMIT_TOKEN_PARAMS(NVC36F_CTRL_CMD_GPFIFO_GET_WORK_SUBMIT_TOKEN_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).workSubmitToken);
+}
+
+static void
+_kgspCtrlSwap_NVC36F_CTRL_GPFIFO_UPDATE_FAULT_METHOD_BUFFER_PARAMS(NVC36F_CTRL_GPFIFO_UPDATE_FAULT_METHOD_BUFFER_PARAMS *p)
+{
+    NvU32 i0;
+
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).bar2Addr); i0++)
+    {
+        KGSP_RPC_REVERSE((*p).bar2Addr[i0]);
+    }
+}
+
+static void
+_kgspCtrlSwap_NVC36F_CTRL_GPFIFO_SET_WORK_SUBMIT_TOKEN_NOTIF_INDEX_PARAMS(NVC36F_CTRL_GPFIFO_SET_WORK_SUBMIT_TOKEN_NOTIF_INDEX_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).index);
+}
+
+static void
+_kgspCtrlSwap_NVC36F_CTRL_INTERNAL_GPFIFO_GET_WORK_SUBMIT_TOKEN_PARAMS(NVC36F_CTRL_INTERNAL_GPFIFO_GET_WORK_SUBMIT_TOKEN_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).workSubmitToken);
+}
+
 /* NV_TRUE: command known and buffer large enough; params converted. */
 static NvBool
 _kgspCtrlSwapParams(NvU32 cmd, NvU8 *pParams, NvU32 paramsSize)
@@ -14390,6 +14540,16 @@ _kgspCtrlSwapParams(NvU32 cmd, NvU8 *pParams, NvU32 paramsSize)
                 return NV_FALSE;
             _kgspCtrlSwap_NV2080_CTRL_INTERNAL_GCX_ENTRY_PREREQUISITE_PARAMS((NV2080_CTRL_INTERNAL_GCX_ENTRY_PREREQUISITE_PARAMS *)pParams);
             return NV_TRUE;
+        case 0x906f0105: /* NV906F_CTRL_CMD_GET_DEFER_RC_STATE */
+            if (paramsSize < sizeof(NV906F_CTRL_CMD_GET_DEFER_RC_STATE_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV906F_CTRL_CMD_GET_DEFER_RC_STATE_PARAMS((NV906F_CTRL_CMD_GET_DEFER_RC_STATE_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x906f0106: /* NV906F_CTRL_CMD_GET_MMU_FAULT_INFO */
+            if (paramsSize < sizeof(NV906F_CTRL_GET_MMU_FAULT_INFO_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV906F_CTRL_GET_MMU_FAULT_INFO_PARAMS((NV906F_CTRL_GET_MMU_FAULT_INFO_PARAMS *)pParams);
+            return NV_TRUE;
         case 0x90f10103: /* NV90F1_CTRL_CMD_VASPACE_RESERVE_ENTRIES */
             if (paramsSize < sizeof(NV90F1_CTRL_VASPACE_RESERVE_ENTRIES_PARAMS))
                 return NV_FALSE;
@@ -14414,6 +14574,101 @@ _kgspCtrlSwapParams(NvU32 cmd, NvU8 *pParams, NvU32 paramsSize)
             if (paramsSize < sizeof(NV90F1_CTRL_VASPACE_GET_VAS_HEAP_INFO_PARAMS))
                 return NV_FALSE;
             _kgspCtrlSwap_NV90F1_CTRL_VASPACE_GET_VAS_HEAP_INFO_PARAMS((NV90F1_CTRL_VASPACE_GET_VAS_HEAP_INFO_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0xa06f0103: /* NVA06F_CTRL_CMD_GPFIFO_SCHEDULE */
+            if (paramsSize < sizeof(NVA06F_CTRL_GPFIFO_SCHEDULE_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NVA06F_CTRL_GPFIFO_SCHEDULE_PARAMS((NVA06F_CTRL_GPFIFO_SCHEDULE_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0xa06f0104: /* NVA06F_CTRL_CMD_BIND */
+            if (paramsSize < sizeof(NVA06F_CTRL_BIND_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NVA06F_CTRL_BIND_PARAMS((NVA06F_CTRL_BIND_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0xa06f0108: /* NVA06F_CTRL_CMD_SET_ERROR_NOTIFIER */
+            if (paramsSize < sizeof(NVA06F_CTRL_SET_ERROR_NOTIFIER_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NVA06F_CTRL_SET_ERROR_NOTIFIER_PARAMS((NVA06F_CTRL_SET_ERROR_NOTIFIER_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0xa06f0109: /* NVA06F_CTRL_CMD_SET_INTERLEAVE_LEVEL */
+            if (paramsSize < sizeof(NVA06F_CTRL_SET_INTERLEAVE_LEVEL_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NVA06F_CTRL_SET_INTERLEAVE_LEVEL_PARAMS((NVA06F_CTRL_SET_INTERLEAVE_LEVEL_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0xa06f0110: /* NVA06F_CTRL_CMD_GET_INTERLEAVE_LEVEL */
+            if (paramsSize < sizeof(NVA06F_CTRL_GET_INTERLEAVE_LEVEL_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NVA06F_CTRL_GET_INTERLEAVE_LEVEL_PARAMS((NVA06F_CTRL_GET_INTERLEAVE_LEVEL_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0xa06f0111: /* NVA06F_CTRL_CMD_RESTART_RUNLIST */
+            if (paramsSize < sizeof(NVA06F_CTRL_RESTART_RUNLIST_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NVA06F_CTRL_RESTART_RUNLIST_PARAMS((NVA06F_CTRL_RESTART_RUNLIST_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0xa06f0112: /* NVA06F_CTRL_CMD_STOP_CHANNEL */
+            if (paramsSize < sizeof(NVA06F_CTRL_STOP_CHANNEL_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NVA06F_CTRL_STOP_CHANNEL_PARAMS((NVA06F_CTRL_STOP_CHANNEL_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0xa06f0113: /* NVA06F_CTRL_CMD_GET_CONTEXT_ID */
+            if (paramsSize < sizeof(NVA06F_CTRL_GET_CONTEXT_ID_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NVA06F_CTRL_GET_CONTEXT_ID_PARAMS((NVA06F_CTRL_GET_CONTEXT_ID_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0xa06f0301: /* NVA06F_CTRL_CMD_INTERNAL_STOP_CHANNEL */
+            if (paramsSize < sizeof(NVA06F_CTRL_INTERNAL_STOP_CHANNEL_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NVA06F_CTRL_INTERNAL_STOP_CHANNEL_PARAMS((NVA06F_CTRL_INTERNAL_STOP_CHANNEL_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0xb06f010b: /* NVB06F_CTRL_CMD_GET_ENGINE_CTX_SIZE */
+            if (paramsSize < sizeof(NVB06F_CTRL_GET_ENGINE_CTX_SIZE_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NVB06F_CTRL_GET_ENGINE_CTX_SIZE_PARAMS((NVB06F_CTRL_GET_ENGINE_CTX_SIZE_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0xb06f010e: /* NVB06F_CTRL_CMD_GET_ENGINE_CTX_STATE */
+            if (paramsSize < sizeof(NVB06F_CTRL_GET_ENGINE_CTX_STATE_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NVB06F_CTRL_GET_ENGINE_CTX_STATE_PARAMS((NVB06F_CTRL_GET_ENGINE_CTX_STATE_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0xb06f010f: /* NVB06F_CTRL_CMD_GET_CHANNEL_HW_STATE */
+            if (paramsSize < sizeof(NVB06F_CTRL_GET_CHANNEL_HW_STATE_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NVB06F_CTRL_GET_CHANNEL_HW_STATE_PARAMS((NVB06F_CTRL_GET_CHANNEL_HW_STATE_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0xb06f0110: /* NVB06F_CTRL_CMD_SET_CHANNEL_HW_STATE */
+            if (paramsSize < sizeof(NVB06F_CTRL_SET_CHANNEL_HW_STATE_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NVB06F_CTRL_SET_CHANNEL_HW_STATE_PARAMS((NVB06F_CTRL_SET_CHANNEL_HW_STATE_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0xb06f0111: /* NVB06F_CTRL_CMD_SAVE_ENGINE_CTX_DATA */
+            if (paramsSize < sizeof(NVB06F_CTRL_SAVE_ENGINE_CTX_DATA_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NVB06F_CTRL_SAVE_ENGINE_CTX_DATA_PARAMS((NVB06F_CTRL_SAVE_ENGINE_CTX_DATA_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0xb06f0112: /* NVB06F_CTRL_CMD_RESTORE_ENGINE_CTX_DATA */
+            if (paramsSize < sizeof(NVB06F_CTRL_CMD_RESTORE_ENGINE_CTX_DATA_FINN_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NVB06F_CTRL_CMD_RESTORE_ENGINE_CTX_DATA_FINN_PARAMS((NVB06F_CTRL_CMD_RESTORE_ENGINE_CTX_DATA_FINN_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0xc36f0108: /* NVC36F_CTRL_CMD_GPFIFO_GET_WORK_SUBMIT_TOKEN */
+            if (paramsSize < sizeof(NVC36F_CTRL_CMD_GPFIFO_GET_WORK_SUBMIT_TOKEN_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NVC36F_CTRL_CMD_GPFIFO_GET_WORK_SUBMIT_TOKEN_PARAMS((NVC36F_CTRL_CMD_GPFIFO_GET_WORK_SUBMIT_TOKEN_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0xc36f0109: /* NVC36F_CTRL_CMD_GPFIFO_UPDATE_FAULT_METHOD_BUFFER */
+            if (paramsSize < sizeof(NVC36F_CTRL_GPFIFO_UPDATE_FAULT_METHOD_BUFFER_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NVC36F_CTRL_GPFIFO_UPDATE_FAULT_METHOD_BUFFER_PARAMS((NVC36F_CTRL_GPFIFO_UPDATE_FAULT_METHOD_BUFFER_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0xc36f010a: /* NVC36F_CTRL_CMD_GPFIFO_SET_WORK_SUBMIT_TOKEN_NOTIF_INDEX */
+            if (paramsSize < sizeof(NVC36F_CTRL_GPFIFO_SET_WORK_SUBMIT_TOKEN_NOTIF_INDEX_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NVC36F_CTRL_GPFIFO_SET_WORK_SUBMIT_TOKEN_NOTIF_INDEX_PARAMS((NVC36F_CTRL_GPFIFO_SET_WORK_SUBMIT_TOKEN_NOTIF_INDEX_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0xc36f0301: /* NVC36F_CTRL_CMD_INTERNAL_GPFIFO_GET_WORK_SUBMIT_TOKEN */
+            if (paramsSize < sizeof(NVC36F_CTRL_INTERNAL_GPFIFO_GET_WORK_SUBMIT_TOKEN_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NVC36F_CTRL_INTERNAL_GPFIFO_GET_WORK_SUBMIT_TOKEN_PARAMS((NVC36F_CTRL_INTERNAL_GPFIFO_GET_WORK_SUBMIT_TOKEN_PARAMS *)pParams);
             return NV_TRUE;
         default:
             break;

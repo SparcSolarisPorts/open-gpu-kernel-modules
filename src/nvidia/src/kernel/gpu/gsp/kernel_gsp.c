@@ -111,6 +111,22 @@
 #include "class/clc86f.h"
 #include "class/clc96f.h"
 #include "class/clca6f.h"
+#include "class/clb0b5sw.h"  // NVB0B5_ALLOCATION_PARAMETERS (copy engine classes)
+#include "class/cla0b5.h"
+#include "class/clb0b5.h"
+#include "class/clc0b5.h"
+#include "class/clc1b5.h"
+#include "class/clc3b5.h"
+#include "class/clc5b5.h"
+#include "class/clc6b5.h"
+#include "class/clc7b5.h"
+#include "class/clc8b5.h"
+#include "class/clc9b5.h"
+#include "class/clcab5.h"
+#include "ctrl/ctrl906f.h"  // channel control parameter families
+#include "ctrl/ctrla06f.h"
+#include "ctrl/ctrlb06f.h"
+#include "ctrl/ctrlc36f.h"
 #include "nvos.h"          // NV01_EVENT_KERNEL_CALLBACK_EX
 #include "class/cl0080.h"  // NV0080_ALLOC_PARAMETERS
 #include "class/cl2080.h"  // NV2080_ALLOC_PARAMETERS
@@ -790,6 +806,29 @@ _kgspRpcSwapRmAlloc(OBJRPC *pRpc, NvBool bToWire)
                 break;
 
             _kgspRpcSwapChannelAlloc(q);
+            return;
+        }
+
+        case KEPLER_DMA_COPY_A:
+        case MAXWELL_DMA_COPY_A:
+        case PASCAL_DMA_COPY_A:
+        case PASCAL_DMA_COPY_B:
+        case VOLTA_DMA_COPY_A:
+        case TURING_DMA_COPY_A:
+        case AMPERE_DMA_COPY_A:
+        case AMPERE_DMA_COPY_B:
+        case HOPPER_DMA_COPY_A:
+        case BLACKWELL_DMA_COPY_A:
+        case BLACKWELL_DMA_COPY_B:
+        {
+            // NVB0B5_ALLOCATION_PARAMETERS: version and engineType, both 32-bit.
+            NVB0B5_ALLOCATION_PARAMETERS *q = (NVB0B5_ALLOCATION_PARAMETERS *)pParams;
+
+            if (paramsSize < sizeof(*q))
+                break;
+
+            KGSP_RPC_REVERSE(q->version);
+            KGSP_RPC_REVERSE(q->engineType);
             return;
         }
 
