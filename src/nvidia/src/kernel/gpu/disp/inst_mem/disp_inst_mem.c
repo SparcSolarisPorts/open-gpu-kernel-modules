@@ -570,6 +570,15 @@ _instmemClearHashEntry
                             0 /* NV_UDISP_HASH_TBL_INSTANCE_INVALID */,
                             0 /* dispChannelNum */);
 
+#if NVCPU_IS_BIG_ENDIAN
+    //
+    // memmgrMemWrite() copies bytes, and the display engine reads this entry
+    // as two little-endian words, so store the words in little-endian order.
+    //
+    entry.ht_ObjectHandle = NV_BYTESWAP32(entry.ht_ObjectHandle);
+    entry.ht_Context      = NV_BYTESWAP32(entry.ht_Context);
+#endif
+
     NV_ASSERT_OK(memmgrMemWrite(pMemoryManager, &dest, &entry, sizeof(entry),
                                 TRANSFER_FLAGS_NONE));
 }
@@ -720,6 +729,29 @@ _instmemAddHashEntry
                             hClient,
                             offset,
                             dispChannelNum);
+
+#if NVCPU_IS_BIG_ENDIAN
+    {
+        // BE diag (remove once display bring-up works).
+        static NvU32 diagCount;
+
+        if (diagCount < 8)
+        {
+            diagCount++;
+            NV_PRINTF(LEVEL_ERROR,
+                      "BE diag: disp hash entry %u at 0x%x: handle 0x%x ctx 0x%x chn %u\n",
+                      Entry, entryOffset, (NvU32)entry.ht_ObjectHandle,
+                      (NvU32)entry.ht_Context, dispChannelNum);
+        }
+    }
+
+    //
+    // memmgrMemWrite() copies bytes, and the display engine reads this entry
+    // as two little-endian words, so store the words in little-endian order.
+    //
+    entry.ht_ObjectHandle = NV_BYTESWAP32(entry.ht_ObjectHandle);
+    entry.ht_Context      = NV_BYTESWAP32(entry.ht_Context);
+#endif
 
     NV_ASSERT_OK_OR_RETURN(memmgrMemWrite(pMemoryManager, &dest, &entry, sizeof(entry),
                                           TRANSFER_FLAGS_NONE));
