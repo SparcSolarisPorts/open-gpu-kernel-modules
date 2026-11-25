@@ -25,7 +25,10 @@
 #         nvidia.conf in the source tree is not changed.
 #         With -l the staged nvidia.conf gets NVreg_EnableGpuFirmwareLogs=1,
 #         which asks the driver to print the GSP firmware's own log to the
-#         system log. It needs gsp_log_<chip>.bin next to the GSP firmware.
+#         system log. It needs gsp_log_<chip>.bin next to the GSP firmware,
+#         and NVIDIA does not distribute that file (open-gpu-kernel-modules
+#         discussion #490), so without one this only makes the driver print
+#         "failed to read firmware ... gsp_log_<chip>.bin" at attach.
 # bind    After "load -n", adds the PCI IDs with update_drv so the driver
 #         attaches to the GPU. This is the step that touches the hardware.
 # keep    Cancels the watchdog. The modules stay until the next reboot.

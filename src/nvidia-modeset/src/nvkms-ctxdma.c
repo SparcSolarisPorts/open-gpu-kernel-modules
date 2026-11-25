@@ -211,6 +211,14 @@ NvU32 nvCtxDmaAlloc(NVDevEvoPtr pDevEvo, NvU32 *pCtxDmaHandle,
                        NV01_CONTEXT_DMA,
                        &ctxdmaParams);
 
+#if NVCPU_IS_BIG_ENDIAN
+    /* BE diag (remove once display bring-up works). */
+    nvEvoLogDev(pDevEvo, EVO_LOG_WARN,
+        "BE diag: ctxdma 0x%x for memory 0x%x flags 0x%x limit 0x%x:%08x status 0x%x",
+        ctxDmaHandle, memoryHandle, localCtxDmaFlags,
+        (NvU32)(limit >> 32), (NvU32)limit, ret);
+#endif
+
     if (ret != NVOS_STATUS_SUCCESS) {
         nvFreeUnixRmHandle(&pDevEvo->handleAllocator, ctxDmaHandle);
     } else {

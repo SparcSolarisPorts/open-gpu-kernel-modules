@@ -43,6 +43,35 @@ void nvDmaKickoffEvo(NVEvoChannelPtr pChannel)
         return;
     }
 
+#if NVCPU_IS_BIG_ENDIAN
+    /*
+     * BE diag (remove once display bring-up works): the first words of the
+     * first few kickoffs, exactly as stored in the push buffer, i.e. after
+     * the byte swap. A method header 0x20000000 (jump) therefore reads
+     * 0x00000020 here.
+     */
+    {
+        static NvU32 diagCount;
+
+        if (diagCount < 8) {
+            const NvU32 start = (putOffset >= p->put_offset) ? p->put_offset : 0;
+            const volatile NvU32 *w = (const volatile NvU32 *)
+                ((const char *)p->base + start);
+            const NvU32 n = (putOffset - start) / 4;
+
+            diagCount++;
+            nvEvoLogDev(p->pDevEvo, EVO_LOG_WARN,
+                "BE diag: kickoff class 0x%x inst %d put %u->%u, %u words from %u: "
+                "%08x %08x %08x %08x %08x %08x %08x %08x",
+                pChannel->hwclass, pChannel->instance,
+                p->put_offset, putOffset, n, start,
+                n > 0 ? w[0] : 0, n > 1 ? w[1] : 0, n > 2 ? w[2] : 0,
+                n > 3 ? w[3] : 0, n > 4 ? w[4] : 0, n > 5 ? w[5] : 0,
+                n > 6 ? w[6] : 0, n > 7 ? w[7] : 0);
+        }
+    }
+#endif
+
     EvoCoreKickoff(p, putOffset);
 }
 
