@@ -279,7 +279,7 @@ channelReadChannelMemdesc
 
     NV_ASSERT_OR_RETURN(pChannel->pbCpuVA != NULL, 0);
 
-    result = MEM_RD32((NvU8*)pChannel->pbCpuVA + offset);
+    result = channelGpuWord(pChannel, MEM_RD32((NvU8*)pChannel->pbCpuVA + offset));
 
     if (bReleaseMapping)
     {
@@ -494,8 +494,23 @@ channelFillGpFifo
     pGpEntry = (NvU32 *)(((NvU8 *)pChannel->pbCpuVA) + pChannel->channelPbSize +
                 (pChannel->lastSubmittedEntry * NV906F_GP_ENTRY__SIZE));
 
-    MEM_WR32(&pGpEntry[0], GpEntry0);
-    MEM_WR32(&pGpEntry[1], GpEntry1);
+#if NVCPU_IS_BIG_ENDIAN
+    {
+        static NvU32 nGpDiag;
+
+        if (nGpDiag < 4)
+        {
+            nGpDiag++;
+            NV_PRINTF(LEVEL_ERROR,
+                      "BE diag: GPFIFO put %u entry0 0x%08x entry1 0x%08x pb 0x%llx sysmem %d\n",
+                      putIndex, GpEntry0, GpEntry1, pbPutOffset,
+                      (int)(memdescGetAddressSpace(pChannel->pChannelBufferMemdesc) == ADDR_SYSMEM));
+        }
+    }
+#endif
+
+    MEM_WR32(&pGpEntry[0], channelGpuWord(pChannel, GpEntry0));
+    MEM_WR32(&pGpEntry[1], channelGpuWord(pChannel, GpEntry1));
 
     if (bReleaseMapping)
     {

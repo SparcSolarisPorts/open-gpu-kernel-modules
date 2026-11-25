@@ -60,6 +60,29 @@
 
 #define RM_SUBCHANNEL 0x0
 
+#if NVCPU_IS_BIG_ENDIAN
+//
+// The GPU reads and writes the channel buffer (push buffer, GPFIFO entries,
+// semaphores) as little-endian dwords. When that buffer is system memory it is
+// plain host RAM, so a dword stored as a number must be byte-swapped to give
+// the GPU the right bytes (the same swap converts a GPU-written dword on the
+// way back). Video memory is reached through a byte-swapping BAR mapping,
+// where a numeric store is already correct, so it is left alone.
+//
+static NV_INLINE NvU32
+channelGpuWord(OBJCHANNEL *pChannel, NvU32 value)
+{
+    if ((pChannel->pChannelBufferMemdesc != NULL) &&
+        (memdescGetAddressSpace(pChannel->pChannelBufferMemdesc) == ADDR_SYSMEM))
+    {
+        return NV_BYTESWAP32(value);
+    }
+    return value;
+}
+#else
+#define channelGpuWord(pChannel, value) (value)
+#endif
+
 #define NV_PUSH_METHOD(OpType, SubCh, Method, Count)                    \
     (DRF_DEF(906F, _DMA, _SEC_OP, OpType) |                             \
      DRF_NUM(906F, _DMA, _METHOD_ADDRESS, (Method) >> 2) |              \
@@ -68,7 +91,7 @@
 
 #define _NV_ASSERT_CONTIGUOUS_METHOD(a1, a2) NV_ASSERT((a2) - (a1) == 4)
 
-#define NV_PUSH_DATA(Data) MEM_WR32(pPtr++, (Data))
+#define NV_PUSH_DATA(Data) MEM_WR32(pPtr++, channelGpuWord(pChannel, (Data)))
 
 #define _NV_PUSH_INC_1U(SubCh, a1, d1, Count)                           \
     do                                                                  \
