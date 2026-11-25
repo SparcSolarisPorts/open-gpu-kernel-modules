@@ -404,7 +404,10 @@ nv_attach_gpu(dev_info_t *dip)
     int rc;
 
     if (pci_config_setup(dip, &cfg) != DDI_SUCCESS)
+    {
+        dev_err(dip, CE_WARN, "attach: pci_config_setup failed");
         return (DDI_FAILURE);
+    }
 
     vendor = pci_config_get16(cfg, PCI_CONF_VENID);
     device = pci_config_get16(cfg, PCI_CONF_DEVID);
@@ -413,14 +416,19 @@ nv_attach_gpu(dev_info_t *dip)
     class = pci_config_get8(cfg, PCI_CONF_BASCLASS);
     subclass = pci_config_get8(cfg, PCI_CONF_SUBCLASS);
 
+    dev_err(dip, CE_NOTE, "attach: config space reads vendor 0x%x device 0x%x "
+        "class 0x%x subclass 0x%x", vendor, device, class, subclass);
+
     if (nv_pci_dip_bdf(dip, &bus, &slot, &func) != DDI_SUCCESS)
     {
+        dev_err(dip, CE_WARN, "attach: nv_pci_dip_bdf failed");
         pci_config_teardown(&cfg);
         return (DDI_FAILURE);
     }
 
     if (nv_stack_alloc(&sp) != 0)
     {
+        dev_err(dip, CE_WARN, "attach: nv_stack_alloc failed");
         pci_config_teardown(&cfg);
         return (DDI_FAILURE);
     }
@@ -749,10 +757,14 @@ nvidia_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
             return (DDI_FAILURE);
     }
 
+    if (!nv_dip_is_pseudo(dip))
+        dev_err(dip, CE_NOTE, "attach requested");
+
     mutex_enter(&nv_global_lock);
     rc = nv_global_init(dip);
     if (rc != 0)
     {
+        dev_err(dip, CE_WARN, "attach: nv_global_init failed (%d)", rc);
         mutex_exit(&nv_global_lock);
         return (DDI_FAILURE);
     }
@@ -764,6 +776,9 @@ nvidia_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
     else
         rc = nv_attach_gpu(dip);
     mutex_exit(&nv_global_lock);
+
+    if (rc != DDI_SUCCESS && !nv_dip_is_pseudo(dip))
+        dev_err(dip, CE_WARN, "attach failed (%d)", rc);
 
     return (rc);
 }
