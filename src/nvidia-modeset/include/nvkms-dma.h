@@ -104,9 +104,17 @@ static inline NvU32 nvDmaLoadPioMethod(
  * and are not passed through this.
  */
 #if NVCPU_IS_BIG_ENDIAN
+/*
+ * Written out with shifts instead of __builtin_bswap32(): SPARC V9 has no
+ * byte-swap instruction, so gcc turns the builtin into a call to libgcc's
+ * __bswapsi2, which a kernel module cannot link (krtld refuses to load it).
+ */
 static inline NvU32 nvDmaGpuWord(NvU32 value)
 {
-    return __builtin_bswap32(value);
+    return ((value & 0xff000000U) >> 24) |
+           ((value & 0x00ff0000U) >>  8) |
+           ((value & 0x0000ff00U) <<  8) |
+           ((value & 0x000000ffU) << 24);
 }
 #else
 static inline NvU32 nvDmaGpuWord(NvU32 value)
