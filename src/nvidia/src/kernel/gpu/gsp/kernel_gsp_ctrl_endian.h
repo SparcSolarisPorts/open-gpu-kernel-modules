@@ -9963,6 +9963,47 @@ _kgspCtrlSwap_NV0073_CTRL_SYSTEM_QUERY_UEFI_DISPLAY_BANDWIDTH_PARAMS(NV0073_CTRL
     KGSP_RPC_REVERSE((*p).floorBandwidthKBPS);
 }
 
+static void
+_kgspCtrlSwap_NV90F1_CTRL_VASPACE_RESERVE_ENTRIES_PARAMS(NV90F1_CTRL_VASPACE_RESERVE_ENTRIES_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).hSubDevice);
+    KGSP_RPC_REVERSE((*p).subDeviceId);
+    KGSP_RPC_REVERSE((*p).pageSize);
+    KGSP_RPC_REVERSE((*p).virtAddrLo);
+    KGSP_RPC_REVERSE((*p).virtAddrHi);
+}
+
+static void
+_kgspCtrlSwap_NV90F1_CTRL_VASPACE_RELEASE_ENTRIES_PARAMS(NV90F1_CTRL_VASPACE_RELEASE_ENTRIES_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).hSubDevice);
+    KGSP_RPC_REVERSE((*p).subDeviceId);
+    KGSP_RPC_REVERSE((*p).pageSize);
+    KGSP_RPC_REVERSE((*p).virtAddrLo);
+    KGSP_RPC_REVERSE((*p).virtAddrHi);
+}
+
+static void
+_kgspCtrlSwap_NV90F1_CTRL_VASPACE_GET_HOST_RM_MANAGED_SIZE_PARAMS(NV90F1_CTRL_VASPACE_GET_HOST_RM_MANAGED_SIZE_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).hSubDevice);
+    KGSP_RPC_REVERSE((*p).subDeviceId);
+    KGSP_RPC_REVERSE((*p).requiredVaRange);
+}
+
+static void
+_kgspCtrlSwap_NV90F1_CTRL_VASPACE_GET_VAS_HEAP_INFO_PARAMS(NV90F1_CTRL_VASPACE_GET_VAS_HEAP_INFO_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).hSubDevice);
+    KGSP_RPC_REVERSE((*p).subDeviceId);
+    KGSP_RPC_REVERSE((*p).bytesFree);
+    KGSP_RPC_REVERSE((*p).bytesTotal);
+    KGSP_RPC_REVERSE((*p).largestFreeOffset);
+    KGSP_RPC_REVERSE((*p).largestFreeSize);
+    KGSP_RPC_REVERSE((*p).usableBytesFree);
+    KGSP_RPC_REVERSE((*p).numFreeBlocks);
+}
+
 /* NV_TRUE: command known and buffer large enough; params converted. */
 static NvBool
 _kgspCtrlSwapParams(NvU32 cmd, NvU8 *pParams, NvU32 paramsSize)
@@ -14348,6 +14389,31 @@ _kgspCtrlSwapParams(NvU32 cmd, NvU8 *pParams, NvU32 paramsSize)
             if (paramsSize < sizeof(NV2080_CTRL_INTERNAL_GCX_ENTRY_PREREQUISITE_PARAMS))
                 return NV_FALSE;
             _kgspCtrlSwap_NV2080_CTRL_INTERNAL_GCX_ENTRY_PREREQUISITE_PARAMS((NV2080_CTRL_INTERNAL_GCX_ENTRY_PREREQUISITE_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x90f10103: /* NV90F1_CTRL_CMD_VASPACE_RESERVE_ENTRIES */
+            if (paramsSize < sizeof(NV90F1_CTRL_VASPACE_RESERVE_ENTRIES_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV90F1_CTRL_VASPACE_RESERVE_ENTRIES_PARAMS((NV90F1_CTRL_VASPACE_RESERVE_ENTRIES_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x90f10104: /* NV90F1_CTRL_CMD_VASPACE_RELEASE_ENTRIES */
+            if (paramsSize < sizeof(NV90F1_CTRL_VASPACE_RELEASE_ENTRIES_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV90F1_CTRL_VASPACE_RELEASE_ENTRIES_PARAMS((NV90F1_CTRL_VASPACE_RELEASE_ENTRIES_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x90f10106: /* NV90F1_CTRL_CMD_VASPACE_COPY_SERVER_RESERVED_PDES */
+            if (paramsSize < sizeof(NV90F1_CTRL_VASPACE_COPY_SERVER_RESERVED_PDES_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV90F1_CTRL_VASPACE_COPY_SERVER_RESERVED_PDES_PARAMS((NV90F1_CTRL_VASPACE_COPY_SERVER_RESERVED_PDES_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x90f10107: /* NV90F1_CTRL_CMD_VASPACE_GET_HOST_RM_MANAGED_SIZE */
+            if (paramsSize < sizeof(NV90F1_CTRL_VASPACE_GET_HOST_RM_MANAGED_SIZE_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV90F1_CTRL_VASPACE_GET_HOST_RM_MANAGED_SIZE_PARAMS((NV90F1_CTRL_VASPACE_GET_HOST_RM_MANAGED_SIZE_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x90f10108: /* NV90F1_CTRL_CMD_VASPACE_GET_VAS_HEAP_INFO */
+            if (paramsSize < sizeof(NV90F1_CTRL_VASPACE_GET_VAS_HEAP_INFO_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV90F1_CTRL_VASPACE_GET_VAS_HEAP_INFO_PARAMS((NV90F1_CTRL_VASPACE_GET_VAS_HEAP_INFO_PARAMS *)pParams);
             return NV_TRUE;
         default:
             break;
