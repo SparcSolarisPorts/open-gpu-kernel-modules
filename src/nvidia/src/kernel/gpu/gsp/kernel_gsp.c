@@ -99,6 +99,7 @@
 #include "class/cl0000.h"  // NV0000_ALLOC_PARAMETERS
 #include "class/cl0005.h"  // NV0005_ALLOC_PARAMETERS
 #include "class/cl90f1.h"  // FERMI_VASPACE_A
+#include "class/cl0070.h"  // NV01_MEMORY_VIRTUAL, NV_MEMORY_VIRTUAL_ALLOCATION_PARAMS
 #include "alloc/alloc_channel.h"  // NV_CHANNEL_ALLOC_PARAMS
 #include "class/cl906f.h"  // GF100_CHANNEL_GPFIFO and the later GPFIFO channel classes
 #include "class/cla06f.h"
@@ -832,6 +833,20 @@ _kgspRpcSwapRmAlloc(OBJRPC *pRpc, NvBool bToWire)
             return;
         }
 
+        case NV01_MEMORY_VIRTUAL:
+        {
+            // NV_MEMORY_VIRTUAL_ALLOCATION_PARAMS (cl0070.h): two 64-bit values and a handle.
+            NV_MEMORY_VIRTUAL_ALLOCATION_PARAMS *q = (NV_MEMORY_VIRTUAL_ALLOCATION_PARAMS *)pParams;
+
+            if (paramsSize < sizeof(*q))
+                break;
+
+            KGSP_RPC_REVERSE(q->offset);
+            KGSP_RPC_REVERSE(q->limit);
+            KGSP_RPC_REVERSE(q->hVASpace);
+            return;
+        }
+
         case NV01_EVENT_KERNEL_CALLBACK_EX:
         {
             // Four 32-bit handles and indexes, then the 64-bit callback pointer, which the
@@ -935,6 +950,85 @@ _kgspRpcSwapRmControl(OBJRPC *pRpc, NvBool bToWire)
     }
 
     kgspRpcSwapCtrlParams(cmd, rpcFlags, pParams, paramsSize);
+}
+
+//
+// struct pte_desc starts with a 32-bit word of bit fields (idr:2, reserved1:14, length:16).
+// gcc on a big-endian host allocates bit fields from the high bit down, but the GSP (little
+// endian) expects idr in bits 1:0 and length in bits 31:16 of a little-endian word. The word
+// is therefore built and taken apart explicitly; the 64-bit entries after it are plain values.
+//
+static void
+_kgspRpcPteDescWordToWire(struct pte_desc *pd)
+{
+    NvU32 w = ((NvU32)pd->idr) | (((NvU32)pd->reserved1) << 2) | (((NvU32)pd->length) << 16);
+    NvU8 *b = (NvU8 *)pd;
+
+    b[0] = (NvU8)(w);
+    b[1] = (NvU8)(w >> 8);
+    b[2] = (NvU8)(w >> 16);
+    b[3] = (NvU8)(w >> 24);
+}
+
+static void
+_kgspRpcPteDescWordFromWire(struct pte_desc *pd)
+{
+    const NvU8 *b = (const NvU8 *)pd;
+    NvU32 w = ((NvU32)b[0]) | (((NvU32)b[1]) << 8) | (((NvU32)b[2]) << 16) | (((NvU32)b[3]) << 24);
+
+    pd->idr       = w & 0x3;
+    pd->reserved1 = (w >> 2) & 0x3fff;
+    pd->length    = w >> 16;
+}
+
+// ALLOC_MEMORY: seven 32-bit fields, a 64-bit length, a 32-bit page count, then a pte_desc.
+static void
+_kgspRpcSwapAllocMemory(OBJRPC *pRpc, NvU32 payloadSize, NvBool bToWire)
+{
+    rpc_alloc_memory_v *p = &rpcGetVgpuMessageData(pRpc)->alloc_memory_v13_01;
+    const NvU32 pteOff = (NvU32)NV_OFFSETOF(rpc_alloc_memory_v, pteDesc);
+    const NvU32 pteHdr = (NvU32)NV_OFFSETOF(struct pte_desc, pte_pde[0].pte);
+    NvU32 count, avail, i;
+
+    if (payloadSize < pteOff + pteHdr)
+    {
+        _kgspRpcReportUnconverted(NV_VGPU_MSG_FUNCTION_ALLOC_MEMORY, payloadSize);
+        return;
+    }
+
+    KGSP_RPC_REVERSE(p->hClient);
+    KGSP_RPC_REVERSE(p->hDevice);
+    KGSP_RPC_REVERSE(p->hMemory);
+    KGSP_RPC_REVERSE(p->hClass);
+    KGSP_RPC_REVERSE(p->flags);
+    KGSP_RPC_REVERSE(p->pteAdjust);
+    KGSP_RPC_REVERSE(p->format);
+    KGSP_RPC_REVERSE(p->length);
+    KGSP_RPC_REVERSE(p->pageCount);
+
+    // The entry count lives in the bit field word: read it before it is converted to the wire
+    // form, or after it has been converted back.
+    if (bToWire)
+    {
+        count = p->pteDesc.length;
+        _kgspRpcPteDescWordToWire(&p->pteDesc);
+    }
+    else
+    {
+        _kgspRpcPteDescWordFromWire(&p->pteDesc);
+        count = p->pteDesc.length;
+    }
+
+    avail = (payloadSize - pteOff - pteHdr) / (NvU32)sizeof(NvU64);
+    if (count > avail)
+    {
+        // The rest of the entries travel in continuation records, which are not converted here.
+        _kgspRpcReportUnconverted(NV_VGPU_MSG_FUNCTION_ALLOC_MEMORY, payloadSize);
+        count = avail;
+    }
+
+    for (i = 0; i < count; i++)
+        KGSP_RPC_REVERSE(p->pteDesc.pte_pde[i].pte);
 }
 
 // Convert the payload of the RM_RPC message in the staging buffer (the header is in host order).
@@ -1053,6 +1147,10 @@ _kgspRpcPayloadSwap(OBJRPC *pRpc, NvBool bToWire)
             }
             break;
         }
+
+        case NV_VGPU_MSG_FUNCTION_ALLOC_MEMORY:
+            _kgspRpcSwapAllocMemory(pRpc, payloadSize, bToWire);
+            break;
 
         case NV_VGPU_MSG_FUNCTION_CONTINUATION_RECORD:
             // Raw slice of a large parameter block; the sender or receiver of the
