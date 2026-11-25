@@ -7850,12 +7850,2990 @@ _kgspCtrlSwap_NV0080_CTRL_OS_UNIX_VT_GET_FB_INFO_PARAMS(NV0080_CTRL_OS_UNIX_VT_G
     KGSP_RPC_REVERSE((*p).size);
 }
 
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_FRL_CONFIG_MACRO_PAD_PARAMS(NV0073_CTRL_CMD_FRL_CONFIG_MACRO_PAD_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).cmd);
+    KGSP_RPC_REVERSE((*p).linkBw);
+    KGSP_RPC_REVERSE((*p).laneCount);
+    KGSP_RPC_REVERSE((*p).sorIndex);
+    KGSP_RPC_REVERSE((*p).padlinkIndex);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DFP_GET_INFO_PARAMS(NV0073_CTRL_DFP_GET_INFO_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).flags);
+    KGSP_RPC_REVERSE((*p).UHBRSupportedByDfp);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DFP_GET_DISPLAYPORT_DONGLE_INFO_PARAMS(NV0073_CTRL_DFP_GET_DISPLAYPORT_DONGLE_INFO_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).flags);
+    KGSP_RPC_REVERSE((*p).maxTmdsClkRateHz);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DFP_SET_ELD_AUDIO_CAP_PARAMS(NV0073_CTRL_DFP_SET_ELD_AUDIO_CAP_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).numELDSize);
+    KGSP_RPC_REVERSE((*p).maxFreqSupported);
+    KGSP_RPC_REVERSE((*p).ctrl);
+    KGSP_RPC_REVERSE((*p).deviceEntry);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DFP_GET_SPREAD_SPECTRUM_PARAMS(NV0073_CTRL_DFP_GET_SPREAD_SPECTRUM_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).displayId);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DFP_UPDATE_DYNAMIC_DFP_CACHE_PARAMS(NV0073_CTRL_DFP_UPDATE_DYNAMIC_DFP_CACHE_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).headIndex);
+    KGSP_RPC_REVERSE((*p).hdcpFlags);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DFP_SET_AUDIO_ENABLE_PARAMS(NV0073_CTRL_DFP_SET_AUDIO_ENABLE_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DFP_ASSIGN_SOR_INFO(NV0073_CTRL_DFP_ASSIGN_SOR_INFO *p)
+{
+    KGSP_RPC_REVERSE((*p).displayMask);
+    KGSP_RPC_REVERSE((*p).sorType);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DFP_ASSIGN_SOR_PARAMS(NV0073_CTRL_DFP_ASSIGN_SOR_PARAMS *p)
+{
+    NvU32 i0;
+
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).slaveDisplayId);
+    KGSP_RPC_REVERSE((*p).forceSublinkConfig);
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).sorAssignList); i0++)
+    {
+        KGSP_RPC_REVERSE((*p).sorAssignList[i0]);
+    }
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).sorAssignListWithTag); i0++)
+    {
+        _kgspCtrlSwap_NV0073_CTRL_DFP_ASSIGN_SOR_INFO(&(*p).sorAssignListWithTag[i0]);
+    }
+    KGSP_RPC_REVERSE((*p).flags);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DFP_GET_PADLINK_MASK_PARAMS(NV0073_CTRL_DFP_GET_PADLINK_MASK_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).padlinkMask);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DFP_GET_LCD_GPIO_PIN_NUM_PARAMS(NV0073_CTRL_DFP_GET_LCD_GPIO_PIN_NUM_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).funcType);
+    KGSP_RPC_REVERSE((*p).lcdGpioPinNum);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DFP_CONFIG_TWO_HEAD_ONE_OR_PARAMS(NV0073_CTRL_DFP_CONFIG_TWO_HEAD_ONE_OR_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).masterSorIdx);
+    KGSP_RPC_REVERSE((*p).slaveSorIdx);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DFP_DSC_CRC_CONTROL_PARAMS(NV0073_CTRL_DFP_DSC_CRC_CONTROL_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).headIndex);
+    KGSP_RPC_REVERSE((*p).cmd);
+    KGSP_RPC_REVERSE((*p).gpuCrc0);
+    KGSP_RPC_REVERSE((*p).gpuCrc1);
+    KGSP_RPC_REVERSE((*p).gpuCrc2);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_DFP_INIT_MUX_DATA_PARAMS(NV0073_CTRL_CMD_DFP_INIT_MUX_DATA_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).manfId);
+    KGSP_RPC_REVERSE((*p).productId);
+    KGSP_RPC_REVERSE((*p).tconId);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_DFP_SWITCH_DISP_MUX_PARAMS(NV0073_CTRL_CMD_DFP_SWITCH_DISP_MUX_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).flags);
+    KGSP_RPC_REVERSE((*p).auxSettleDelay);
+    KGSP_RPC_REVERSE((*p).muxSwitchLatencyMs);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_DFP_RUN_PRE_DISP_MUX_OPERATIONS_PARAMS(NV0073_CTRL_CMD_DFP_RUN_PRE_DISP_MUX_OPERATIONS_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).flags);
+    KGSP_RPC_REVERSE((*p).iGpuBrightness);
+    KGSP_RPC_REVERSE((*p).preOpsLatencyMs);
+    KGSP_RPC_REVERSE((*p).psrEntryLatencyMs);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_DFP_RUN_POST_DISP_MUX_OPERATIONS_PARAMS(NV0073_CTRL_CMD_DFP_RUN_POST_DISP_MUX_OPERATIONS_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).flags);
+    KGSP_RPC_REVERSE((*p).postOpsLatencyMs);
+    KGSP_RPC_REVERSE((*p).psrExitLatencyMs);
+    KGSP_RPC_REVERSE((*p).psrExitTransitionToInactiveLatencyMs);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_DFP_GET_DISP_MUX_STATUS_PARAMS(NV0073_CTRL_CMD_DFP_GET_DISP_MUX_STATUS_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).muxStatus);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_DSC_CAP_PARAMS(NV0073_CTRL_CMD_DSC_CAP_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).encoderColorFormatMask);
+    KGSP_RPC_REVERSE((*p).lineBufferSizeKB);
+    KGSP_RPC_REVERSE((*p).rateBufferSizeKB);
+    KGSP_RPC_REVERSE((*p).bitsPerPixelPrecision);
+    KGSP_RPC_REVERSE((*p).maxNumHztSlices);
+    KGSP_RPC_REVERSE((*p).lineBufferBitDepth);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_DFP_GET_DSI_MODE_TIMING_PARAMS(NV0073_CTRL_CMD_DFP_GET_DSI_MODE_TIMING_PARAMS *p)
+{
+    NvU32 i0;
+
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).hActive);
+    KGSP_RPC_REVERSE((*p).vActive);
+    KGSP_RPC_REVERSE((*p).hFrontPorch);
+    KGSP_RPC_REVERSE((*p).vFrontPorch);
+    KGSP_RPC_REVERSE((*p).hBackPorch);
+    KGSP_RPC_REVERSE((*p).vBackPorch);
+    KGSP_RPC_REVERSE((*p).hSyncWidth);
+    KGSP_RPC_REVERSE((*p).vSyncWidth);
+    KGSP_RPC_REVERSE((*p).bpp);
+    KGSP_RPC_REVERSE((*p).refresh);
+    KGSP_RPC_REVERSE((*p).pclkHz);
+    KGSP_RPC_REVERSE((*p).numLanes);
+    KGSP_RPC_REVERSE((*p).dscEnable);
+    KGSP_RPC_REVERSE((*p).dscBpp);
+    KGSP_RPC_REVERSE((*p).dscNumSlices);
+    KGSP_RPC_REVERSE((*p).dscDualDsc);
+    KGSP_RPC_REVERSE((*p).dscSliceHeight);
+    KGSP_RPC_REVERSE((*p).dscBlockPrediction);
+    KGSP_RPC_REVERSE((*p).dscDecoderVersionMajor);
+    KGSP_RPC_REVERSE((*p).dscDecoderVersionMinor);
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).dscCustomPPSData); i0++)
+    {
+        KGSP_RPC_REVERSE((*p).dscCustomPPSData[i0]);
+    }
+    _kgspCtrlSwap_NV0073_CTRL_CMD_DSC_CAP_PARAMS(&(*p).dscEncoderCaps);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DFP_ENTER_DISPLAY_POWER_GATING_DIAGNOSTIC_DATA(NV0073_CTRL_DFP_ENTER_DISPLAY_POWER_GATING_DIAGNOSTIC_DATA *p)
+{
+    KGSP_RPC_REVERSE((*p).totalRmEntryLatencyUs);
+    KGSP_RPC_REVERSE((*p).hwOkToGateLatencyUs);
+    KGSP_RPC_REVERSE((*p).carEntryApiLatencyUs);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_DFP_ENTER_DISPLAY_POWER_GATING_PARAMS(NV0073_CTRL_CMD_DFP_ENTER_DISPLAY_POWER_GATING_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).flag);
+    _kgspCtrlSwap_NV0073_CTRL_DFP_ENTER_DISPLAY_POWER_GATING_DIAGNOSTIC_DATA(&(*p).diagnosticData);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DFP_EXIT_DISPLAY_POWER_GATING_DIAGNOSTIC_DATA(NV0073_CTRL_DFP_EXIT_DISPLAY_POWER_GATING_DIAGNOSTIC_DATA *p)
+{
+    KGSP_RPC_REVERSE((*p).totalRmExitLatencyUs);
+    KGSP_RPC_REVERSE((*p).riscvBootupLatencyUs);
+    KGSP_RPC_REVERSE((*p).carExitApiLatencyUs);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_DFP_EXIT_DISPLAY_POWER_GATING_PARAMS(NV0073_CTRL_CMD_DFP_EXIT_DISPLAY_POWER_GATING_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).flag);
+    _kgspCtrlSwap_NV0073_CTRL_DFP_EXIT_DISPLAY_POWER_GATING_DIAGNOSTIC_DATA(&(*p).diagnosticData);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DFP_EDP_DRIVER_UNLOAD_PARAMS(NV0073_CTRL_DFP_EDP_DRIVER_UNLOAD_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_SYSTEM_SET_REGION_RAM_RECTANGLES_PARAMS(NV0073_CTRL_CMD_SYSTEM_SET_REGION_RAM_RECTANGLES_PARAMS *p)
+{
+    NvU32 i0;
+
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).rectanglesInfo); i0++)
+    {
+        KGSP_RPC_REVERSE((*p).rectanglesInfo[i0].xCoordinate);
+        KGSP_RPC_REVERSE((*p).rectanglesInfo[i0].yCoordinate);
+        KGSP_RPC_REVERSE((*p).rectanglesInfo[i0].width);
+        KGSP_RPC_REVERSE((*p).rectanglesInfo[i0].height);
+    }
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_SYSTEM_CONFIGURE_SAFETY_INTERRUPTS_PARAMS(NV0073_CTRL_CMD_SYSTEM_CONFIGURE_SAFETY_INTERRUPTS_PARAMS *p)
+{
+    NvU32 i0;
+
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).tellTaleEvents); i0++)
+    {
+    }
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).frozenFrameEvents); i0++)
+    {
+    }
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).overlapEvents); i0++)
+    {
+    }
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DFP_DISP_PHY_PD_CABLE_ID_A_INFO(NV0073_CTRL_DFP_DISP_PHY_PD_CABLE_ID_A_INFO *p)
+{
+    KGSP_RPC_REVERSE((*p).dpProt);
+    KGSP_RPC_REVERSE((*p).srcPinSet);
+    KGSP_RPC_REVERSE((*p).sinkPinSet);
+    KGSP_RPC_REVERSE((*p).activeComp);
+    KGSP_RPC_REVERSE((*p).dpamVers);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DFP_DISP_PHY_PD_CABLE_ID_B_INFO(NV0073_CTRL_DFP_DISP_PHY_PD_CABLE_ID_B_INFO *p)
+{
+    KGSP_RPC_REVERSE((*p).vconnSrc);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DFP_DISP_PHY_DIA_INFO(NV0073_CTRL_DFP_DISP_PHY_DIA_INFO *p)
+{
+    KGSP_RPC_REVERSE((*p).sorSel);
+    KGSP_RPC_REVERSE((*p).sorClkMeasuredKHz);
+    KGSP_RPC_REVERSE((*p).sorClkProgrammedKHz);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DFP_DISP_PHY_PADLINK_INFO(NV0073_CTRL_DFP_DISP_PHY_PADLINK_INFO *p)
+{
+    NvU32 i0;
+
+    KGSP_RPC_REVERSE((*p).mode);
+    KGSP_RPC_REVERSE((*p).cableOrient);
+    KGSP_RPC_REVERSE((*p).safeMode);
+    KGSP_RPC_REVERSE((*p).tpllForceVal);
+    KGSP_RPC_REVERSE((*p).pllPwrSeqState);
+    KGSP_RPC_REVERSE((*p).bitRateSel);
+    _kgspCtrlSwap_NV0073_CTRL_DFP_DISP_PHY_PD_CABLE_ID_A_INFO(&(*p).pdCableIdA);
+    _kgspCtrlSwap_NV0073_CTRL_DFP_DISP_PHY_PD_CABLE_ID_B_INFO(&(*p).pdCableIdB);
+    KGSP_RPC_REVERSE((*p).dpMode);
+    KGSP_RPC_REVERSE((*p).sorSel);
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).diaInfo); i0++)
+    {
+        _kgspCtrlSwap_NV0073_CTRL_DFP_DISP_PHY_DIA_INFO(&(*p).diaInfo[i0]);
+    }
+    KGSP_RPC_REVERSE((*p).sorClkMeasuredKHz);
+    KGSP_RPC_REVERSE((*p).sorClkProgrammedKHz);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DFP_GET_DISP_PHY_INFO_PARAMS(NV0073_CTRL_DFP_GET_DISP_PHY_INFO_PARAMS *p)
+{
+    NvU32 i0;
+
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).edpClkSrc);
+    KGSP_RPC_REVERSE((*p).edpPllFreq);
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).padLink); i0++)
+    {
+        _kgspCtrlSwap_NV0073_CTRL_DFP_DISP_PHY_PADLINK_INFO(&(*p).padLink[i0]);
+    }
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DP_AUXCH_CTRL_PARAMS(NV0073_CTRL_DP_AUXCH_CTRL_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).cmd);
+    KGSP_RPC_REVERSE((*p).addr);
+    KGSP_RPC_REVERSE((*p).size);
+    KGSP_RPC_REVERSE((*p).replyType);
+    KGSP_RPC_REVERSE((*p).retryTimeMs);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DP_CTRL_PARAMS(NV0073_CTRL_DP_CTRL_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).cmd);
+    KGSP_RPC_REVERSE((*p).data);
+    KGSP_RPC_REVERSE((*p).err);
+    KGSP_RPC_REVERSE((*p).retryTimeMs);
+    KGSP_RPC_REVERSE((*p).eightLaneDpcdBaseAddr);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DP_GET_LANE_DATA_PARAMS(NV0073_CTRL_DP_GET_LANE_DATA_PARAMS *p)
+{
+    NvU32 i0;
+
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).numLanes);
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).data); i0++)
+    {
+        KGSP_RPC_REVERSE((*p).data[i0]);
+    }
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DP_SET_LANE_DATA_PARAMS(NV0073_CTRL_DP_SET_LANE_DATA_PARAMS *p)
+{
+    NvU32 i0;
+
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).numLanes);
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).data); i0++)
+    {
+        KGSP_RPC_REVERSE((*p).data[i0]);
+    }
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DP_TESTPATTERN(NV0073_CTRL_DP_TESTPATTERN *p)
+{
+    KGSP_RPC_REVERSE((*p).testPattern);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DP_CSTM(NV0073_CTRL_DP_CSTM *p)
+{
+    KGSP_RPC_REVERSE((*p).field_31_0);
+    KGSP_RPC_REVERSE((*p).field_63_32);
+    KGSP_RPC_REVERSE((*p).field_95_64);
+    KGSP_RPC_REVERSE((*p).field_127_96);
+    KGSP_RPC_REVERSE((*p).field_159_128);
+    KGSP_RPC_REVERSE((*p).field_191_160);
+    KGSP_RPC_REVERSE((*p).field_223_192);
+    KGSP_RPC_REVERSE((*p).field_255_224);
+    KGSP_RPC_REVERSE((*p).field_263_256);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DP_SET_TESTPATTERN_PARAMS(NV0073_CTRL_DP_SET_TESTPATTERN_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    _kgspCtrlSwap_NV0073_CTRL_DP_TESTPATTERN(&(*p).testPattern);
+    _kgspCtrlSwap_NV0073_CTRL_DP_CSTM(&(*p).cstm);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DP_GET_TESTPATTERN_PARAMS(NV0073_CTRL_DP_GET_TESTPATTERN_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    _kgspCtrlSwap_NV0073_CTRL_DP_TESTPATTERN(&(*p).testPattern);
+    _kgspCtrlSwap_NV0073_CTRL_DP_CSTM(&(*p).cstm);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DP_PREEMPHASIS_DRIVECURRENT_POSTCURSOR2_1(NV0073_CTRL_DP_PREEMPHASIS_DRIVECURRENT_POSTCURSOR2_1 *p)
+{
+    KGSP_RPC_REVERSE((*p).preEmphasis);
+    KGSP_RPC_REVERSE((*p).driveCurrent);
+    KGSP_RPC_REVERSE((*p).postCursor2);
+    KGSP_RPC_REVERSE((*p).TxPu);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DP_SET_PREEMPHASIS_DRIVECURRENT_POSTCURSOR2_DATA_PARAMS(NV0073_CTRL_DP_SET_PREEMPHASIS_DRIVECURRENT_POSTCURSOR2_DATA_PARAMS *p)
+{
+    NvU32 i0, i1, i2;
+
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).dpData); i0++)
+    {
+        for (i1 = 0; i1 < NV_ARRAY_ELEMENTS((*p).dpData[i0]); i1++)
+        {
+            for (i2 = 0; i2 < NV_ARRAY_ELEMENTS((*p).dpData[i0][i1]); i2++)
+            {
+                _kgspCtrlSwap_NV0073_CTRL_DP_PREEMPHASIS_DRIVECURRENT_POSTCURSOR2_1(&(*p).dpData[i0][i1][i2]);
+            }
+        }
+    }
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DP_GET_PREEMPHASIS_DRIVECURRENT_POSTCURSOR2_DATA_PARAMS(NV0073_CTRL_DP_GET_PREEMPHASIS_DRIVECURRENT_POSTCURSOR2_DATA_PARAMS *p)
+{
+    NvU32 i0, i1, i2;
+
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).dpData); i0++)
+    {
+        for (i1 = 0; i1 < NV_ARRAY_ELEMENTS((*p).dpData[i0]); i1++)
+        {
+            for (i2 = 0; i2 < NV_ARRAY_ELEMENTS((*p).dpData[i0][i1]); i2++)
+            {
+                _kgspCtrlSwap_NV0073_CTRL_DP_PREEMPHASIS_DRIVECURRENT_POSTCURSOR2_1(&(*p).dpData[i0][i1][i2]);
+            }
+        }
+    }
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DP_MAIN_LINK_CTRL_PARAMS(NV0073_CTRL_DP_MAIN_LINK_CTRL_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).ctrl);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DP_SET_AUDIO_MUTESTREAM_PARAMS(NV0073_CTRL_DP_SET_AUDIO_MUTESTREAM_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).mute);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DP_ASSR_CTRL_PARAMS(NV0073_CTRL_DP_ASSR_CTRL_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).cmd);
+    KGSP_RPC_REVERSE((*p).data);
+    KGSP_RPC_REVERSE((*p).err);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_DP_TOPOLOGY_ALLOCATE_DISPLAYID_PARAMS(NV0073_CTRL_CMD_DP_TOPOLOGY_ALLOCATE_DISPLAYID_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).preferredDisplayId);
+    KGSP_RPC_REVERSE((*p).displayIdAssigned);
+    KGSP_RPC_REVERSE((*p).allDisplayMask);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_DP_TOPOLOGY_FREE_DISPLAYID_PARAMS(NV0073_CTRL_CMD_DP_TOPOLOGY_FREE_DISPLAYID_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DP_GET_LINK_CONFIG_PARAMS(NV0073_CTRL_DP_GET_LINK_CONFIG_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).laneCount);
+    KGSP_RPC_REVERSE((*p).linkBW);
+    KGSP_RPC_REVERSE((*p).dp2LinkBW);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DP_GET_EDP_DATA_PARAMS(NV0073_CTRL_DP_GET_EDP_DATA_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).data);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_DP_CONFIG_STREAM_PARAMS(NV0073_CTRL_CMD_DP_CONFIG_STREAM_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).head);
+    KGSP_RPC_REVERSE((*p).sorIndex);
+    KGSP_RPC_REVERSE((*p).dpLink);
+    KGSP_RPC_REVERSE((*p).singleHeadMultistreamMode);
+    KGSP_RPC_REVERSE((*p).hBlankSym);
+    KGSP_RPC_REVERSE((*p).vBlankSym);
+    KGSP_RPC_REVERSE((*p).colorFormat);
+    KGSP_RPC_REVERSE((*p).MST.slotStart);
+    KGSP_RPC_REVERSE((*p).MST.slotEnd);
+    KGSP_RPC_REVERSE((*p).MST.PBN);
+    KGSP_RPC_REVERSE((*p).MST.Timeslice);
+    KGSP_RPC_REVERSE((*p).MST.singleHeadMSTPipeline);
+    KGSP_RPC_REVERSE((*p).SST.tuSize);
+    KGSP_RPC_REVERSE((*p).SST.waterMark);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_DP_SET_RATE_GOV_PARAMS(NV0073_CTRL_CMD_DP_SET_RATE_GOV_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).head);
+    KGSP_RPC_REVERSE((*p).sorIndex);
+    KGSP_RPC_REVERSE((*p).flags);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_DP_SET_MANUAL_DISPLAYPORT_PARAMS(NV0073_CTRL_CMD_DP_SET_MANUAL_DISPLAYPORT_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_DP_SET_ECF_PARAMS(NV0073_CTRL_CMD_DP_SET_ECF_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).sorIndex);
+    KGSP_RPC_REVERSE((*p).ecf);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_DP_SEND_ACT_PARAMS(NV0073_CTRL_CMD_DP_SEND_ACT_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_DP_GET_CAPS_PARAMS(NV0073_CTRL_CMD_DP_GET_CAPS_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).sorIndex);
+    KGSP_RPC_REVERSE((*p).maxLinkRate);
+    KGSP_RPC_REVERSE((*p).dpVersionsSupported);
+    KGSP_RPC_REVERSE((*p).UHBRSupportedByGpu);
+    _kgspCtrlSwap_NV0073_CTRL_CMD_DSC_CAP_PARAMS(&(*p).DSC);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DP_MSA_PROPERTIES_MASK(NV0073_CTRL_DP_MSA_PROPERTIES_MASK *p)
+{
+    (void)p;
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DP_MSA_PROPERTIES_VALUES(NV0073_CTRL_DP_MSA_PROPERTIES_VALUES *p)
+{
+    KGSP_RPC_REVERSE((*p).rasterTotalHorizontal);
+    KGSP_RPC_REVERSE((*p).rasterTotalVertical);
+    KGSP_RPC_REVERSE((*p).activeStartHorizontal);
+    KGSP_RPC_REVERSE((*p).activeStartVertical);
+    KGSP_RPC_REVERSE((*p).surfaceTotalHorizontal);
+    KGSP_RPC_REVERSE((*p).surfaceTotalVertical);
+    KGSP_RPC_REVERSE((*p).syncWidthHorizontal);
+    KGSP_RPC_REVERSE((*p).syncPolarityHorizontal);
+    KGSP_RPC_REVERSE((*p).syncHeightVertical);
+    KGSP_RPC_REVERSE((*p).syncPolarityVertical);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_DP_GENERATE_FAKE_INTERRUPT_PARAMS(NV0073_CTRL_CMD_DP_GENERATE_FAKE_INTERRUPT_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).interruptType);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_DP_CONFIG_RAD_SCRATCH_REG_PARAMS(NV0073_CTRL_CMD_DP_CONFIG_RAD_SCRATCH_REG_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).activeDevAddr);
+    KGSP_RPC_REVERSE((*p).sorIndex);
+    KGSP_RPC_REVERSE((*p).dpLink);
+    KGSP_RPC_REVERSE((*p).hopCount);
+    KGSP_RPC_REVERSE((*p).dpMsDevAddrState);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_DP_SET_TRIGGER_SELECT_PARAMS(NV0073_CTRL_CMD_DP_SET_TRIGGER_SELECT_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).head);
+    KGSP_RPC_REVERSE((*p).sorIndex);
+    KGSP_RPC_REVERSE((*p).singleHeadMSTPipeline);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_DP_CONFIG_SINGLE_HEAD_MULTI_STREAM_PARAMS(NV0073_CTRL_CMD_DP_CONFIG_SINGLE_HEAD_MULTI_STREAM_PARAMS *p)
+{
+    NvU32 i0;
+
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).displayIDs); i0++)
+    {
+        KGSP_RPC_REVERSE((*p).displayIDs[i0]);
+    }
+    KGSP_RPC_REVERSE((*p).numStreams);
+    KGSP_RPC_REVERSE((*p).mode);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_DP_SET_TRIGGER_ALL_PARAMS(NV0073_CTRL_CMD_DP_SET_TRIGGER_ALL_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).head);
+}
+
+static void
+_kgspCtrlSwap_DPAUXPACKET(DPAUXPACKET *p)
+{
+    KGSP_RPC_REVERSE((*p).auxEvents);
+    KGSP_RPC_REVERSE((*p).auxRequestTimeStamp);
+    KGSP_RPC_REVERSE((*p).auxMessageReqSize);
+    KGSP_RPC_REVERSE((*p).auxMessageReplySize);
+    KGSP_RPC_REVERSE((*p).auxOutPort);
+    KGSP_RPC_REVERSE((*p).auxPortAddress);
+    KGSP_RPC_REVERSE((*p).auxReplyTimeStamp);
+    KGSP_RPC_REVERSE((*p).auxCount);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_DP_GET_AUXLOGGER_BUFFER_DATA_PARAMS(NV0073_CTRL_CMD_DP_GET_AUXLOGGER_BUFFER_DATA_PARAMS *p)
+{
+    NvU32 i0;
+
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).dpAuxBufferReadSize);
+    KGSP_RPC_REVERSE((*p).dpNumMessagesRead);
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).dpAuxBuffer); i0++)
+    {
+        _kgspCtrlSwap_DPAUXPACKET(&(*p).dpAuxBuffer[i0]);
+    }
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_DP_CONFIG_INDEXED_LINK_RATES_PARAMS(NV0073_CTRL_CMD_DP_CONFIG_INDEXED_LINK_RATES_PARAMS *p)
+{
+    NvU32 i0;
+
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).linkRateTbl); i0++)
+    {
+        KGSP_RPC_REVERSE((*p).linkRateTbl[i0]);
+    }
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).linkBwTbl); i0++)
+    {
+        KGSP_RPC_REVERSE((*p).linkBwTbl[i0]);
+    }
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_DP_SET_STEREO_MSA_PROPERTIES_PARAMS(NV0073_CTRL_CMD_DP_SET_STEREO_MSA_PROPERTIES_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    _kgspCtrlSwap_NV0073_CTRL_DP_MSA_PROPERTIES_MASK(&(*p).featureMask);
+    _kgspCtrlSwap_NV0073_CTRL_DP_MSA_PROPERTIES_VALUES(&(*p).featureValues);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_DP_CONFIGURE_FEC_PARAMS(NV0073_CTRL_CMD_DP_CONFIGURE_FEC_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_DP_CONFIG_MACRO_PAD_PARAMS(NV0073_CTRL_CMD_DP_CONFIG_MACRO_PAD_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).cmd);
+    KGSP_RPC_REVERSE((*p).linkBw);
+    KGSP_RPC_REVERSE((*p).laneCount);
+    KGSP_RPC_REVERSE((*p).sorIndex);
+    KGSP_RPC_REVERSE((*p).sublinkIndex);
+    KGSP_RPC_REVERSE((*p).priPadLinkIndex);
+    KGSP_RPC_REVERSE((*p).secPadLinkIndex);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DP_AUXCH_I2C_TRANSFER_CTRL_PARAMS(NV0073_CTRL_DP_AUXCH_I2C_TRANSFER_CTRL_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).addr);
+    KGSP_RPC_REVERSE((*p).size);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_DP_ENABLE_VRR_PARAMS(NV0073_CTRL_CMD_DP_ENABLE_VRR_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).cmd);
+    KGSP_RPC_REVERSE((*p).result);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DP_GET_GENERIC_INFOFRAME_PARAMS(NV0073_CTRL_DP_GET_GENERIC_INFOFRAME_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).infoframeIndex);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DP_GET_MSA_ATTRIBUTES_PARAMS(NV0073_CTRL_DP_GET_MSA_ATTRIBUTES_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).mvid);
+    KGSP_RPC_REVERSE((*p).nvid);
+    KGSP_RPC_REVERSE((*p).hTotal);
+    KGSP_RPC_REVERSE((*p).vTotal);
+    KGSP_RPC_REVERSE((*p).hActiveStart);
+    KGSP_RPC_REVERSE((*p).vActiveStart);
+    KGSP_RPC_REVERSE((*p).hActiveWidth);
+    KGSP_RPC_REVERSE((*p).vActiveWidth);
+    KGSP_RPC_REVERSE((*p).hSyncWidth);
+    KGSP_RPC_REVERSE((*p).vSyncWidth);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_DP_AUXCH_OD_CTRL_PARAMS(NV0073_CTRL_CMD_DP_AUXCH_OD_CTRL_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_DP_SET_MSA_PROPERTIES_V2_PARAMS(NV0073_CTRL_CMD_DP_SET_MSA_PROPERTIES_V2_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    _kgspCtrlSwap_NV0073_CTRL_DP_MSA_PROPERTIES_MASK(&(*p).featureMask);
+    _kgspCtrlSwap_NV0073_CTRL_DP_MSA_PROPERTIES_VALUES(&(*p).featureValues);
+    _kgspCtrlSwap_NV0073_CTRL_DP_MSA_PROPERTIES_VALUES(&(*p).featureDebugValues);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_DP2X_LINK_TRAINING_CTRL_PARAMS(NV0073_CTRL_CMD_DP2X_LINK_TRAINING_CTRL_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).cmd);
+    KGSP_RPC_REVERSE((*p).data);
+    KGSP_RPC_REVERSE((*p).pollingInfo);
+    KGSP_RPC_REVERSE((*p).err);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DP2X_GET_LANE_DATA_PARAMS(NV0073_CTRL_DP2X_GET_LANE_DATA_PARAMS *p)
+{
+    NvU32 i0;
+
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).numLanes);
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).data); i0++)
+    {
+        KGSP_RPC_REVERSE((*p).data[i0]);
+    }
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DP2X_SET_LANE_DATA_PARAMS(NV0073_CTRL_DP2X_SET_LANE_DATA_PARAMS *p)
+{
+    NvU32 i0;
+
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).numLanes);
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).data); i0++)
+    {
+        KGSP_RPC_REVERSE((*p).data[i0]);
+    }
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_DP_AUXCH_VBL_CTRL_PARAMS(NV0073_CTRL_CMD_DP_AUXCH_VBL_CTRL_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DP_LEVEL_INFO_TABLE_ENTRY(NV0073_CTRL_DP_LEVEL_INFO_TABLE_ENTRY *p)
+{
+    KGSP_RPC_REVERSE((*p).preEmphasis);
+    KGSP_RPC_REVERSE((*p).driveCurrent);
+    KGSP_RPC_REVERSE((*p).preShoot);
+    KGSP_RPC_REVERSE((*p).txPu);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DP_SET_LEVEL_INFO_TABLE_DATA_PARAMS(NV0073_CTRL_DP_SET_LEVEL_INFO_TABLE_DATA_PARAMS *p)
+{
+    NvU32 i0, i1;
+
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).padlinkIndex);
+    KGSP_RPC_REVERSE((*p).linkRate);
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).dpData); i0++)
+    {
+        for (i1 = 0; i1 < NV_ARRAY_ELEMENTS((*p).dpData[i0]); i1++)
+        {
+            _kgspCtrlSwap_NV0073_CTRL_DP_LEVEL_INFO_TABLE_ENTRY(&(*p).dpData[i0][i1]);
+        }
+    }
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DP_GET_LEVEL_INFO_TABLE_DATA_PARAMS(NV0073_CTRL_DP_GET_LEVEL_INFO_TABLE_DATA_PARAMS *p)
+{
+    NvU32 i0, i1;
+
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).padlinkIndex);
+    KGSP_RPC_REVERSE((*p).linkRate);
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).dpData); i0++)
+    {
+        for (i1 = 0; i1 < NV_ARRAY_ELEMENTS((*p).dpData[i0]); i1++)
+        {
+            _kgspCtrlSwap_NV0073_CTRL_DP_LEVEL_INFO_TABLE_ENTRY(&(*p).dpData[i0][i1]);
+        }
+    }
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DP2X_SET_LEVEL_INFO_TABLE_DATA_PARAMS(NV0073_CTRL_DP2X_SET_LEVEL_INFO_TABLE_DATA_PARAMS *p)
+{
+    NvU32 i0;
+
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).padlinkIndex);
+    KGSP_RPC_REVERSE((*p).linkRate);
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).dpData); i0++)
+    {
+        _kgspCtrlSwap_NV0073_CTRL_DP_LEVEL_INFO_TABLE_ENTRY(&(*p).dpData[i0]);
+    }
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DP2X_GET_LEVEL_INFO_TABLE_DATA_PARAMS(NV0073_CTRL_DP2X_GET_LEVEL_INFO_TABLE_DATA_PARAMS *p)
+{
+    NvU32 i0;
+
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).padlinkIndex);
+    KGSP_RPC_REVERSE((*p).linkRate);
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).dpData); i0++)
+    {
+        _kgspCtrlSwap_NV0073_CTRL_DP_LEVEL_INFO_TABLE_ENTRY(&(*p).dpData[i0]);
+    }
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_DP_SET_PROP_FORCE_PCLK_FACTOR_PARAMS(NV0073_CTRL_CMD_DP_SET_PROP_FORCE_PCLK_FACTOR_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).bEnable);
+    KGSP_RPC_REVERSE((*p).head);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DP_IMP_LINK_CONFIGURATION(NV0073_CTRL_DP_IMP_LINK_CONFIGURATION *p)
+{
+    KGSP_RPC_REVERSE((*p).linkRate10M);
+    KGSP_RPC_REVERSE((*p).laneCount);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DP_IMP_MODESET_DATA(NV0073_CTRL_DP_IMP_MODESET_DATA *p)
+{
+    KGSP_RPC_REVERSE((*p).rasterWidth);
+    KGSP_RPC_REVERSE((*p).rasterHeight);
+    KGSP_RPC_REVERSE((*p).surfaceWidth);
+    KGSP_RPC_REVERSE((*p).surfaceHeight);
+    KGSP_RPC_REVERSE((*p).rasterBlankStartX);
+    KGSP_RPC_REVERSE((*p).rasterBlankEndX);
+    KGSP_RPC_REVERSE((*p).depth);
+    KGSP_RPC_REVERSE((*p).twoChannelAudioHz);
+    KGSP_RPC_REVERSE((*p).eightChannelAudioHz);
+    KGSP_RPC_REVERSE((*p).pixelFrequencyKHz);
+    KGSP_RPC_REVERSE((*p).bitsPerComponent);
+    KGSP_RPC_REVERSE((*p).colorFormat);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DP_IMP_DSC_PARAMETERS(NV0073_CTRL_DP_IMP_DSC_PARAMETERS *p)
+{
+    KGSP_RPC_REVERSE((*p).sliceCount);
+    KGSP_RPC_REVERSE((*p).sliceWidth);
+    KGSP_RPC_REVERSE((*p).sliceHeight);
+    KGSP_RPC_REVERSE((*p).dscVersionMajor);
+    KGSP_RPC_REVERSE((*p).dscVersionMinor);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DP_IMP_WATERMARK(NV0073_CTRL_DP_IMP_WATERMARK *p)
+{
+    KGSP_RPC_REVERSE((*p).waterMark);
+    KGSP_RPC_REVERSE((*p).tuSize);
+    KGSP_RPC_REVERSE((*p).minHBlank);
+    KGSP_RPC_REVERSE((*p).hBlankSym);
+    KGSP_RPC_REVERSE((*p).vBlankSym);
+    KGSP_RPC_REVERSE((*p).effectiveBpp);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_CALCULATE_DP_IMP_PARAMS(NV0073_CTRL_CMD_CALCULATE_DP_IMP_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).headIndex);
+    _kgspCtrlSwap_NV0073_CTRL_DP_IMP_LINK_CONFIGURATION(&(*p).linkConfig);
+    _kgspCtrlSwap_NV0073_CTRL_DP_IMP_MODESET_DATA(&(*p).modesetInfo);
+    _kgspCtrlSwap_NV0073_CTRL_DP_IMP_DSC_PARAMETERS(&(*p).dscInfo);
+    _kgspCtrlSwap_NV0073_CTRL_DP_IMP_WATERMARK(&(*p).watermark);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DP_USBC_CABLEID_INFO(NV0073_CTRL_DP_USBC_CABLEID_INFO *p)
+{
+    KGSP_RPC_REVERSE((*p).type);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DP_USBC_CABLEID_INFO_PARAMS(NV0073_CTRL_DP_USBC_CABLEID_INFO_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    _kgspCtrlSwap_NV0073_CTRL_DP_USBC_CABLEID_INFO(&(*p).cableIDInfo);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_STUFF_DUMMY_SYMBOL_WAR_PARAMS(NV0073_CTRL_STUFF_DUMMY_SYMBOL_WAR_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).head);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DP_NOTIFY_LT_PARAMS(NV0073_CTRL_DP_NOTIFY_LT_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DP_USB4_INFO(NV0073_CTRL_DP_USB4_INFO *p)
+{
+    (void)p;
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_GET_USB_DPIN_ADAPTER_INFO_PARAMS(NV0073_CTRL_CMD_GET_USB_DPIN_ADAPTER_INFO_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    _kgspCtrlSwap_NV0073_CTRL_DP_USB4_INFO(&(*p).usb4Info);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_DP_SET_WAR_FLAGS_PARAMS(NV0073_CTRL_CMD_DP_SET_WAR_FLAGS_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).warId);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_EVENT_SET_NOTIFICATION_PARAMS(NV0073_CTRL_EVENT_SET_NOTIFICATION_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).hEvent);
+    KGSP_RPC_REVERSE((*p).event);
+    KGSP_RPC_REVERSE((*p).action);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_INTERNAL_GET_HOTPLUG_UNPLUG_STATE_PARAMS(NV0073_CTRL_INTERNAL_GET_HOTPLUG_UNPLUG_STATE_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).flags);
+    KGSP_RPC_REVERSE((*p).hotPlugMask);
+    KGSP_RPC_REVERSE((*p).hotUnplugMask);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_INTERNAL_DFP_GET_DISP_MUX_STATUS_PARAMS(NV0073_CTRL_CMD_INTERNAL_DFP_GET_DISP_MUX_STATUS_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).muxStatus);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_PSR_GET_SR_PANEL_INFO_PARAMS(NV0073_CTRL_PSR_GET_SR_PANEL_INFO_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).frameLockPin);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SPECIFIC_GET_TYPE_PARAMS(NV0073_CTRL_SPECIFIC_GET_TYPE_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).displayType);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SPECIFIC_GET_EDID_V2_PARAMS(NV0073_CTRL_SPECIFIC_GET_EDID_V2_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).bufferSize);
+    KGSP_RPC_REVERSE((*p).flags);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SPECIFIC_SET_EDID_V2_PARAMS(NV0073_CTRL_SPECIFIC_SET_EDID_V2_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).bufferSize);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_SPECIFIC_FAKE_DEVICE_PARAMS(NV0073_CTRL_CMD_SPECIFIC_FAKE_DEVICE_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).cmd);
+    KGSP_RPC_REVERSE((*p).data);
+    KGSP_RPC_REVERSE((*p).tvType);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SPECIFIC_GET_I2C_PORTID_PARAMS(NV0073_CTRL_SPECIFIC_GET_I2C_PORTID_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).commPortId);
+    KGSP_RPC_REVERSE((*p).ddcPortId);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SPECIFIC_GET_CONNECTOR_DATA_PARAMS(NV0073_CTRL_SPECIFIC_GET_CONNECTOR_DATA_PARAMS *p)
+{
+    NvU32 i0;
+
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).flags);
+    KGSP_RPC_REVERSE((*p).DDCPartners);
+    KGSP_RPC_REVERSE((*p).count);
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).data); i0++)
+    {
+        KGSP_RPC_REVERSE((*p).data[i0].index);
+        KGSP_RPC_REVERSE((*p).data[i0].type);
+        KGSP_RPC_REVERSE((*p).data[i0].location);
+    }
+    KGSP_RPC_REVERSE((*p).platform);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SPECIFIC_GET_HDCP_REPEATER_INFO_PARAMS(NV0073_CTRL_SPECIFIC_GET_HDCP_REPEATER_INFO_PARAMS *p)
+{
+    NvU32 i0;
+
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).Cn); i0++)
+    {
+        KGSP_RPC_REVERSE((*p).Cn[i0]);
+    }
+    KGSP_RPC_REVERSE((*p).actualKsvSize);
+    KGSP_RPC_REVERSE((*p).BStatus);
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).VPrime); i0++)
+    {
+        KGSP_RPC_REVERSE((*p).VPrime[i0]);
+    }
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).MPrime); i0++)
+    {
+        KGSP_RPC_REVERSE((*p).MPrime[i0]);
+    }
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SPECIFIC_SET_HDMI_ENABLE_PARAMS(NV0073_CTRL_SPECIFIC_SET_HDMI_ENABLE_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).displayId);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SPECIFIC_CTRL_HDMI_PARAMS(NV0073_CTRL_SPECIFIC_CTRL_HDMI_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).displayId);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_SPECIFIC_SET_HDMI_AUDIO_MUTESTREAM_PARAMS(NV0073_CTRL_CMD_SPECIFIC_SET_HDMI_AUDIO_MUTESTREAM_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).displayId);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SPECIFIC_GET_HDCP_STATE_PARAMS(NV0073_CTRL_SPECIFIC_GET_HDCP_STATE_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).flags);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SPECIFIC_HDCP_CTRL_STATUS_INFO(NV0073_CTRL_SPECIFIC_HDCP_CTRL_STATUS_INFO *p)
+{
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).S);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SPECIFIC_HDCP_CTRL_PARAMS(NV0073_CTRL_SPECIFIC_HDCP_CTRL_PARAMS *p)
+{
+    NvU32 i0;
+
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).err);
+    KGSP_RPC_REVERSE((*p).cmd);
+    KGSP_RPC_REVERSE((*p).flags);
+    KGSP_RPC_REVERSE((*p).cN);
+    KGSP_RPC_REVERSE((*p).cKsv);
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).apIndex); i0++)
+    {
+        KGSP_RPC_REVERSE((*p).apIndex[i0]);
+    }
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).aN); i0++)
+    {
+        KGSP_RPC_REVERSE((*p).aN[i0]);
+    }
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).aKsv); i0++)
+    {
+        KGSP_RPC_REVERSE((*p).aKsv[i0]);
+    }
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).bStatus); i0++)
+    {
+        KGSP_RPC_REVERSE((*p).bStatus[i0]);
+    }
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).bCaps); i0++)
+    {
+        KGSP_RPC_REVERSE((*p).bCaps[i0]);
+    }
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).stStatus); i0++)
+    {
+        _kgspCtrlSwap_NV0073_CTRL_SPECIFIC_HDCP_CTRL_STATUS_INFO(&(*p).stStatus[i0]);
+    }
+    KGSP_RPC_REVERSE((*p).cS);
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).bKsv); i0++)
+    {
+        KGSP_RPC_REVERSE((*p).bKsv[i0]);
+    }
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).bKsvList); i0++)
+    {
+        KGSP_RPC_REVERSE((*p).bKsvList[i0]);
+    }
+    KGSP_RPC_REVERSE((*p).numBksvs);
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).kP); i0++)
+    {
+        KGSP_RPC_REVERSE((*p).kP[i0]);
+    }
+    KGSP_RPC_REVERSE((*p).mP);
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).dKsv); i0++)
+    {
+        KGSP_RPC_REVERSE((*p).dKsv[i0]);
+    }
+    KGSP_RPC_REVERSE((*p).streamIndex);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SPECIFIC_GET_HDCP_DIAGNOSTICS_PARAMS(NV0073_CTRL_SPECIFIC_GET_HDCP_DIAGNOSTICS_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).flags);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_GET_ACPI_DOD_DISPLAY_PORT_ATTACHMENT_PARAMS(NV0073_CTRL_GET_ACPI_DOD_DISPLAY_PORT_ATTACHMENT_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).dispPortAttachment);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SPECIFIC_ACPI_ID_MAPPING(NV0073_CTRL_SPECIFIC_ACPI_ID_MAPPING *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).acpiId);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).dodIndex);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SPECIFIC_SET_ACPI_ID_MAPPING_PARAMS(NV0073_CTRL_SPECIFIC_SET_ACPI_ID_MAPPING_PARAMS *p)
+{
+    NvU32 i0;
+
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).mapTable); i0++)
+    {
+        _kgspCtrlSwap_NV0073_CTRL_SPECIFIC_ACPI_ID_MAPPING(&(*p).mapTable[i0]);
+    }
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SPECIFIC_GET_ALL_HEAD_MASK_PARAMS(NV0073_CTRL_SPECIFIC_GET_ALL_HEAD_MASK_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).headMask);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SPECIFIC_SET_OD_PACKET_PARAMS(NV0073_CTRL_SPECIFIC_SET_OD_PACKET_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).transmitControl);
+    KGSP_RPC_REVERSE((*p).packetSize);
+    KGSP_RPC_REVERSE((*p).targetHead);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SPECIFIC_SET_OD_PACKET_CTRL_PARAMS(NV0073_CTRL_SPECIFIC_SET_OD_PACKET_CTRL_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).type);
+    KGSP_RPC_REVERSE((*p).transmitControl);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SPECIFIC_GET_PCLK_LIMIT_PARAMS(NV0073_CTRL_SPECIFIC_GET_PCLK_LIMIT_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).pclkLimit);
+    KGSP_RPC_REVERSE((*p).orPclkLimit);
+    KGSP_RPC_REVERSE((*p).vbPclkLimit);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SPECIFIC_OR_GET_INFO_PARAMS(NV0073_CTRL_SPECIFIC_OR_GET_INFO_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).index);
+    KGSP_RPC_REVERSE((*p).type);
+    KGSP_RPC_REVERSE((*p).protocol);
+    KGSP_RPC_REVERSE((*p).ditherType);
+    KGSP_RPC_REVERSE((*p).ditherAlgo);
+    KGSP_RPC_REVERSE((*p).location);
+    KGSP_RPC_REVERSE((*p).rootPortId);
+    KGSP_RPC_REVERSE((*p).dcbIndex);
+    KGSP_RPC_REVERSE((*p).vbiosAddress);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SPECIFIC_HDCP_KSVLIST_VALIDATE_PARAMS(NV0073_CTRL_SPECIFIC_HDCP_KSVLIST_VALIDATE_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SPECIFIC_HDCP_UPDATE_PARAMS(NV0073_CTRL_SPECIFIC_HDCP_UPDATE_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SPECIFIC_GET_BACKLIGHT_BRIGHTNESS_PARAMS(NV0073_CTRL_SPECIFIC_GET_BACKLIGHT_BRIGHTNESS_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).brightness);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SPECIFIC_SET_BACKLIGHT_BRIGHTNESS_PARAMS(NV0073_CTRL_SPECIFIC_SET_BACKLIGHT_BRIGHTNESS_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).brightness);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SPECIFIC_SET_HDMI_SINK_CAPS_PARAMS(NV0073_CTRL_SPECIFIC_SET_HDMI_SINK_CAPS_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).caps);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SPECIFIC_SET_MONITOR_POWER_PARAMS(NV0073_CTRL_SPECIFIC_SET_MONITOR_POWER_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).powerState);
+    KGSP_RPC_REVERSE((*p).headIdx);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SPECIFIC_SET_HDMI_FRL_LINK_CONFIG_PARAMS(NV0073_CTRL_SPECIFIC_SET_HDMI_FRL_LINK_CONFIG_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).data);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SPECIFIC_SET_HDMI_FRL_FLUSH_MODE_PARAMS(NV0073_CTRL_SPECIFIC_SET_HDMI_FRL_FLUSH_MODE_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_SPECIFIC_GET_REGIONAL_CRCS_PARAMS(NV0073_CTRL_CMD_SPECIFIC_GET_REGIONAL_CRCS_PARAMS *p)
+{
+    NvU32 i0;
+
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).regionCrcs); i0++)
+    {
+        KGSP_RPC_REVERSE((*p).regionCrcs[i0]);
+    }
+    KGSP_RPC_REVERSE((*p).reqRegionCrcMask);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SPECIFIC_APPLY_EDID_OVERRIDE_V2_PARAMS(NV0073_CTRL_SPECIFIC_APPLY_EDID_OVERRIDE_V2_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).bufferSize);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SPECIFIC_GET_HDMI_GPU_CAPS_PARAMS(NV0073_CTRL_SPECIFIC_GET_HDMI_GPU_CAPS_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).caps);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SPECIFIC_DISPLAY_CHANGE_PARAMS(NV0073_CTRL_SPECIFIC_DISPLAY_CHANGE_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).newDevices);
+    KGSP_RPC_REVERSE((*p).properties);
+    KGSP_RPC_REVERSE((*p).enable);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SPECIFIC_GET_HDMI_SCDC_DATA_PARAMS(NV0073_CTRL_SPECIFIC_GET_HDMI_SCDC_DATA_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SPECIFIC_IS_DIRECTMODE_DISPLAY_PARAMS(NV0073_CTRL_SPECIFIC_IS_DIRECTMODE_DISPLAY_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).manufacturerID);
+    KGSP_RPC_REVERSE((*p).productID);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_FRL_CAPACITY_COMPUTATION_PARAMS(NV0073_CTRL_FRL_CAPACITY_COMPUTATION_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).numLanes);
+    KGSP_RPC_REVERSE((*p).frlBitRateGbps);
+    KGSP_RPC_REVERSE((*p).pclk10KHz);
+    KGSP_RPC_REVERSE((*p).hTotal);
+    KGSP_RPC_REVERSE((*p).hActive);
+    KGSP_RPC_REVERSE((*p).bpc);
+    KGSP_RPC_REVERSE((*p).pixelPacking);
+    KGSP_RPC_REVERSE((*p).audioType);
+    KGSP_RPC_REVERSE((*p).numAudioChannels);
+    KGSP_RPC_REVERSE((*p).audioFreqKHz);
+    KGSP_RPC_REVERSE((*p).compressionInfo.bppTargetx16);
+    KGSP_RPC_REVERSE((*p).compressionInfo.hSlices);
+    KGSP_RPC_REVERSE((*p).compressionInfo.sliceWidth);
+    KGSP_RPC_REVERSE((*p).compressionInfo.dscTotalChunkKBytes);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_FRL_CAPACITY_COMPUTATION_RESULT(NV0073_CTRL_FRL_CAPACITY_COMPUTATION_RESULT *p)
+{
+    KGSP_RPC_REVERSE((*p).frlRate);
+    KGSP_RPC_REVERSE((*p).bppTargetx16);
+    KGSP_RPC_REVERSE((*p).triBytesBorrowed);
+    KGSP_RPC_REVERSE((*p).hcActiveBytes);
+    KGSP_RPC_REVERSE((*p).hcActiveTriBytes);
+    KGSP_RPC_REVERSE((*p).hcBlankTriBytes);
+    KGSP_RPC_REVERSE((*p).tBlankToTTotalX1k);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_FRL_PRE_CALC_CONFIG(NV0073_CTRL_FRL_PRE_CALC_CONFIG *p)
+{
+    KGSP_RPC_REVERSE((*p).vic);
+    KGSP_RPC_REVERSE((*p).packing);
+    KGSP_RPC_REVERSE((*p).bpc);
+    KGSP_RPC_REVERSE((*p).frlRate);
+    KGSP_RPC_REVERSE((*p).bppX16);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_IS_FRL_DSC_POSSIBLE_PARAMS(NV0073_CTRL_IS_FRL_DSC_POSSIBLE_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).maxSliceCount);
+    KGSP_RPC_REVERSE((*p).maxSliceWidth);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SPECIFIC_GET_HDMI_FRL_CAPACITY_COMPUTATION_PARAMS(NV0073_CTRL_SPECIFIC_GET_HDMI_FRL_CAPACITY_COMPUTATION_PARAMS *p)
+{
+    _kgspCtrlSwap_NV0073_CTRL_FRL_CAPACITY_COMPUTATION_PARAMS(&(*p).input);
+    _kgspCtrlSwap_NV0073_CTRL_FRL_CAPACITY_COMPUTATION_RESULT(&(*p).result);
+    _kgspCtrlSwap_NV0073_CTRL_FRL_PRE_CALC_CONFIG(&(*p).preCalc);
+    _kgspCtrlSwap_NV0073_CTRL_IS_FRL_DSC_POSSIBLE_PARAMS(&(*p).dsc);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SPECIFIC_SET_SHARED_GENERIC_PACKET_PARAMS(NV0073_CTRL_SPECIFIC_SET_SHARED_GENERIC_PACKET_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).transmitControl);
+    KGSP_RPC_REVERSE((*p).packetSize);
+    KGSP_RPC_REVERSE((*p).targetHeadIndex);
+    KGSP_RPC_REVERSE((*p).infoframeIndex);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SPECIFIC_ACQUIRE_SHARED_GENERIC_PACKET_PARAMS(NV0073_CTRL_SPECIFIC_ACQUIRE_SHARED_GENERIC_PACKET_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).targetHeadIndex);
+    KGSP_RPC_REVERSE((*p).infoframeIndex);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SPECIFIC_RELEASE_SHARED_GENERIC_PACKET_PARAMS(NV0073_CTRL_SPECIFIC_RELEASE_SHARED_GENERIC_PACKET_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).targetHeadIndex);
+    KGSP_RPC_REVERSE((*p).infoframeIndex);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SPECIFIC_DISP_I2C_READ_WRITE_PARAMS(NV0073_CTRL_SPECIFIC_DISP_I2C_READ_WRITE_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).i2cPort);
+    KGSP_RPC_REVERSE((*p).i2cSlaveAddress);
+    KGSP_RPC_REVERSE((*p).readWriteFlag);
+    KGSP_RPC_REVERSE((*p).readWriteLen);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SPECIFIC_GET_VALID_HEAD_WINDOW_ASSIGNMENT_PARAMS(NV0073_CTRL_SPECIFIC_GET_VALID_HEAD_WINDOW_ASSIGNMENT_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SPECIFIC_DEFAULT_ADAPTIVESYNC_DISPLAY_PARAMS(NV0073_CTRL_SPECIFIC_DEFAULT_ADAPTIVESYNC_DISPLAY_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).manufacturerID);
+    KGSP_RPC_REVERSE((*p).productID);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SPECIFIC_GET_DISPLAY_BRIGHTNESS_LTM_PARAMS(NV0073_CTRL_SPECIFIC_GET_DISPLAY_BRIGHTNESS_LTM_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).brightnessMilliNits);
+    KGSP_RPC_REVERSE((*p).transitionTimeMs);
+    KGSP_RPC_REVERSE((*p).ambientIlluminance);
+    KGSP_RPC_REVERSE((*p).ambientChromaticityX);
+    KGSP_RPC_REVERSE((*p).ambientChromaticityY);
+    KGSP_RPC_REVERSE((*p).contrastGain);
+    KGSP_RPC_REVERSE((*p).detailGain);
+    KGSP_RPC_REVERSE((*p).maxDisplayLuminance);
+    KGSP_RPC_REVERSE((*p).maxOutputLuminance);
+    KGSP_RPC_REVERSE((*p).luminanceScalingFactor);
+    KGSP_RPC_REVERSE((*p).hlcAdjust);
+    KGSP_RPC_REVERSE((*p).blMaxDropPerFrame);
+    KGSP_RPC_REVERSE((*p).blMaxBoostPerFrame);
+    KGSP_RPC_REVERSE((*p).blDropThreshold);
+    KGSP_RPC_REVERSE((*p).blBoostThreshold);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SPECIFIC_SET_DISPLAY_BRIGHTNESS_LTM_PARAMS(NV0073_CTRL_SPECIFIC_SET_DISPLAY_BRIGHTNESS_LTM_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).brightnessMilliNits);
+    KGSP_RPC_REVERSE((*p).transitionTimeMs);
+    KGSP_RPC_REVERSE((*p).ambientIlluminance);
+    KGSP_RPC_REVERSE((*p).ambientChromaticityX);
+    KGSP_RPC_REVERSE((*p).ambientChromaticityY);
+    KGSP_RPC_REVERSE((*p).contrastGain);
+    KGSP_RPC_REVERSE((*p).detailGain);
+    KGSP_RPC_REVERSE((*p).maxDisplayLuminance);
+    KGSP_RPC_REVERSE((*p).maxOutputLuminance);
+    KGSP_RPC_REVERSE((*p).luminanceScalingFactor);
+    KGSP_RPC_REVERSE((*p).hlcAdjust);
+    KGSP_RPC_REVERSE((*p).blMaxDropPerFrame);
+    KGSP_RPC_REVERSE((*p).blMaxBoostPerFrame);
+    KGSP_RPC_REVERSE((*p).blDropThreshold);
+    KGSP_RPC_REVERSE((*p).blBoostThreshold);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_GET_REGISTER_OFFSET_FOR_ULMB_TIMESTAMP_PARAMS(NV0073_CTRL_GET_REGISTER_OFFSET_FOR_ULMB_TIMESTAMP_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).dispRegisterBase);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SPECIFIC_HDCP_KEY_DECRYPTION_PARAMS(NV0073_CTRL_SPECIFIC_HDCP_KEY_DECRYPTION_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).flags);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_STEREO_DONGLE_SUPPORTED_PARAMS(NV0073_CTRL_STEREO_DONGLE_SUPPORTED_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).head);
+    KGSP_RPC_REVERSE((*p).support);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_STEREO_VIDEO_MODE_TIMINGS(NV0073_CTRL_STEREO_VIDEO_MODE_TIMINGS *p)
+{
+    KGSP_RPC_REVERSE((*p).PixelClock);
+    KGSP_RPC_REVERSE((*p).TotalWidth);
+    KGSP_RPC_REVERSE((*p).VisibleImageWidth);
+    KGSP_RPC_REVERSE((*p).HorizontalBlankStart);
+    KGSP_RPC_REVERSE((*p).HorizontalBlankWidth);
+    KGSP_RPC_REVERSE((*p).HorizontalSyncStart);
+    KGSP_RPC_REVERSE((*p).HorizontalSyncWidth);
+    KGSP_RPC_REVERSE((*p).TotalHeight);
+    KGSP_RPC_REVERSE((*p).VisibleImageHeight);
+    KGSP_RPC_REVERSE((*p).VerticalBlankStart);
+    KGSP_RPC_REVERSE((*p).VerticalBlankHeight);
+    KGSP_RPC_REVERSE((*p).VerticalSyncStart);
+    KGSP_RPC_REVERSE((*p).VerticalSyncHeight);
+    KGSP_RPC_REVERSE((*p).InterlacedMode);
+    KGSP_RPC_REVERSE((*p).DoubleScanMode);
+    KGSP_RPC_REVERSE((*p).MonitorVendorId);
+    KGSP_RPC_REVERSE((*p).MonitorProductId);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_STEREO_DONGLE_SET_TIMINGS_PARAMS(NV0073_CTRL_STEREO_DONGLE_SET_TIMINGS_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).head);
+    _kgspCtrlSwap_NV0073_CTRL_STEREO_VIDEO_MODE_TIMINGS(&(*p).timings);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_STEREO_DONGLE_ACTIVATE_PARAMS(NV0073_CTRL_STEREO_DONGLE_ACTIVATE_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).head);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_STEREO_DONGLE_DEACTIVATE_PARAMS(NV0073_CTRL_STEREO_DONGLE_DEACTIVATE_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).head);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SYSTEM_GET_CAPS_V2_PARAMS(NV0073_CTRL_SYSTEM_GET_CAPS_V2_PARAMS *p)
+{
+    (void)p;
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SYSTEM_GET_NUM_HEADS_PARAMS(NV0073_CTRL_SYSTEM_GET_NUM_HEADS_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).flags);
+    KGSP_RPC_REVERSE((*p).numHeads);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SYSTEM_GET_SCANLINE_PARAMS(NV0073_CTRL_SYSTEM_GET_SCANLINE_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).head);
+    KGSP_RPC_REVERSE((*p).currentScanline);
+    KGSP_RPC_REVERSE((*p).stereoEye);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SYSTEM_GET_VBLANK_COUNTER_PARAMS(NV0073_CTRL_SYSTEM_GET_VBLANK_COUNTER_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).head);
+    KGSP_RPC_REVERSE((*p).verticalBlankCounter);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SYSTEM_GET_VBLANK_ENABLE_PARAMS(NV0073_CTRL_SYSTEM_GET_VBLANK_ENABLE_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).head);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SYSTEM_GET_SUPPORTED_PARAMS(NV0073_CTRL_SYSTEM_GET_SUPPORTED_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayMask);
+    KGSP_RPC_REVERSE((*p).displayMaskDDC);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SYSTEM_GET_CONNECT_STATE_PARAMS(NV0073_CTRL_SYSTEM_GET_CONNECT_STATE_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).flags);
+    KGSP_RPC_REVERSE((*p).displayMask);
+    KGSP_RPC_REVERSE((*p).retryTimeMs);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SYSTEM_GET_SET_HOTPLUG_CONFIG_PARAMS(NV0073_CTRL_SYSTEM_GET_SET_HOTPLUG_CONFIG_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).flags);
+    KGSP_RPC_REVERSE((*p).hotplugEventMask);
+    KGSP_RPC_REVERSE((*p).hotplugPollable);
+    KGSP_RPC_REVERSE((*p).hotplugInterruptible);
+    KGSP_RPC_REVERSE((*p).hotplugAlwaysAttached);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SYSTEM_GET_HOTPLUG_STATE_PARAMS(NV0073_CTRL_SYSTEM_GET_HOTPLUG_STATE_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).flags);
+    KGSP_RPC_REVERSE((*p).hotplugAfterEdidMask);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SYSTEM_GET_HEAD_ROUTING_MAP_PARAMS(NV0073_CTRL_SYSTEM_GET_HEAD_ROUTING_MAP_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayMask);
+    KGSP_RPC_REVERSE((*p).oldDisplayMask);
+    KGSP_RPC_REVERSE((*p).oldHeadRoutingMap);
+    KGSP_RPC_REVERSE((*p).headRoutingMap);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SYSTEM_GET_ACTIVE_PARAMS(NV0073_CTRL_SYSTEM_GET_ACTIVE_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).head);
+    KGSP_RPC_REVERSE((*p).flags);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).staleSorIndex);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SYSTEM_ACPI_ID_MAP_PARAMS(NV0073_CTRL_SYSTEM_ACPI_ID_MAP_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).acpiId);
+    KGSP_RPC_REVERSE((*p).flags);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SYSTEM_GET_ACPI_ID_MAP_PARAMS(NV0073_CTRL_SYSTEM_GET_ACPI_ID_MAP_PARAMS *p)
+{
+    NvU32 i0;
+
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).acpiIdMap); i0++)
+    {
+        _kgspCtrlSwap_NV0073_CTRL_SYSTEM_ACPI_ID_MAP_PARAMS(&(*p).acpiIdMap[i0]);
+    }
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SYSTEM_GET_INTERNAL_DISPLAYS_PARAMS(NV0073_CTRL_SYSTEM_GET_INTERNAL_DISPLAYS_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).internalDisplaysMask);
+    KGSP_RPC_REVERSE((*p).availableInternalDisplaysMask);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SYSTEM_ACPI_SUBSYSTEM_ACTIVATED_PARAMS(NV0073_CTRL_SYSTEM_ACPI_SUBSYSTEM_ACTIVATED_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SYSTEM_SRM_CHUNK(NV0073_CTRL_SYSTEM_SRM_CHUNK *p)
+{
+    KGSP_RPC_REVERSE((*p).startByte);
+    KGSP_RPC_REVERSE((*p).numBytes);
+    KGSP_RPC_REVERSE((*p).totalBytes);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SYSTEM_VALIDATE_SRM_PARAMS(NV0073_CTRL_SYSTEM_VALIDATE_SRM_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    _kgspCtrlSwap_NV0073_CTRL_SYSTEM_SRM_CHUNK(&(*p).srm);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SYSTEM_GET_SRM_STATUS_PARAMS(NV0073_CTRL_SYSTEM_GET_SRM_STATUS_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).status);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SYSTEM_HDCP_REVOCATE_PARAMS(NV0073_CTRL_SYSTEM_HDCP_REVOCATE_PARAMS *p)
+{
+    _kgspCtrlSwap_NV0073_CTRL_SYSTEM_SRM_CHUNK(&(*p).srm);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SYSTEM_UPDATE_SRM_PARAMS(NV0073_CTRL_SYSTEM_UPDATE_SRM_PARAMS *p)
+{
+    _kgspCtrlSwap_NV0073_CTRL_SYSTEM_SRM_CHUNK(&(*p).srm);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SYSTEM_CONNECTOR_INFO(NV0073_CTRL_SYSTEM_CONNECTOR_INFO *p)
+{
+    KGSP_RPC_REVERSE((*p).type);
+    KGSP_RPC_REVERSE((*p).displayMask);
+    KGSP_RPC_REVERSE((*p).location);
+    KGSP_RPC_REVERSE((*p).hotplug);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SYSTEM_GET_CONNECTOR_TABLE_PARAMS(NV0073_CTRL_SYSTEM_GET_CONNECTOR_TABLE_PARAMS *p)
+{
+    NvU32 i0;
+
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).version);
+    KGSP_RPC_REVERSE((*p).platform);
+    KGSP_RPC_REVERSE((*p).connectorTableEntries);
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).connectorTable); i0++)
+    {
+        _kgspCtrlSwap_NV0073_CTRL_SYSTEM_CONNECTOR_INFO(&(*p).connectorTable[i0]);
+    }
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SYSTEM_GET_BOOT_DISPLAYS_PARAMS(NV0073_CTRL_SYSTEM_GET_BOOT_DISPLAYS_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).bootDisplayMask);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SYSTEM_VRR_DISPLAY_INFO_PARAMS(NV0073_CTRL_SYSTEM_VRR_DISPLAY_INFO_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SYSTEM_GET_HOTPLUG_UNPLUG_STATE_PARAMS(NV0073_CTRL_SYSTEM_GET_HOTPLUG_UNPLUG_STATE_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).flags);
+    KGSP_RPC_REVERSE((*p).hotPlugMask);
+    KGSP_RPC_REVERSE((*p).hotUnplugMask);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SYSTEM_CLEAR_ELV_BLOCK_PARAMS(NV0073_CTRL_SYSTEM_CLEAR_ELV_BLOCK_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SYSTEM_ARM_LIGHTWEIGHT_SUPERVISOR_PARAMS(NV0073_CTRL_SYSTEM_ARM_LIGHTWEIGHT_SUPERVISOR_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).vActive);
+    KGSP_RPC_REVERSE((*p).vfp);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SYSTEM_CONFIG_VRR_PSTATE_SWITCH_PARAMS(NV0073_CTRL_SYSTEM_CONFIG_VRR_PSTATE_SWITCH_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).maxVblankExtension);
+    KGSP_RPC_REVERSE((*p).internalVRRHeadVblankStretch);
+    KGSP_RPC_REVERSE((*p).minVblankExtension);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_SYSTEM_QUERY_DISPLAY_IDS_WITH_MUX_PARAMS(NV0073_CTRL_CMD_SYSTEM_QUERY_DISPLAY_IDS_WITH_MUX_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).muxDisplayMask);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SYSTEM_ALLOCATE_DISPLAY_BANDWIDTH_PARAMS(NV0073_CTRL_SYSTEM_ALLOCATE_DISPLAY_BANDWIDTH_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).averageBandwidthKBPS);
+    KGSP_RPC_REVERSE((*p).floorBandwidthKBPS);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SYSTEM_INTERNAL_ALLOCATE_DISPLAY_BANDWIDTH_PARAMS(NV0073_CTRL_SYSTEM_INTERNAL_ALLOCATE_DISPLAY_BANDWIDTH_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).averageBandwidthKBPS);
+    KGSP_RPC_REVERSE((*p).floorBandwidthKBPS);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SYSTEM_GET_HOTPLUG_EVENT_CONFIG_PARAMS(NV0073_CTRL_SYSTEM_GET_HOTPLUG_EVENT_CONFIG_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).deviceMapFilter);
+    KGSP_RPC_REVERSE((*p).hotPluginSense);
+    KGSP_RPC_REVERSE((*p).hotUnplugSense);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SYSTEM_SET_HOTPLUG_EVENT_CONFIG_PARAMS(NV0073_CTRL_SYSTEM_SET_HOTPLUG_EVENT_CONFIG_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).deviceMapFilter);
+    KGSP_RPC_REVERSE((*p).hotPluginSense);
+    KGSP_RPC_REVERSE((*p).hotUnplugSense);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_SYSTEM_RECORD_CHANNEL_REGS_PARAMS(NV0073_CTRL_CMD_SYSTEM_RECORD_CHANNEL_REGS_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).headMask);
+    KGSP_RPC_REVERSE((*p).windowMask);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_SYSTEM_CHECK_SIDEBAND_I2C_SUPPORT_PARAMS(NV0073_CTRL_CMD_SYSTEM_CHECK_SIDEBAND_I2C_SUPPORT_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_SYSTEM_CHECK_SIDEBAND_SR_SUPPORT_PARAMS(NV0073_CTRL_CMD_SYSTEM_CHECK_SIDEBAND_SR_SUPPORT_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SHARED_MEMDESC_INFO(NV0073_CTRL_SHARED_MEMDESC_INFO *p)
+{
+    KGSP_RPC_REVERSE((*p).base);
+    KGSP_RPC_REVERSE((*p).size);
+    KGSP_RPC_REVERSE((*p).alignment);
+    KGSP_RPC_REVERSE((*p).addressSpace);
+    KGSP_RPC_REVERSE((*p).cpuCacheAttrib);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_SYSTEM_MAP_SHARED_DATA_PARAMS(NV0073_CTRL_CMD_SYSTEM_MAP_SHARED_DATA_PARAMS *p)
+{
+    _kgspCtrlSwap_NV0073_CTRL_SHARED_MEMDESC_INFO(&(*p).memDescInfo);
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_SYSTEM_GET_LOADV_COUNTER_INFO_PARAMS(NV0073_CTRL_CMD_SYSTEM_GET_LOADV_COUNTER_INFO_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).head);
+    KGSP_RPC_REVERSE((*p).counterValue);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DISP_LPWR_FEATURE(NV0073_CTRL_DISP_LPWR_FEATURE *p)
+{
+    KGSP_RPC_REVERSE((*p).featureId);
+    KGSP_RPC_REVERSE((*p).subfeatureId);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DISP_LPWR_PARAMETER(NV0073_CTRL_DISP_LPWR_PARAMETER *p)
+{
+    KGSP_RPC_REVERSE((*p).paramId);
+    KGSP_RPC_REVERSE((*p).flag);
+    KGSP_RPC_REVERSE((*p).val);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DISP_LPWR_FEATURE_PARAMETER(NV0073_CTRL_DISP_LPWR_FEATURE_PARAMETER *p)
+{
+    _kgspCtrlSwap_NV0073_CTRL_DISP_LPWR_FEATURE(&(*p).feature);
+    _kgspCtrlSwap_NV0073_CTRL_DISP_LPWR_PARAMETER(&(*p).param);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DISP_LPWR_FEATURE_PARAMETER_GET_PARAMS(NV0073_CTRL_DISP_LPWR_FEATURE_PARAMETER_GET_PARAMS *p)
+{
+    NvU32 i0;
+
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).listSize);
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).list); i0++)
+    {
+        _kgspCtrlSwap_NV0073_CTRL_DISP_LPWR_FEATURE_PARAMETER(&(*p).list[i0]);
+    }
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_DISP_LPWR_FEATURE_PARAMETER_SET_PARAMS(NV0073_CTRL_DISP_LPWR_FEATURE_PARAMETER_SET_PARAMS *p)
+{
+    NvU32 i0;
+
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).listSize);
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).list); i0++)
+    {
+        _kgspCtrlSwap_NV0073_CTRL_DISP_LPWR_FEATURE_PARAMETER(&(*p).list[i0]);
+    }
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_SYSTEM_NOTIFY_DRR_MSCG_WAR_PARAMS(NV0073_CTRL_CMD_SYSTEM_NOTIFY_DRR_MSCG_WAR_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).presentDurationUs);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_CMD_SYSTEM_GET_CRASH_LOCK_COUNTER_INFO_PARAMS(NV0073_CTRL_CMD_SYSTEM_GET_CRASH_LOCK_COUNTER_INFO_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).head);
+    KGSP_RPC_REVERSE((*p).counterValueV);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SYSTEM_GSYNC_SET_EXACT_REFRESH_RATE_PARAMS(NV0073_CTRL_SYSTEM_GSYNC_SET_EXACT_REFRESH_RATE_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).refreshRateNumerator);
+    KGSP_RPC_REVERSE((*p).refreshRateDenominator);
+    KGSP_RPC_REVERSE((*p).hTotal);
+    KGSP_RPC_REVERSE((*p).vTotal);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SYSTEM_GSYNC_GET_EXACT_PIXEL_CLOCK_PARAMS(NV0073_CTRL_SYSTEM_GSYNC_GET_EXACT_PIXEL_CLOCK_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).displayId);
+    KGSP_RPC_REVERSE((*p).pixelClockNumerator);
+    KGSP_RPC_REVERSE((*p).pixelClockDenominator);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SYSTEM_GET_RASTER_FRAME_LINE_PIXEL_PARAMS(NV0073_CTRL_SYSTEM_GET_RASTER_FRAME_LINE_PIXEL_PARAMS *p)
+{
+    NvU32 i0;
+
+    KGSP_RPC_REVERSE((*p).displayCount);
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).displays); i0++)
+    {
+        KGSP_RPC_REVERSE((*p).displays[i0].displayId);
+        KGSP_RPC_REVERSE((*p).displays[i0].timestampBeginning);
+        KGSP_RPC_REVERSE((*p).displays[i0].timestampEnd);
+        KGSP_RPC_REVERSE((*p).displays[i0].frame);
+        KGSP_RPC_REVERSE((*p).displays[i0].line);
+        KGSP_RPC_REVERSE((*p).displays[i0].pixel);
+    }
+    KGSP_RPC_REVERSE((*p).timestampFrequency);
+}
+
+static void
+_kgspCtrlSwap_NV0073_CTRL_SYSTEM_QUERY_UEFI_DISPLAY_BANDWIDTH_PARAMS(NV0073_CTRL_SYSTEM_QUERY_UEFI_DISPLAY_BANDWIDTH_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).isoBandwidthKBPS);
+    KGSP_RPC_REVERSE((*p).floorBandwidthKBPS);
+}
+
 /* NV_TRUE: command known and buffer large enough; params converted. */
 static NvBool
 _kgspCtrlSwapParams(NvU32 cmd, NvU8 *pParams, NvU32 paramsSize)
 {
     switch (cmd)
     {
+        case 0x00730101: /* NV0073_CTRL_CMD_SYSTEM_GET_CAPS_V2 */
+            if (paramsSize < sizeof(NV0073_CTRL_SYSTEM_GET_CAPS_V2_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SYSTEM_GET_CAPS_V2_PARAMS((NV0073_CTRL_SYSTEM_GET_CAPS_V2_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730102: /* NV0073_CTRL_CMD_SYSTEM_GET_NUM_HEADS */
+            if (paramsSize < sizeof(NV0073_CTRL_SYSTEM_GET_NUM_HEADS_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SYSTEM_GET_NUM_HEADS_PARAMS((NV0073_CTRL_SYSTEM_GET_NUM_HEADS_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730104: /* NV0073_CTRL_CMD_SYSTEM_GET_SCANLINE */
+            if (paramsSize < sizeof(NV0073_CTRL_SYSTEM_GET_SCANLINE_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SYSTEM_GET_SCANLINE_PARAMS((NV0073_CTRL_SYSTEM_GET_SCANLINE_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730105: /* NV0073_CTRL_CMD_SYSTEM_GET_VBLANK_COUNTER */
+            if (paramsSize < sizeof(NV0073_CTRL_SYSTEM_GET_VBLANK_COUNTER_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SYSTEM_GET_VBLANK_COUNTER_PARAMS((NV0073_CTRL_SYSTEM_GET_VBLANK_COUNTER_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730106: /* NV0073_CTRL_CMD_SYSTEM_GET_VBLANK_ENABLE */
+            if (paramsSize < sizeof(NV0073_CTRL_SYSTEM_GET_VBLANK_ENABLE_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SYSTEM_GET_VBLANK_ENABLE_PARAMS((NV0073_CTRL_SYSTEM_GET_VBLANK_ENABLE_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730107: /* NV0073_CTRL_CMD_SYSTEM_GET_SUPPORTED */
+            if (paramsSize < sizeof(NV0073_CTRL_SYSTEM_GET_SUPPORTED_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SYSTEM_GET_SUPPORTED_PARAMS((NV0073_CTRL_SYSTEM_GET_SUPPORTED_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730108: /* NV0073_CTRL_CMD_SYSTEM_GET_CONNECT_STATE */
+            if (paramsSize < sizeof(NV0073_CTRL_SYSTEM_GET_CONNECT_STATE_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SYSTEM_GET_CONNECT_STATE_PARAMS((NV0073_CTRL_SYSTEM_GET_CONNECT_STATE_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730109: /* NV0073_CTRL_CMD_SYSTEM_GET_HOTPLUG_CONFIG */
+            if (paramsSize < sizeof(NV0073_CTRL_SYSTEM_GET_SET_HOTPLUG_CONFIG_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SYSTEM_GET_SET_HOTPLUG_CONFIG_PARAMS((NV0073_CTRL_SYSTEM_GET_SET_HOTPLUG_CONFIG_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x0073010a: /* NV0073_CTRL_CMD_SYSTEM_GET_HOTPLUG_STATE */
+            if (paramsSize < sizeof(NV0073_CTRL_SYSTEM_GET_HOTPLUG_STATE_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SYSTEM_GET_HOTPLUG_STATE_PARAMS((NV0073_CTRL_SYSTEM_GET_HOTPLUG_STATE_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x0073010b: /* NV0073_CTRL_CMD_SYSTEM_GET_HEAD_ROUTING_MAP */
+            if (paramsSize < sizeof(NV0073_CTRL_SYSTEM_GET_HEAD_ROUTING_MAP_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SYSTEM_GET_HEAD_ROUTING_MAP_PARAMS((NV0073_CTRL_SYSTEM_GET_HEAD_ROUTING_MAP_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x0073010c: /* NV0073_CTRL_CMD_SYSTEM_GET_ACTIVE */
+            if (paramsSize < sizeof(NV0073_CTRL_SYSTEM_GET_ACTIVE_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SYSTEM_GET_ACTIVE_PARAMS((NV0073_CTRL_SYSTEM_GET_ACTIVE_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730115: /* NV0073_CTRL_CMD_SYSTEM_GET_ACPI_ID_MAP */
+            if (paramsSize < sizeof(NV0073_CTRL_SYSTEM_GET_ACPI_ID_MAP_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SYSTEM_GET_ACPI_ID_MAP_PARAMS((NV0073_CTRL_SYSTEM_GET_ACPI_ID_MAP_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730116: /* NV0073_CTRL_CMD_SYSTEM_GET_INTERNAL_DISPLAYS */
+            if (paramsSize < sizeof(NV0073_CTRL_SYSTEM_GET_INTERNAL_DISPLAYS_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SYSTEM_GET_INTERNAL_DISPLAYS_PARAMS((NV0073_CTRL_SYSTEM_GET_INTERNAL_DISPLAYS_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730117: /* NV0073_CTRL_CMD_SYSTEM_ACPI_SUBSYSTEM_ACTIVATED */
+            if (paramsSize < sizeof(NV0073_CTRL_SYSTEM_ACPI_SUBSYSTEM_ACTIVATED_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SYSTEM_ACPI_SUBSYSTEM_ACTIVATED_PARAMS((NV0073_CTRL_SYSTEM_ACPI_SUBSYSTEM_ACTIVATED_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730118: /* NV0073_CTRL_CMD_SYSTEM_VALIDATE_SRM */
+            if (paramsSize < sizeof(NV0073_CTRL_SYSTEM_VALIDATE_SRM_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SYSTEM_VALIDATE_SRM_PARAMS((NV0073_CTRL_SYSTEM_VALIDATE_SRM_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730119: /* NV0073_CTRL_CMD_SYSTEM_GET_SRM_STATUS */
+            if (paramsSize < sizeof(NV0073_CTRL_SYSTEM_GET_SRM_STATUS_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SYSTEM_GET_SRM_STATUS_PARAMS((NV0073_CTRL_SYSTEM_GET_SRM_STATUS_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x0073011b: /* NV0073_CTRL_CMD_SYSTEM_HDCP_REVOCATION_CHECK */
+            if (paramsSize < sizeof(NV0073_CTRL_SYSTEM_HDCP_REVOCATE_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SYSTEM_HDCP_REVOCATE_PARAMS((NV0073_CTRL_SYSTEM_HDCP_REVOCATE_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x0073011c: /* NV0073_CTRL_CMD_SYSTEM_UPDATE_SRM */
+            if (paramsSize < sizeof(NV0073_CTRL_SYSTEM_UPDATE_SRM_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SYSTEM_UPDATE_SRM_PARAMS((NV0073_CTRL_SYSTEM_UPDATE_SRM_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x0073011d: /* NV0073_CTRL_CMD_SYSTEM_GET_CONNECTOR_TABLE */
+            if (paramsSize < sizeof(NV0073_CTRL_SYSTEM_GET_CONNECTOR_TABLE_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SYSTEM_GET_CONNECTOR_TABLE_PARAMS((NV0073_CTRL_SYSTEM_GET_CONNECTOR_TABLE_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x0073011e: /* NV0073_CTRL_CMD_SYSTEM_GET_BOOT_DISPLAYS */
+            if (paramsSize < sizeof(NV0073_CTRL_SYSTEM_GET_BOOT_DISPLAYS_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SYSTEM_GET_BOOT_DISPLAYS_PARAMS((NV0073_CTRL_SYSTEM_GET_BOOT_DISPLAYS_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x0073012c: /* NV0073_CTRL_CMD_SYSTEM_VRR_DISPLAY_INFO */
+            if (paramsSize < sizeof(NV0073_CTRL_SYSTEM_VRR_DISPLAY_INFO_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SYSTEM_VRR_DISPLAY_INFO_PARAMS((NV0073_CTRL_SYSTEM_VRR_DISPLAY_INFO_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x0073012d: /* NV0073_CTRL_CMD_SYSTEM_GET_HOTPLUG_UNPLUG_STATE */
+            if (paramsSize < sizeof(NV0073_CTRL_SYSTEM_GET_HOTPLUG_UNPLUG_STATE_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SYSTEM_GET_HOTPLUG_UNPLUG_STATE_PARAMS((NV0073_CTRL_SYSTEM_GET_HOTPLUG_UNPLUG_STATE_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x0073012e: /* NV0073_CTRL_CMD_SYSTEM_CLEAR_ELV_BLOCK */
+            if (paramsSize < sizeof(NV0073_CTRL_SYSTEM_CLEAR_ELV_BLOCK_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SYSTEM_CLEAR_ELV_BLOCK_PARAMS((NV0073_CTRL_SYSTEM_CLEAR_ELV_BLOCK_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x0073012f: /* NV0073_CTRL_CMD_SYSTEM_ARM_LIGHTWEIGHT_SUPERVISOR */
+            if (paramsSize < sizeof(NV0073_CTRL_SYSTEM_ARM_LIGHTWEIGHT_SUPERVISOR_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SYSTEM_ARM_LIGHTWEIGHT_SUPERVISOR_PARAMS((NV0073_CTRL_SYSTEM_ARM_LIGHTWEIGHT_SUPERVISOR_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730134: /* NV0073_CTRL_CMD_SYSTEM_CONFIG_VRR_PSTATE_SWITCH */
+            if (paramsSize < sizeof(NV0073_CTRL_SYSTEM_CONFIG_VRR_PSTATE_SWITCH_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SYSTEM_CONFIG_VRR_PSTATE_SWITCH_PARAMS((NV0073_CTRL_SYSTEM_CONFIG_VRR_PSTATE_SWITCH_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x0073013d: /* NV0073_CTRL_CMD_SYSTEM_QUERY_DISPLAY_IDS_WITH_MUX */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_SYSTEM_QUERY_DISPLAY_IDS_WITH_MUX_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_SYSTEM_QUERY_DISPLAY_IDS_WITH_MUX_PARAMS((NV0073_CTRL_CMD_SYSTEM_QUERY_DISPLAY_IDS_WITH_MUX_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730143: /* NV0073_CTRL_CMD_SYSTEM_ALLOCATE_DISPLAY_BANDWIDTH */
+            if (paramsSize < sizeof(NV0073_CTRL_SYSTEM_ALLOCATE_DISPLAY_BANDWIDTH_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SYSTEM_ALLOCATE_DISPLAY_BANDWIDTH_PARAMS((NV0073_CTRL_SYSTEM_ALLOCATE_DISPLAY_BANDWIDTH_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730144: /* NV0073_CTRL_CMD_SYSTEM_GET_HOTPLUG_EVENT_CONFIG */
+            if (paramsSize < sizeof(NV0073_CTRL_SYSTEM_GET_HOTPLUG_EVENT_CONFIG_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SYSTEM_GET_HOTPLUG_EVENT_CONFIG_PARAMS((NV0073_CTRL_SYSTEM_GET_HOTPLUG_EVENT_CONFIG_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730145: /* NV0073_CTRL_CMD_SYSTEM_SET_HOTPLUG_EVENT_CONFIG */
+            if (paramsSize < sizeof(NV0073_CTRL_SYSTEM_SET_HOTPLUG_EVENT_CONFIG_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SYSTEM_SET_HOTPLUG_EVENT_CONFIG_PARAMS((NV0073_CTRL_SYSTEM_SET_HOTPLUG_EVENT_CONFIG_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x0073014a: /* NV0073_CTRL_CMD_SYSTEM_RECORD_CHANNEL_REGS */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_SYSTEM_RECORD_CHANNEL_REGS_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_SYSTEM_RECORD_CHANNEL_REGS_PARAMS((NV0073_CTRL_CMD_SYSTEM_RECORD_CHANNEL_REGS_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x0073014b: /* NV0073_CTRL_CMD_SYSTEM_CHECK_SIDEBAND_I2C_SUPPORT */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_SYSTEM_CHECK_SIDEBAND_I2C_SUPPORT_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_SYSTEM_CHECK_SIDEBAND_I2C_SUPPORT_PARAMS((NV0073_CTRL_CMD_SYSTEM_CHECK_SIDEBAND_I2C_SUPPORT_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x0073014c: /* NV0073_CTRL_CMD_SYSTEM_CHECK_SIDEBAND_SR_SUPPORT */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_SYSTEM_CHECK_SIDEBAND_SR_SUPPORT_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_SYSTEM_CHECK_SIDEBAND_SR_SUPPORT_PARAMS((NV0073_CTRL_CMD_SYSTEM_CHECK_SIDEBAND_SR_SUPPORT_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730151: /* NV0073_CTRL_CMD_SYSTEM_MAP_SHARED_DATA */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_SYSTEM_MAP_SHARED_DATA_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_SYSTEM_MAP_SHARED_DATA_PARAMS((NV0073_CTRL_CMD_SYSTEM_MAP_SHARED_DATA_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730154: /* NV0073_CTRL_CMD_SYSTEM_GET_LOADV_COUNTER_INFO */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_SYSTEM_GET_LOADV_COUNTER_INFO_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_SYSTEM_GET_LOADV_COUNTER_INFO_PARAMS((NV0073_CTRL_CMD_SYSTEM_GET_LOADV_COUNTER_INFO_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730155: /* NV0073_CTRL_CMD_DISP_LPWR_FEATURE_PARAMETER_GET */
+            if (paramsSize < sizeof(NV0073_CTRL_DISP_LPWR_FEATURE_PARAMETER_GET_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_DISP_LPWR_FEATURE_PARAMETER_GET_PARAMS((NV0073_CTRL_DISP_LPWR_FEATURE_PARAMETER_GET_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730156: /* NV0073_CTRL_CMD_DISP_LPWR_FEATURE_PARAMETER_SET */
+            if (paramsSize < sizeof(NV0073_CTRL_DISP_LPWR_FEATURE_PARAMETER_SET_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_DISP_LPWR_FEATURE_PARAMETER_SET_PARAMS((NV0073_CTRL_DISP_LPWR_FEATURE_PARAMETER_SET_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730157: /* NV0073_CTRL_CMD_SYSTEM_INTERNAL_ALLOCATE_DISPLAY_BANDWIDTH */
+            if (paramsSize < sizeof(NV0073_CTRL_SYSTEM_INTERNAL_ALLOCATE_DISPLAY_BANDWIDTH_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SYSTEM_INTERNAL_ALLOCATE_DISPLAY_BANDWIDTH_PARAMS((NV0073_CTRL_SYSTEM_INTERNAL_ALLOCATE_DISPLAY_BANDWIDTH_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730159: /* NV0073_CTRL_CMD_SYSTEM_NOTIFY_DRR_MSCG_WAR */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_SYSTEM_NOTIFY_DRR_MSCG_WAR_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_SYSTEM_NOTIFY_DRR_MSCG_WAR_PARAMS((NV0073_CTRL_CMD_SYSTEM_NOTIFY_DRR_MSCG_WAR_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730160: /* NV0073_CTRL_CMD_SYSTEM_GET_CRASH_LOCK_COUNTER_INFO */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_SYSTEM_GET_CRASH_LOCK_COUNTER_INFO_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_SYSTEM_GET_CRASH_LOCK_COUNTER_INFO_PARAMS((NV0073_CTRL_CMD_SYSTEM_GET_CRASH_LOCK_COUNTER_INFO_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730161: /* NV0073_CTRL_CMD_SYSTEM_QUERY_UEFI_DISPLAY_BANDWIDTH */
+            if (paramsSize < sizeof(NV0073_CTRL_SYSTEM_QUERY_UEFI_DISPLAY_BANDWIDTH_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SYSTEM_QUERY_UEFI_DISPLAY_BANDWIDTH_PARAMS((NV0073_CTRL_SYSTEM_QUERY_UEFI_DISPLAY_BANDWIDTH_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x007301a4: /* NV0073_CTRL_CMD_SYSTEM_GSYNC_SET_EXACT_REFRESH_RATE */
+            if (paramsSize < sizeof(NV0073_CTRL_SYSTEM_GSYNC_SET_EXACT_REFRESH_RATE_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SYSTEM_GSYNC_SET_EXACT_REFRESH_RATE_PARAMS((NV0073_CTRL_SYSTEM_GSYNC_SET_EXACT_REFRESH_RATE_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x007301a5: /* NV0073_CTRL_CMD_SYSTEM_GET_RASTER_FRAME_LINE_PIXEL */
+            if (paramsSize < sizeof(NV0073_CTRL_SYSTEM_GET_RASTER_FRAME_LINE_PIXEL_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SYSTEM_GET_RASTER_FRAME_LINE_PIXEL_PARAMS((NV0073_CTRL_SYSTEM_GET_RASTER_FRAME_LINE_PIXEL_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x007301a6: /* NV0073_CTRL_CMD_SYSTEM_GSYNC_GET_EXACT_PIXEL_CLOCK */
+            if (paramsSize < sizeof(NV0073_CTRL_SYSTEM_GSYNC_GET_EXACT_PIXEL_CLOCK_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SYSTEM_GSYNC_GET_EXACT_PIXEL_CLOCK_PARAMS((NV0073_CTRL_SYSTEM_GSYNC_GET_EXACT_PIXEL_CLOCK_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730211: /* NV0073_CTRL_CMD_SPECIFIC_GET_I2C_PORTID */
+            if (paramsSize < sizeof(NV0073_CTRL_SPECIFIC_GET_I2C_PORTID_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SPECIFIC_GET_I2C_PORTID_PARAMS((NV0073_CTRL_SPECIFIC_GET_I2C_PORTID_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730240: /* NV0073_CTRL_CMD_SPECIFIC_GET_TYPE */
+            if (paramsSize < sizeof(NV0073_CTRL_SPECIFIC_GET_TYPE_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SPECIFIC_GET_TYPE_PARAMS((NV0073_CTRL_SPECIFIC_GET_TYPE_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730243: /* NV0073_CTRL_CMD_SPECIFIC_FAKE_DEVICE */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_SPECIFIC_FAKE_DEVICE_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_SPECIFIC_FAKE_DEVICE_PARAMS((NV0073_CTRL_CMD_SPECIFIC_FAKE_DEVICE_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730245: /* NV0073_CTRL_CMD_SPECIFIC_GET_EDID_V2 */
+            if (paramsSize < sizeof(NV0073_CTRL_SPECIFIC_GET_EDID_V2_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SPECIFIC_GET_EDID_V2_PARAMS((NV0073_CTRL_SPECIFIC_GET_EDID_V2_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730246: /* NV0073_CTRL_CMD_SPECIFIC_SET_EDID_V2 */
+            if (paramsSize < sizeof(NV0073_CTRL_SPECIFIC_SET_EDID_V2_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SPECIFIC_SET_EDID_V2_PARAMS((NV0073_CTRL_SPECIFIC_SET_EDID_V2_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730250: /* NV0073_CTRL_CMD_SPECIFIC_GET_CONNECTOR_DATA */
+            if (paramsSize < sizeof(NV0073_CTRL_SPECIFIC_GET_CONNECTOR_DATA_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SPECIFIC_GET_CONNECTOR_DATA_PARAMS((NV0073_CTRL_SPECIFIC_GET_CONNECTOR_DATA_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730260: /* NV0073_CTRL_CMD_SPECIFIC_GET_HDCP_REPEATER_INFO */
+            if (paramsSize < sizeof(NV0073_CTRL_SPECIFIC_GET_HDCP_REPEATER_INFO_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SPECIFIC_GET_HDCP_REPEATER_INFO_PARAMS((NV0073_CTRL_SPECIFIC_GET_HDCP_REPEATER_INFO_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730273: /* NV0073_CTRL_CMD_SPECIFIC_SET_HDMI_ENABLE */
+            if (paramsSize < sizeof(NV0073_CTRL_SPECIFIC_SET_HDMI_ENABLE_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SPECIFIC_SET_HDMI_ENABLE_PARAMS((NV0073_CTRL_SPECIFIC_SET_HDMI_ENABLE_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730274: /* NV0073_CTRL_CMD_SPECIFIC_CTRL_HDMI */
+            if (paramsSize < sizeof(NV0073_CTRL_SPECIFIC_CTRL_HDMI_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SPECIFIC_CTRL_HDMI_PARAMS((NV0073_CTRL_SPECIFIC_CTRL_HDMI_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730275: /* NV0073_CTRL_CMD_SPECIFIC_SET_HDMI_AUDIO_MUTESTREAM */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_SPECIFIC_SET_HDMI_AUDIO_MUTESTREAM_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_SPECIFIC_SET_HDMI_AUDIO_MUTESTREAM_PARAMS((NV0073_CTRL_CMD_SPECIFIC_SET_HDMI_AUDIO_MUTESTREAM_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730280: /* NV0073_CTRL_CMD_SPECIFIC_GET_HDCP_STATE */
+            if (paramsSize < sizeof(NV0073_CTRL_SPECIFIC_GET_HDCP_STATE_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SPECIFIC_GET_HDCP_STATE_PARAMS((NV0073_CTRL_SPECIFIC_GET_HDCP_STATE_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730281: /* NV0073_CTRL_CMD_SPECIFIC_GET_HDCP_DIAGNOSTICS */
+            if (paramsSize < sizeof(NV0073_CTRL_SPECIFIC_GET_HDCP_DIAGNOSTICS_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SPECIFIC_GET_HDCP_DIAGNOSTICS_PARAMS((NV0073_CTRL_SPECIFIC_GET_HDCP_DIAGNOSTICS_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730282: /* NV0073_CTRL_CMD_SPECIFIC_HDCP_CTRL */
+            if (paramsSize < sizeof(NV0073_CTRL_SPECIFIC_HDCP_CTRL_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SPECIFIC_HDCP_CTRL_PARAMS((NV0073_CTRL_SPECIFIC_HDCP_CTRL_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730284: /* NV0073_CTRL_CMD_SPECIFIC_SET_ACPI_ID_MAPPING */
+            if (paramsSize < sizeof(NV0073_CTRL_SPECIFIC_SET_ACPI_ID_MAPPING_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SPECIFIC_SET_ACPI_ID_MAPPING_PARAMS((NV0073_CTRL_SPECIFIC_SET_ACPI_ID_MAPPING_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730285: /* NV0073_CTRL_CMD_SPECIFIC_GET_ACPI_DOD_DISPLAY_PORT_ATTACHMENT */
+            if (paramsSize < sizeof(NV0073_CTRL_GET_ACPI_DOD_DISPLAY_PORT_ATTACHMENT_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_GET_ACPI_DOD_DISPLAY_PORT_ATTACHMENT_PARAMS((NV0073_CTRL_GET_ACPI_DOD_DISPLAY_PORT_ATTACHMENT_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730287: /* NV0073_CTRL_CMD_SPECIFIC_GET_ALL_HEAD_MASK */
+            if (paramsSize < sizeof(NV0073_CTRL_SPECIFIC_GET_ALL_HEAD_MASK_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SPECIFIC_GET_ALL_HEAD_MASK_PARAMS((NV0073_CTRL_SPECIFIC_GET_ALL_HEAD_MASK_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730288: /* NV0073_CTRL_CMD_SPECIFIC_SET_OD_PACKET */
+            if (paramsSize < sizeof(NV0073_CTRL_SPECIFIC_SET_OD_PACKET_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SPECIFIC_SET_OD_PACKET_PARAMS((NV0073_CTRL_SPECIFIC_SET_OD_PACKET_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730289: /* NV0073_CTRL_CMD_SPECIFIC_SET_OD_PACKET_CTRL */
+            if (paramsSize < sizeof(NV0073_CTRL_SPECIFIC_SET_OD_PACKET_CTRL_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SPECIFIC_SET_OD_PACKET_CTRL_PARAMS((NV0073_CTRL_SPECIFIC_SET_OD_PACKET_CTRL_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x0073028a: /* NV0073_CTRL_CMD_SPECIFIC_GET_PCLK_LIMIT */
+            if (paramsSize < sizeof(NV0073_CTRL_SPECIFIC_GET_PCLK_LIMIT_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SPECIFIC_GET_PCLK_LIMIT_PARAMS((NV0073_CTRL_SPECIFIC_GET_PCLK_LIMIT_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x0073028b: /* NV0073_CTRL_CMD_SPECIFIC_OR_GET_INFO */
+            if (paramsSize < sizeof(NV0073_CTRL_SPECIFIC_OR_GET_INFO_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SPECIFIC_OR_GET_INFO_PARAMS((NV0073_CTRL_SPECIFIC_OR_GET_INFO_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x0073028d: /* NV0073_CTRL_CMD_SPECIFIC_HDCP_KSVLIST_VALIDATE */
+            if (paramsSize < sizeof(NV0073_CTRL_SPECIFIC_HDCP_KSVLIST_VALIDATE_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SPECIFIC_HDCP_KSVLIST_VALIDATE_PARAMS((NV0073_CTRL_SPECIFIC_HDCP_KSVLIST_VALIDATE_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x0073028e: /* NV0073_CTRL_CMD_SPECIFIC_HDCP_UPDATE */
+            if (paramsSize < sizeof(NV0073_CTRL_SPECIFIC_HDCP_UPDATE_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SPECIFIC_HDCP_UPDATE_PARAMS((NV0073_CTRL_SPECIFIC_HDCP_UPDATE_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730291: /* NV0073_CTRL_CMD_SPECIFIC_GET_BACKLIGHT_BRIGHTNESS */
+            if (paramsSize < sizeof(NV0073_CTRL_SPECIFIC_GET_BACKLIGHT_BRIGHTNESS_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SPECIFIC_GET_BACKLIGHT_BRIGHTNESS_PARAMS((NV0073_CTRL_SPECIFIC_GET_BACKLIGHT_BRIGHTNESS_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730292: /* NV0073_CTRL_CMD_SPECIFIC_SET_BACKLIGHT_BRIGHTNESS */
+            if (paramsSize < sizeof(NV0073_CTRL_SPECIFIC_SET_BACKLIGHT_BRIGHTNESS_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SPECIFIC_SET_BACKLIGHT_BRIGHTNESS_PARAMS((NV0073_CTRL_SPECIFIC_SET_BACKLIGHT_BRIGHTNESS_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730293: /* NV0073_CTRL_CMD_SPECIFIC_SET_HDMI_SINK_CAPS */
+            if (paramsSize < sizeof(NV0073_CTRL_SPECIFIC_SET_HDMI_SINK_CAPS_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SPECIFIC_SET_HDMI_SINK_CAPS_PARAMS((NV0073_CTRL_SPECIFIC_SET_HDMI_SINK_CAPS_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730295: /* NV0073_CTRL_CMD_SPECIFIC_SET_MONITOR_POWER */
+            if (paramsSize < sizeof(NV0073_CTRL_SPECIFIC_SET_MONITOR_POWER_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SPECIFIC_SET_MONITOR_POWER_PARAMS((NV0073_CTRL_SPECIFIC_SET_MONITOR_POWER_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x0073029a: /* NV0073_CTRL_CMD_SPECIFIC_SET_HDMI_FRL_CONFIG */
+            if (paramsSize < sizeof(NV0073_CTRL_SPECIFIC_SET_HDMI_FRL_LINK_CONFIG_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SPECIFIC_SET_HDMI_FRL_LINK_CONFIG_PARAMS((NV0073_CTRL_SPECIFIC_SET_HDMI_FRL_LINK_CONFIG_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x0073029b: /* NV0073_CTRL_CMD_SPECIFIC_SET_HDMI_FRL_FLUSH_MODE */
+            if (paramsSize < sizeof(NV0073_CTRL_SPECIFIC_SET_HDMI_FRL_FLUSH_MODE_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SPECIFIC_SET_HDMI_FRL_FLUSH_MODE_PARAMS((NV0073_CTRL_SPECIFIC_SET_HDMI_FRL_FLUSH_MODE_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x007302a0: /* NV0073_CTRL_CMD_SPECIFIC_GET_REGIONAL_CRCS */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_SPECIFIC_GET_REGIONAL_CRCS_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_SPECIFIC_GET_REGIONAL_CRCS_PARAMS((NV0073_CTRL_CMD_SPECIFIC_GET_REGIONAL_CRCS_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x007302a1: /* NV0073_CTRL_CMD_SPECIFIC_APPLY_EDID_OVERRIDE_V2 */
+            if (paramsSize < sizeof(NV0073_CTRL_SPECIFIC_APPLY_EDID_OVERRIDE_V2_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SPECIFIC_APPLY_EDID_OVERRIDE_V2_PARAMS((NV0073_CTRL_SPECIFIC_APPLY_EDID_OVERRIDE_V2_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x007302a2: /* NV0073_CTRL_CMD_SPECIFIC_GET_HDMI_GPU_CAPS */
+            if (paramsSize < sizeof(NV0073_CTRL_SPECIFIC_GET_HDMI_GPU_CAPS_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SPECIFIC_GET_HDMI_GPU_CAPS_PARAMS((NV0073_CTRL_SPECIFIC_GET_HDMI_GPU_CAPS_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x007302a4: /* NV0073_CTRL_CMD_SPECIFIC_DISPLAY_CHANGE */
+            if (paramsSize < sizeof(NV0073_CTRL_SPECIFIC_DISPLAY_CHANGE_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SPECIFIC_DISPLAY_CHANGE_PARAMS((NV0073_CTRL_SPECIFIC_DISPLAY_CHANGE_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x007302a6: /* NV0073_CTRL_CMD_SPECIFIC_GET_HDMI_SCDC_DATA */
+            if (paramsSize < sizeof(NV0073_CTRL_SPECIFIC_GET_HDMI_SCDC_DATA_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SPECIFIC_GET_HDMI_SCDC_DATA_PARAMS((NV0073_CTRL_SPECIFIC_GET_HDMI_SCDC_DATA_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x007302a7: /* NV0073_CTRL_CMD_SPECIFIC_IS_DIRECTMODE_DISPLAY */
+            if (paramsSize < sizeof(NV0073_CTRL_SPECIFIC_IS_DIRECTMODE_DISPLAY_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SPECIFIC_IS_DIRECTMODE_DISPLAY_PARAMS((NV0073_CTRL_SPECIFIC_IS_DIRECTMODE_DISPLAY_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x007302a8: /* NV0073_CTRL_CMD_SPECIFIC_GET_HDMI_FRL_CAPACITY_COMPUTATION */
+            if (paramsSize < sizeof(NV0073_CTRL_SPECIFIC_GET_HDMI_FRL_CAPACITY_COMPUTATION_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SPECIFIC_GET_HDMI_FRL_CAPACITY_COMPUTATION_PARAMS((NV0073_CTRL_SPECIFIC_GET_HDMI_FRL_CAPACITY_COMPUTATION_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x007302a9: /* NV0073_CTRL_CMD_SPECIFIC_SET_SHARED_GENERIC_PACKET */
+            if (paramsSize < sizeof(NV0073_CTRL_SPECIFIC_SET_SHARED_GENERIC_PACKET_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SPECIFIC_SET_SHARED_GENERIC_PACKET_PARAMS((NV0073_CTRL_SPECIFIC_SET_SHARED_GENERIC_PACKET_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x007302aa: /* NV0073_CTRL_CMD_SPECIFIC_ACQUIRE_SHARED_GENERIC_PACKET */
+            if (paramsSize < sizeof(NV0073_CTRL_SPECIFIC_ACQUIRE_SHARED_GENERIC_PACKET_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SPECIFIC_ACQUIRE_SHARED_GENERIC_PACKET_PARAMS((NV0073_CTRL_SPECIFIC_ACQUIRE_SHARED_GENERIC_PACKET_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x007302ab: /* NV0073_CTRL_CMD_SPECIFIC_RELEASE_SHARED_GENERIC_PACKET */
+            if (paramsSize < sizeof(NV0073_CTRL_SPECIFIC_RELEASE_SHARED_GENERIC_PACKET_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SPECIFIC_RELEASE_SHARED_GENERIC_PACKET_PARAMS((NV0073_CTRL_SPECIFIC_RELEASE_SHARED_GENERIC_PACKET_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x007302ac: /* NV0073_CTRL_CMD_SPECIFIC_DISP_I2C_READ_WRITE */
+            if (paramsSize < sizeof(NV0073_CTRL_SPECIFIC_DISP_I2C_READ_WRITE_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SPECIFIC_DISP_I2C_READ_WRITE_PARAMS((NV0073_CTRL_SPECIFIC_DISP_I2C_READ_WRITE_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x007302ad: /* NV0073_CTRL_CMD_SPECIFIC_GET_VALID_HEAD_WINDOW_ASSIGNMENT */
+            if (paramsSize < sizeof(NV0073_CTRL_SPECIFIC_GET_VALID_HEAD_WINDOW_ASSIGNMENT_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SPECIFIC_GET_VALID_HEAD_WINDOW_ASSIGNMENT_PARAMS((NV0073_CTRL_SPECIFIC_GET_VALID_HEAD_WINDOW_ASSIGNMENT_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x007302ae: /* NV0073_CTRL_CMD_SPECIFIC_DEFAULT_ADAPTIVESYNC_DISPLAY */
+            if (paramsSize < sizeof(NV0073_CTRL_SPECIFIC_DEFAULT_ADAPTIVESYNC_DISPLAY_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SPECIFIC_DEFAULT_ADAPTIVESYNC_DISPLAY_PARAMS((NV0073_CTRL_SPECIFIC_DEFAULT_ADAPTIVESYNC_DISPLAY_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x007302af: /* NV0073_CTRL_CMD_SPECIFIC_GET_DISPLAY_BRIGHTNESS_LTM */
+            if (paramsSize < sizeof(NV0073_CTRL_SPECIFIC_GET_DISPLAY_BRIGHTNESS_LTM_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SPECIFIC_GET_DISPLAY_BRIGHTNESS_LTM_PARAMS((NV0073_CTRL_SPECIFIC_GET_DISPLAY_BRIGHTNESS_LTM_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x007302b0: /* NV0073_CTRL_CMD_SPECIFIC_SET_DISPLAY_BRIGHTNESS_LTM */
+            if (paramsSize < sizeof(NV0073_CTRL_SPECIFIC_SET_DISPLAY_BRIGHTNESS_LTM_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SPECIFIC_SET_DISPLAY_BRIGHTNESS_LTM_PARAMS((NV0073_CTRL_SPECIFIC_SET_DISPLAY_BRIGHTNESS_LTM_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x007302b1: /* NV0073_CTRL_CMD_GET_REGISTER_OFFSET_FOR_ULMB_TIMESTAMP */
+            if (paramsSize < sizeof(NV0073_CTRL_GET_REGISTER_OFFSET_FOR_ULMB_TIMESTAMP_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_GET_REGISTER_OFFSET_FOR_ULMB_TIMESTAMP_PARAMS((NV0073_CTRL_GET_REGISTER_OFFSET_FOR_ULMB_TIMESTAMP_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x007302b2: /* NV0073_CTRL_CMD_SPECIFIC_HDCP_KEY_DECRYPTION */
+            if (paramsSize < sizeof(NV0073_CTRL_SPECIFIC_HDCP_KEY_DECRYPTION_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_SPECIFIC_HDCP_KEY_DECRYPTION_PARAMS((NV0073_CTRL_SPECIFIC_HDCP_KEY_DECRYPTION_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730301: /* NV0073_CTRL_CMD_EVENT_SET_NOTIFICATION */
+            if (paramsSize < sizeof(NV0073_CTRL_EVENT_SET_NOTIFICATION_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_EVENT_SET_NOTIFICATION_PARAMS((NV0073_CTRL_EVENT_SET_NOTIFICATION_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730401: /* NV0073_CTRL_CMD_INTERNAL_GET_HOTPLUG_UNPLUG_STATE */
+            if (paramsSize < sizeof(NV0073_CTRL_INTERNAL_GET_HOTPLUG_UNPLUG_STATE_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_INTERNAL_GET_HOTPLUG_UNPLUG_STATE_PARAMS((NV0073_CTRL_INTERNAL_GET_HOTPLUG_UNPLUG_STATE_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730404: /* NV0073_CTRL_CMD_INTERNAL_DFP_GET_DISP_MUX_STATUS */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_INTERNAL_DFP_GET_DISP_MUX_STATUS_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_INTERNAL_DFP_GET_DISP_MUX_STATUS_PARAMS((NV0073_CTRL_CMD_INTERNAL_DFP_GET_DISP_MUX_STATUS_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730460: /* NV0073_CTRL_CMD_INTERNAL_DFP_SWITCH_DISP_MUX */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_DFP_SWITCH_DISP_MUX_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_DFP_SWITCH_DISP_MUX_PARAMS((NV0073_CTRL_CMD_DFP_SWITCH_DISP_MUX_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00730502: /* NV0073_CTRL_CMD_FRL_CONFIG_MACRO_PAD */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_FRL_CONFIG_MACRO_PAD_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_FRL_CONFIG_MACRO_PAD_PARAMS((NV0073_CTRL_CMD_FRL_CONFIG_MACRO_PAD_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731140: /* NV0073_CTRL_CMD_DFP_GET_INFO */
+            if (paramsSize < sizeof(NV0073_CTRL_DFP_GET_INFO_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_DFP_GET_INFO_PARAMS((NV0073_CTRL_DFP_GET_INFO_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731142: /* NV0073_CTRL_CMD_DFP_GET_DISPLAYPORT_DONGLE_INFO */
+            if (paramsSize < sizeof(NV0073_CTRL_DFP_GET_DISPLAYPORT_DONGLE_INFO_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_DFP_GET_DISPLAYPORT_DONGLE_INFO_PARAMS((NV0073_CTRL_DFP_GET_DISPLAYPORT_DONGLE_INFO_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731144: /* NV0073_CTRL_CMD_DFP_SET_ELD_AUDIO_CAPS */
+            if (paramsSize < sizeof(NV0073_CTRL_DFP_SET_ELD_AUDIO_CAP_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_DFP_SET_ELD_AUDIO_CAP_PARAMS((NV0073_CTRL_DFP_SET_ELD_AUDIO_CAP_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x0073114c: /* NV0073_CTRL_CMD_DFP_GET_SPREAD_SPECTRUM */
+            if (paramsSize < sizeof(NV0073_CTRL_DFP_GET_SPREAD_SPECTRUM_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_DFP_GET_SPREAD_SPECTRUM_PARAMS((NV0073_CTRL_DFP_GET_SPREAD_SPECTRUM_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x0073114e: /* NV0073_CTRL_CMD_DFP_UPDATE_DYNAMIC_DFP_CACHE */
+            if (paramsSize < sizeof(NV0073_CTRL_DFP_UPDATE_DYNAMIC_DFP_CACHE_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_DFP_UPDATE_DYNAMIC_DFP_CACHE_PARAMS((NV0073_CTRL_DFP_UPDATE_DYNAMIC_DFP_CACHE_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731150: /* NV0073_CTRL_CMD_DFP_SET_AUDIO_ENABLE */
+            if (paramsSize < sizeof(NV0073_CTRL_DFP_SET_AUDIO_ENABLE_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_DFP_SET_AUDIO_ENABLE_PARAMS((NV0073_CTRL_DFP_SET_AUDIO_ENABLE_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731152: /* NV0073_CTRL_CMD_DFP_ASSIGN_SOR */
+            if (paramsSize < sizeof(NV0073_CTRL_DFP_ASSIGN_SOR_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_DFP_ASSIGN_SOR_PARAMS((NV0073_CTRL_DFP_ASSIGN_SOR_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731153: /* NV0073_CTRL_CMD_DFP_GET_PADLINK_MASK */
+            if (paramsSize < sizeof(NV0073_CTRL_DFP_GET_PADLINK_MASK_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_DFP_GET_PADLINK_MASK_PARAMS((NV0073_CTRL_DFP_GET_PADLINK_MASK_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731154: /* NV0073_CTRL_CMD_DFP_GET_LCD_GPIO_PIN_NUM */
+            if (paramsSize < sizeof(NV0073_CTRL_DFP_GET_LCD_GPIO_PIN_NUM_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_DFP_GET_LCD_GPIO_PIN_NUM_PARAMS((NV0073_CTRL_DFP_GET_LCD_GPIO_PIN_NUM_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731156: /* NV0073_CTRL_CMD_DFP_CONFIG_TWO_HEAD_ONE_OR */
+            if (paramsSize < sizeof(NV0073_CTRL_DFP_CONFIG_TWO_HEAD_ONE_OR_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_DFP_CONFIG_TWO_HEAD_ONE_OR_PARAMS((NV0073_CTRL_DFP_CONFIG_TWO_HEAD_ONE_OR_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731157: /* NV0073_CTRL_CMD_DFP_DSC_CRC_CONTROL */
+            if (paramsSize < sizeof(NV0073_CTRL_DFP_DSC_CRC_CONTROL_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_DFP_DSC_CRC_CONTROL_PARAMS((NV0073_CTRL_DFP_DSC_CRC_CONTROL_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731158: /* NV0073_CTRL_CMD_DFP_INIT_MUX_DATA */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_DFP_INIT_MUX_DATA_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_DFP_INIT_MUX_DATA_PARAMS((NV0073_CTRL_CMD_DFP_INIT_MUX_DATA_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731160: /* NV0073_CTRL_CMD_DFP_SWITCH_DISP_MUX */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_DFP_SWITCH_DISP_MUX_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_DFP_SWITCH_DISP_MUX_PARAMS((NV0073_CTRL_CMD_DFP_SWITCH_DISP_MUX_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731161: /* NV0073_CTRL_CMD_DFP_RUN_PRE_DISP_MUX_OPERATIONS */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_DFP_RUN_PRE_DISP_MUX_OPERATIONS_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_DFP_RUN_PRE_DISP_MUX_OPERATIONS_PARAMS((NV0073_CTRL_CMD_DFP_RUN_PRE_DISP_MUX_OPERATIONS_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731162: /* NV0073_CTRL_CMD_DFP_RUN_POST_DISP_MUX_OPERATIONS */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_DFP_RUN_POST_DISP_MUX_OPERATIONS_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_DFP_RUN_POST_DISP_MUX_OPERATIONS_PARAMS((NV0073_CTRL_CMD_DFP_RUN_POST_DISP_MUX_OPERATIONS_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731163: /* NV0073_CTRL_CMD_DFP_GET_DISP_MUX_STATUS */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_DFP_GET_DISP_MUX_STATUS_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_DFP_GET_DISP_MUX_STATUS_PARAMS((NV0073_CTRL_CMD_DFP_GET_DISP_MUX_STATUS_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731166: /* NV0073_CTRL_CMD_DFP_GET_DSI_MODE_TIMING */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_DFP_GET_DSI_MODE_TIMING_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_DFP_GET_DSI_MODE_TIMING_PARAMS((NV0073_CTRL_CMD_DFP_GET_DSI_MODE_TIMING_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731174: /* NV0073_CTRL_CMD_DFP_ENTER_DISPLAY_POWER_GATING */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_DFP_ENTER_DISPLAY_POWER_GATING_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_DFP_ENTER_DISPLAY_POWER_GATING_PARAMS((NV0073_CTRL_CMD_DFP_ENTER_DISPLAY_POWER_GATING_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731175: /* NV0073_CTRL_CMD_DFP_EXIT_DISPLAY_POWER_GATING */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_DFP_EXIT_DISPLAY_POWER_GATING_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_DFP_EXIT_DISPLAY_POWER_GATING_PARAMS((NV0073_CTRL_CMD_DFP_EXIT_DISPLAY_POWER_GATING_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731176: /* NV0073_CTRL_CMD_DFP_EDP_DRIVER_UNLOAD */
+            if (paramsSize < sizeof(NV0073_CTRL_DFP_EDP_DRIVER_UNLOAD_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_DFP_EDP_DRIVER_UNLOAD_PARAMS((NV0073_CTRL_DFP_EDP_DRIVER_UNLOAD_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731177: /* NV0073_CTRL_CMD_SYSTEM_SET_REGION_RAM_RECTANGLES */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_SYSTEM_SET_REGION_RAM_RECTANGLES_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_SYSTEM_SET_REGION_RAM_RECTANGLES_PARAMS((NV0073_CTRL_CMD_SYSTEM_SET_REGION_RAM_RECTANGLES_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731178: /* NV0073_CTRL_CMD_SYSTEM_CONFIGURE_SAFETY_INTERRUPTS */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_SYSTEM_CONFIGURE_SAFETY_INTERRUPTS_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_SYSTEM_CONFIGURE_SAFETY_INTERRUPTS_PARAMS((NV0073_CTRL_CMD_SYSTEM_CONFIGURE_SAFETY_INTERRUPTS_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731180: /* NV0073_CTRL_CMD_DFP_GET_DISP_PHY_INFO */
+            if (paramsSize < sizeof(NV0073_CTRL_DFP_GET_DISP_PHY_INFO_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_DFP_GET_DISP_PHY_INFO_PARAMS((NV0073_CTRL_DFP_GET_DISP_PHY_INFO_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731341: /* NV0073_CTRL_CMD_DP_AUXCH_CTRL */
+            if (paramsSize < sizeof(NV0073_CTRL_DP_AUXCH_CTRL_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_DP_AUXCH_CTRL_PARAMS((NV0073_CTRL_DP_AUXCH_CTRL_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731343: /* NV0073_CTRL_CMD_DP_CTRL */
+            if (paramsSize < sizeof(NV0073_CTRL_DP_CTRL_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_DP_CTRL_PARAMS((NV0073_CTRL_DP_CTRL_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731345: /* NV0073_CTRL_CMD_DP_GET_LANE_DATA */
+            if (paramsSize < sizeof(NV0073_CTRL_DP_GET_LANE_DATA_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_DP_GET_LANE_DATA_PARAMS((NV0073_CTRL_DP_GET_LANE_DATA_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731346: /* NV0073_CTRL_CMD_DP_SET_LANE_DATA */
+            if (paramsSize < sizeof(NV0073_CTRL_DP_SET_LANE_DATA_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_DP_SET_LANE_DATA_PARAMS((NV0073_CTRL_DP_SET_LANE_DATA_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731347: /* NV0073_CTRL_CMD_DP_SET_TESTPATTERN */
+            if (paramsSize < sizeof(NV0073_CTRL_DP_SET_TESTPATTERN_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_DP_SET_TESTPATTERN_PARAMS((NV0073_CTRL_DP_SET_TESTPATTERN_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731348: /* NV0073_CTRL_CMD_DP_GET_TESTPATTERN */
+            if (paramsSize < sizeof(NV0073_CTRL_DP_GET_TESTPATTERN_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_DP_GET_TESTPATTERN_PARAMS((NV0073_CTRL_DP_GET_TESTPATTERN_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731351: /* NV0073_CTRL_CMD_DP_SET_PREEMPHASIS_DRIVECURRENT_POSTCURSOR2_DATA */
+            if (paramsSize < sizeof(NV0073_CTRL_DP_SET_PREEMPHASIS_DRIVECURRENT_POSTCURSOR2_DATA_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_DP_SET_PREEMPHASIS_DRIVECURRENT_POSTCURSOR2_DATA_PARAMS((NV0073_CTRL_DP_SET_PREEMPHASIS_DRIVECURRENT_POSTCURSOR2_DATA_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731352: /* NV0073_CTRL_CMD_DP_GET_PREEMPHASIS_DRIVECURRENT_POSTCURSOR2_DATA */
+            if (paramsSize < sizeof(NV0073_CTRL_DP_GET_PREEMPHASIS_DRIVECURRENT_POSTCURSOR2_DATA_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_DP_GET_PREEMPHASIS_DRIVECURRENT_POSTCURSOR2_DATA_PARAMS((NV0073_CTRL_DP_GET_PREEMPHASIS_DRIVECURRENT_POSTCURSOR2_DATA_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731356: /* NV0073_CTRL_CMD_DP_MAIN_LINK_CTRL */
+            if (paramsSize < sizeof(NV0073_CTRL_DP_MAIN_LINK_CTRL_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_DP_MAIN_LINK_CTRL_PARAMS((NV0073_CTRL_DP_MAIN_LINK_CTRL_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731359: /* NV0073_CTRL_CMD_DP_SET_AUDIO_MUTESTREAM */
+            if (paramsSize < sizeof(NV0073_CTRL_DP_SET_AUDIO_MUTESTREAM_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_DP_SET_AUDIO_MUTESTREAM_PARAMS((NV0073_CTRL_DP_SET_AUDIO_MUTESTREAM_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x0073135a: /* NV0073_CTRL_CMD_DP_ASSR_CTRL */
+            if (paramsSize < sizeof(NV0073_CTRL_DP_ASSR_CTRL_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_DP_ASSR_CTRL_PARAMS((NV0073_CTRL_DP_ASSR_CTRL_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x0073135b: /* NV0073_CTRL_CMD_DP_TOPOLOGY_ALLOCATE_DISPLAYID */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_DP_TOPOLOGY_ALLOCATE_DISPLAYID_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_DP_TOPOLOGY_ALLOCATE_DISPLAYID_PARAMS((NV0073_CTRL_CMD_DP_TOPOLOGY_ALLOCATE_DISPLAYID_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x0073135c: /* NV0073_CTRL_CMD_DP_TOPOLOGY_FREE_DISPLAYID */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_DP_TOPOLOGY_FREE_DISPLAYID_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_DP_TOPOLOGY_FREE_DISPLAYID_PARAMS((NV0073_CTRL_CMD_DP_TOPOLOGY_FREE_DISPLAYID_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731360: /* NV0073_CTRL_CMD_DP_GET_LINK_CONFIG */
+            if (paramsSize < sizeof(NV0073_CTRL_DP_GET_LINK_CONFIG_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_DP_GET_LINK_CONFIG_PARAMS((NV0073_CTRL_DP_GET_LINK_CONFIG_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731361: /* NV0073_CTRL_CMD_DP_GET_EDP_DATA */
+            if (paramsSize < sizeof(NV0073_CTRL_DP_GET_EDP_DATA_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_DP_GET_EDP_DATA_PARAMS((NV0073_CTRL_DP_GET_EDP_DATA_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731362: /* NV0073_CTRL_CMD_DP_CONFIG_STREAM */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_DP_CONFIG_STREAM_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_DP_CONFIG_STREAM_PARAMS((NV0073_CTRL_CMD_DP_CONFIG_STREAM_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731363: /* NV0073_CTRL_CMD_DP_SET_RATE_GOV */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_DP_SET_RATE_GOV_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_DP_SET_RATE_GOV_PARAMS((NV0073_CTRL_CMD_DP_SET_RATE_GOV_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731365: /* NV0073_CTRL_CMD_DP_SET_MANUAL_DISPLAYPORT */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_DP_SET_MANUAL_DISPLAYPORT_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_DP_SET_MANUAL_DISPLAYPORT_PARAMS((NV0073_CTRL_CMD_DP_SET_MANUAL_DISPLAYPORT_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731366: /* NV0073_CTRL_CMD_DP_SET_ECF */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_DP_SET_ECF_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_DP_SET_ECF_PARAMS((NV0073_CTRL_CMD_DP_SET_ECF_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731367: /* NV0073_CTRL_CMD_DP_SEND_ACT */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_DP_SEND_ACT_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_DP_SEND_ACT_PARAMS((NV0073_CTRL_CMD_DP_SEND_ACT_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731369: /* NV0073_CTRL_CMD_DP_GET_CAPS */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_DP_GET_CAPS_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_DP_GET_CAPS_PARAMS((NV0073_CTRL_CMD_DP_GET_CAPS_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x0073136b: /* NV0073_CTRL_CMD_DP_GENERATE_FAKE_INTERRUPT */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_DP_GENERATE_FAKE_INTERRUPT_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_DP_GENERATE_FAKE_INTERRUPT_PARAMS((NV0073_CTRL_CMD_DP_GENERATE_FAKE_INTERRUPT_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x0073136c: /* NV0073_CTRL_CMD_DP_CONFIG_RAD_SCRATCH_REG */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_DP_CONFIG_RAD_SCRATCH_REG_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_DP_CONFIG_RAD_SCRATCH_REG_PARAMS((NV0073_CTRL_CMD_DP_CONFIG_RAD_SCRATCH_REG_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x0073136e: /* NV0073_CTRL_CMD_DP_CONFIG_SINGLE_HEAD_MULTI_STREAM */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_DP_CONFIG_SINGLE_HEAD_MULTI_STREAM_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_DP_CONFIG_SINGLE_HEAD_MULTI_STREAM_PARAMS((NV0073_CTRL_CMD_DP_CONFIG_SINGLE_HEAD_MULTI_STREAM_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x0073136f: /* NV0073_CTRL_CMD_DP_SET_TRIGGER_SELECT */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_DP_SET_TRIGGER_SELECT_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_DP_SET_TRIGGER_SELECT_PARAMS((NV0073_CTRL_CMD_DP_SET_TRIGGER_SELECT_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731370: /* NV0073_CTRL_CMD_DP_SET_TRIGGER_ALL */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_DP_SET_TRIGGER_ALL_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_DP_SET_TRIGGER_ALL_PARAMS((NV0073_CTRL_CMD_DP_SET_TRIGGER_ALL_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731373: /* NV0073_CTRL_CMD_DP_GET_AUXLOGGER_BUFFER_DATA */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_DP_GET_AUXLOGGER_BUFFER_DATA_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_DP_GET_AUXLOGGER_BUFFER_DATA_PARAMS((NV0073_CTRL_CMD_DP_GET_AUXLOGGER_BUFFER_DATA_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731377: /* NV0073_CTRL_CMD_DP_CONFIG_INDEXED_LINK_RATES */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_DP_CONFIG_INDEXED_LINK_RATES_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_DP_CONFIG_INDEXED_LINK_RATES_PARAMS((NV0073_CTRL_CMD_DP_CONFIG_INDEXED_LINK_RATES_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731378: /* NV0073_CTRL_CMD_DP_SET_STEREO_MSA_PROPERTIES */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_DP_SET_STEREO_MSA_PROPERTIES_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_DP_SET_STEREO_MSA_PROPERTIES_PARAMS((NV0073_CTRL_CMD_DP_SET_STEREO_MSA_PROPERTIES_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x0073137a: /* NV0073_CTRL_CMD_DP_CONFIGURE_FEC */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_DP_CONFIGURE_FEC_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_DP_CONFIGURE_FEC_PARAMS((NV0073_CTRL_CMD_DP_CONFIGURE_FEC_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x0073137b: /* NV0073_CTRL_CMD_DP_CONFIG_MACRO_PAD */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_DP_CONFIG_MACRO_PAD_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_DP_CONFIG_MACRO_PAD_PARAMS((NV0073_CTRL_CMD_DP_CONFIG_MACRO_PAD_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x0073137c: /* NV0073_CTRL_CMD_DP_AUXCH_I2C_TRANSFER_CTRL */
+            if (paramsSize < sizeof(NV0073_CTRL_DP_AUXCH_I2C_TRANSFER_CTRL_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_DP_AUXCH_I2C_TRANSFER_CTRL_PARAMS((NV0073_CTRL_DP_AUXCH_I2C_TRANSFER_CTRL_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x0073137d: /* NV0073_CTRL_CMD_DP_ENABLE_VRR */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_DP_ENABLE_VRR_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_DP_ENABLE_VRR_PARAMS((NV0073_CTRL_CMD_DP_ENABLE_VRR_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x0073137e: /* NV0073_CTRL_CMD_DP_GET_GENERIC_INFOFRAME */
+            if (paramsSize < sizeof(NV0073_CTRL_DP_GET_GENERIC_INFOFRAME_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_DP_GET_GENERIC_INFOFRAME_PARAMS((NV0073_CTRL_DP_GET_GENERIC_INFOFRAME_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x0073137f: /* NV0073_CTRL_CMD_DP_GET_MSA_ATTRIBUTES */
+            if (paramsSize < sizeof(NV0073_CTRL_DP_GET_MSA_ATTRIBUTES_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_DP_GET_MSA_ATTRIBUTES_PARAMS((NV0073_CTRL_DP_GET_MSA_ATTRIBUTES_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731380: /* NV0073_CTRL_CMD_DP_AUXCH_OD_CTRL */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_DP_AUXCH_OD_CTRL_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_DP_AUXCH_OD_CTRL_PARAMS((NV0073_CTRL_CMD_DP_AUXCH_OD_CTRL_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731381: /* NV0073_CTRL_CMD_DP_SET_MSA_PROPERTIES_V2 */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_DP_SET_MSA_PROPERTIES_V2_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_DP_SET_MSA_PROPERTIES_V2_PARAMS((NV0073_CTRL_CMD_DP_SET_MSA_PROPERTIES_V2_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731383: /* NV0073_CTRL_CMD_DP2X_LINK_TRAINING_CTRL */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_DP2X_LINK_TRAINING_CTRL_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_DP2X_LINK_TRAINING_CTRL_PARAMS((NV0073_CTRL_CMD_DP2X_LINK_TRAINING_CTRL_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731384: /* NV0073_CTRL_CMD_DP2X_GET_LANE_DATA */
+            if (paramsSize < sizeof(NV0073_CTRL_DP2X_GET_LANE_DATA_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_DP2X_GET_LANE_DATA_PARAMS((NV0073_CTRL_DP2X_GET_LANE_DATA_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731385: /* NV0073_CTRL_CMD_DP2X_SET_LANE_DATA */
+            if (paramsSize < sizeof(NV0073_CTRL_DP2X_SET_LANE_DATA_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_DP2X_SET_LANE_DATA_PARAMS((NV0073_CTRL_DP2X_SET_LANE_DATA_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731386: /* NV0073_CTRL_CMD_DP_AUXCH_VBL_CTRL */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_DP_AUXCH_VBL_CTRL_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_DP_AUXCH_VBL_CTRL_PARAMS((NV0073_CTRL_CMD_DP_AUXCH_VBL_CTRL_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731387: /* NV0073_CTRL_CMD_DP_SET_LEVEL_INFO_TABLE_DATA */
+            if (paramsSize < sizeof(NV0073_CTRL_DP_SET_LEVEL_INFO_TABLE_DATA_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_DP_SET_LEVEL_INFO_TABLE_DATA_PARAMS((NV0073_CTRL_DP_SET_LEVEL_INFO_TABLE_DATA_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731388: /* NV0073_CTRL_CMD_DP_GET_LEVEL_INFO_TABLE_DATA */
+            if (paramsSize < sizeof(NV0073_CTRL_DP_GET_LEVEL_INFO_TABLE_DATA_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_DP_GET_LEVEL_INFO_TABLE_DATA_PARAMS((NV0073_CTRL_DP_GET_LEVEL_INFO_TABLE_DATA_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731389: /* NV0073_CTRL_CMD_DP2X_SET_LEVEL_INFO_TABLE_DATA */
+            if (paramsSize < sizeof(NV0073_CTRL_DP2X_SET_LEVEL_INFO_TABLE_DATA_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_DP2X_SET_LEVEL_INFO_TABLE_DATA_PARAMS((NV0073_CTRL_DP2X_SET_LEVEL_INFO_TABLE_DATA_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x0073138a: /* NV0073_CTRL_CMD_DP2X_GET_LEVEL_INFO_TABLE_DATA */
+            if (paramsSize < sizeof(NV0073_CTRL_DP2X_GET_LEVEL_INFO_TABLE_DATA_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_DP2X_GET_LEVEL_INFO_TABLE_DATA_PARAMS((NV0073_CTRL_DP2X_GET_LEVEL_INFO_TABLE_DATA_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x0073138b: /* NV0073_CTRL_CMD_DP_SET_PROP_FORCE_PCLK_FACTOR */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_DP_SET_PROP_FORCE_PCLK_FACTOR_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_DP_SET_PROP_FORCE_PCLK_FACTOR_PARAMS((NV0073_CTRL_CMD_DP_SET_PROP_FORCE_PCLK_FACTOR_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x0073138c: /* NV0073_CTRL_CMD_CALCULATE_DP_IMP */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_CALCULATE_DP_IMP_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_CALCULATE_DP_IMP_PARAMS((NV0073_CTRL_CMD_CALCULATE_DP_IMP_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x0073138d: /* NV0073_CTRL_CMD_DP_GET_CABLEID_INFO_FROM_MACRO */
+            if (paramsSize < sizeof(NV0073_CTRL_DP_USBC_CABLEID_INFO_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_DP_USBC_CABLEID_INFO_PARAMS((NV0073_CTRL_DP_USBC_CABLEID_INFO_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x0073138e: /* NV0073_CTRL_CMD_STUFF_DUMMY_SYMBOL_WAR */
+            if (paramsSize < sizeof(NV0073_CTRL_STUFF_DUMMY_SYMBOL_WAR_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_STUFF_DUMMY_SYMBOL_WAR_PARAMS((NV0073_CTRL_STUFF_DUMMY_SYMBOL_WAR_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x0073138f: /* NV0073_CTRL_CMD_DP_NOTIFY_LT */
+            if (paramsSize < sizeof(NV0073_CTRL_DP_NOTIFY_LT_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_DP_NOTIFY_LT_PARAMS((NV0073_CTRL_DP_NOTIFY_LT_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731390: /* NV0073_CTRL_CMD_GET_USB_DPIN_ADAPTER_INFO */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_GET_USB_DPIN_ADAPTER_INFO_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_GET_USB_DPIN_ADAPTER_INFO_PARAMS((NV0073_CTRL_CMD_GET_USB_DPIN_ADAPTER_INFO_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731391: /* NV0073_CTRL_CMD_DP_SET_WAR_FLAGS */
+            if (paramsSize < sizeof(NV0073_CTRL_CMD_DP_SET_WAR_FLAGS_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_CMD_DP_SET_WAR_FLAGS_PARAMS((NV0073_CTRL_CMD_DP_SET_WAR_FLAGS_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731602: /* NV0073_CTRL_CMD_PSR_GET_SR_PANEL_INFO */
+            if (paramsSize < sizeof(NV0073_CTRL_PSR_GET_SR_PANEL_INFO_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_PSR_GET_SR_PANEL_INFO_PARAMS((NV0073_CTRL_PSR_GET_SR_PANEL_INFO_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731702: /* NV0073_CTRL_CMD_STEREO_DONGLE_SUPPORTED */
+            if (paramsSize < sizeof(NV0073_CTRL_STEREO_DONGLE_SUPPORTED_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_STEREO_DONGLE_SUPPORTED_PARAMS((NV0073_CTRL_STEREO_DONGLE_SUPPORTED_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731703: /* NV0073_CTRL_CMD_STEREO_DONGLE_SET_TIMINGS */
+            if (paramsSize < sizeof(NV0073_CTRL_STEREO_DONGLE_SET_TIMINGS_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_STEREO_DONGLE_SET_TIMINGS_PARAMS((NV0073_CTRL_STEREO_DONGLE_SET_TIMINGS_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731704: /* NV0073_CTRL_CMD_STEREO_DONGLE_ACTIVATE */
+            if (paramsSize < sizeof(NV0073_CTRL_STEREO_DONGLE_ACTIVATE_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_STEREO_DONGLE_ACTIVATE_PARAMS((NV0073_CTRL_STEREO_DONGLE_ACTIVATE_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x00731705: /* NV0073_CTRL_CMD_STEREO_DONGLE_DEACTIVATE */
+            if (paramsSize < sizeof(NV0073_CTRL_STEREO_DONGLE_DEACTIVATE_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV0073_CTRL_STEREO_DONGLE_DEACTIVATE_PARAMS((NV0073_CTRL_STEREO_DONGLE_DEACTIVATE_PARAMS *)pParams);
+            return NV_TRUE;
         case 0x00800102: /* NV0080_CTRL_CMD_BIF_RESET */
             if (paramsSize < sizeof(NV0080_CTRL_BIF_RESET_PARAMS))
                 return NV_FALSE;

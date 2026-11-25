@@ -1946,6 +1946,19 @@ memmgrDeterminePageSize_IMPL
         }
     }
 
+    //
+    // An OS base page between the 4K RM page and the 64K big page (8K on SPARC,
+    // 16K on some other platforms) has no GPU page size of its own. Map it to
+    // the 4K small page: each OS page is then written as several 4K entries,
+    // the same way an OS page larger than the RM page is handled elsewhere.
+    // This only changes sizes that returned 0 (failure) before.
+    //
+    if ((pageSize > RM_PAGE_SIZE) && (pageSize < RM_PAGE_SIZE_64K) &&
+        ((pageSize & (pageSize - 1)) == 0))
+    {
+        pageSize = RM_PAGE_SIZE;
+    }
+
     switch (pageSize)
     {
         case RM_PAGE_SIZE:

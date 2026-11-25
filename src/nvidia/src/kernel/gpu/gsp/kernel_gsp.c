@@ -105,6 +105,7 @@
 #include "ctrl/ctrl2080/ctrl2080internal.h"  // NV2080_CTRL_INTERNAL_GPU_GET_USER_REGISTER_ACCESS_MAP_PARAMS
 #include "ctrl/ctrl0080.h"  // kernel_gsp_ctrl_endian.h (generated) names structures from both
 #include "ctrl/ctrl2080.h"  // control parameter families
+#include "ctrl/ctrl0073.h"  // (display common controls too)
 #include "gmcapi/gmcapi_engine_types.h"
 #include "gmcapi/gmcapi_system_info.h"
 #include "gmcapi/gmcapi_system_info_unstable.h"
