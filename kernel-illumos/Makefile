@@ -212,7 +212,13 @@ NVIDIA_MODESET_OBJS   := $(patsubst %.c,$(OUTPUTDIR)/%.o,$(NVIDIA_MODESET_SRCS))
 NVIDIA_MODESET_CFLAGS := $(CFLAGS_BASE) -Invidia-modeset \
                          -I$(NV_ROOT)/kernel-open/nvidia-modeset \
                          -UDEBUG -U_DEBUG -DNDEBUG -DNV_BUILD_MODULE_INSTANCES=0
+ifeq ($(SUNOS_FLAVOR),solaris)
+# As for nvidia.kmod: Solaris ld rejects undefined symbols unless told
+# otherwise, and the kernel resolves them at load time.
+NVIDIA_MODESET_DEPS   := -z nodefs -Ndrv/nvidia
+else
 NVIDIA_MODESET_DEPS   := -Ndrv/nvidia
+endif
 
 $(OUTPUTDIR)/nvidia-modeset/%.o: nvidia-modeset/%.c \
     nvidia-modeset/nvidia_modeset_illumos.h
@@ -340,8 +346,14 @@ $(ALIASES): $(NV_ROOT)/README.md
 	  for id in $(NVSWITCH_IDS); do echo "\"pciex10de,$$id\""; done ) | \
 	    sort -u > $@
 
-.PHONY: all objs clean install
+.PHONY: all objs clean install modeset modeset-objs
 all: $(MODULES) $(ALIASES)
+
+# On Solaris nvidia_modeset is not part of "all" yet: it is being brought up
+# and must not break the nvidia.kmod build.  "gmake -k modeset-objs" lists
+# every compile error; "gmake modeset" builds and links nvidia_modeset.kmod.
+modeset-objs: $(NVIDIA_MODESET_OBJS)
+modeset: $(OUTPUTDIR)/nvidia_modeset.kmod
 
 ifeq ($(SUNOS_FLAVOR),solaris)
 objs: $(NVIDIA_OBJS)
