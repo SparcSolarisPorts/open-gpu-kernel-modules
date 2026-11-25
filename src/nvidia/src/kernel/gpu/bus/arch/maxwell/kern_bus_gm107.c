@@ -4252,6 +4252,31 @@ kbusVerifyBar2_GM107
             NV_PRINTF(LEVEL_ERROR,
                       "MMUTest BAR0 window offset 0x%x returned garbage 0x%x\n",
                       temp + index, bar0WindowData);
+#if NVCPU_IS_BIG_ENDIAN
+            {
+                //
+                // Diagnostic for the big-endian port: show the first BAR2 page
+                // directory entry as the GPU's BAR0 window returns it (two numeric
+                // 32-bit register reads, low word first), with the addresses the test used.
+                //
+                NvU32 pdeLo = 0xdead0001, pdeHi = 0xdead0002;
+                NvU64 pdeAddr = pKernelBus->bar2[GPU_GFID_PF].pdeBase;
+
+                (void)kbusMemAccessBar0Window_HAL(pGpu, pKernelBus, pdeAddr,
+                                                  &pdeLo, sizeof(pdeLo), NV_TRUE, ADDR_FBMEM);
+                (void)kbusMemAccessBar0Window_HAL(pGpu, pKernelBus, pdeAddr + 4,
+                                                  &pdeHi, sizeof(pdeHi), NV_TRUE, ADDR_FBMEM);
+                NV_PRINTF(LEVEL_ERROR,
+                          "MMUTest BE diag: pdeBase 0x%llx entry0 words lo 0x%08x hi 0x%08x "
+                          "(aperture bits 2:1 = %u, vol bit 3 = %u, address 0x%llx); "
+                          "test PA 0x%llx aperture %d, BAR2 offset 0x%x\n",
+                          pdeAddr, pdeLo, pdeHi,
+                          (pdeLo >> 1) & 3, (pdeLo >> 3) & 1,
+                          (((NvU64)pdeHi << 32) | pdeLo) & 0x003FFFFFFFFFFF00ULL,
+                          testMemoryOffset, (int)testAddrSpace,
+                          (NvU32)(pOffset - pKernelBus->virtualBar2[GPU_GFID_PF].pCpuMapping));
+            }
+#endif
             NV_PRINTF_COND(IS_EMULATION(pGpu), LEVEL_ERROR, LEVEL_INFO,
                            "Setup a trigger for write<bar0 + 0x1700, 0x40> and in the waves search"
                            " the last few bar2 virtual writes mixed with bar0 window reads\n");

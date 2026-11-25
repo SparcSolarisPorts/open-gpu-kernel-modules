@@ -838,6 +838,47 @@ _kgspRpcPayloadSwap(OBJRPC *pRpc, NvBool bToWire)
                 _kgspRpcSwapRmControl(pRpc, bToWire);
             break;
 
+        case NV_VGPU_MSG_EVENT_OS_ERROR_LOG:
+        {
+            // Four 32-bit fields, then a byte string that stays as it is.
+            rpc_os_error_log_v *p = &rpcGetVgpuMessageData(pRpc)->os_error_log_v;
+
+            if (payloadSize >= sizeof(*p))
+            {
+                KGSP_RPC_REVERSE(p->exceptType);
+                KGSP_RPC_REVERSE(p->preemptiveRemovalPreviousXid);
+                KGSP_RPC_REVERSE(p->runlistId);
+                KGSP_RPC_REVERSE(p->chid);
+            }
+            break;
+        }
+
+        case NV_VGPU_MSG_EVENT_RC_TRIGGERED:
+        {
+            // The fixed fields only; rcJournalBuffer is an opaque byte blob and stays as it is.
+            rpc_rc_triggered_v *p = &rpcGetVgpuMessageData(pRpc)->rc_triggered_v;
+
+            if (payloadSize >= sizeof(*p))
+            {
+                KGSP_RPC_REVERSE(p->nv2080EngineType);
+                KGSP_RPC_REVERSE(p->chid);
+                KGSP_RPC_REVERSE(p->gfid);
+                KGSP_RPC_REVERSE(p->exceptLevel);
+                KGSP_RPC_REVERSE(p->exceptType);
+                KGSP_RPC_REVERSE(p->scope);
+                KGSP_RPC_REVERSE(p->partitionAttributionId);
+                KGSP_RPC_REVERSE(p->mmuFaultAddrLo);
+                KGSP_RPC_REVERSE(p->mmuFaultAddrHi);
+                KGSP_RPC_REVERSE(p->mmuFaultType);
+                KGSP_RPC_REVERSE(p->rcChannelInfoType);
+                KGSP_RPC_REVERSE(p->instblkAddrLo);
+                KGSP_RPC_REVERSE(p->instblkAddrHi);
+                KGSP_RPC_REVERSE(p->instblkAperture);
+                KGSP_RPC_REVERSE(p->rcJournalBufferSize);
+            }
+            break;
+        }
+
         case NV_VGPU_MSG_FUNCTION_UPDATE_BAR_PDE:
         {
             // UpdateBarPde: 32-bit bar type, then two 64-bit values (the PDE and its level shift).
