@@ -102,6 +102,7 @@
 #include "class/cl0070.h"  // NV01_MEMORY_VIRTUAL, NV_MEMORY_VIRTUAL_ALLOCATION_PARAMS
 #include "class/cl90cd.h"  // NV_EVENT_BUFFER, NV_EVENT_BUFFER_ALLOC_PARAMETERS
 #include "ctrl/ctrl90cd.h" // NV_EVENT_BUFFER_CTRL_CMD_* (hand-converted, see kgspRpcSwapCtrlParams)
+#include "ctrl/ctrl402c.h" // NV402C I2C controls (generated converters)
 #include "alloc/alloc_channel.h"  // NV_CHANNEL_ALLOC_PARAMS
 #include "class/cl906f.h"  // GF100_CHANNEL_GPFIFO and the later GPFIFO channel classes
 #include "class/cla06f.h"
