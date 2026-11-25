@@ -99,6 +99,18 @@
 #include "class/cl0000.h"  // NV0000_ALLOC_PARAMETERS
 #include "class/cl0005.h"  // NV0005_ALLOC_PARAMETERS
 #include "class/cl90f1.h"  // FERMI_VASPACE_A
+#include "alloc/alloc_channel.h"  // NV_CHANNEL_ALLOC_PARAMS
+#include "class/cl906f.h"  // GF100_CHANNEL_GPFIFO and the later GPFIFO channel classes
+#include "class/cla06f.h"
+#include "class/cla16f.h"
+#include "class/clb06f.h"
+#include "class/clc06f.h"
+#include "class/clc36f.h"
+#include "class/clc46f.h"
+#include "class/clc56f.h"
+#include "class/clc86f.h"
+#include "class/clc96f.h"
+#include "class/clca6f.h"
 #include "nvos.h"          // NV01_EVENT_KERNEL_CALLBACK_EX
 #include "class/cl0080.h"  // NV0080_ALLOC_PARAMETERS
 #include "class/cl2080.h"  // NV2080_ALLOC_PARAMETERS
@@ -596,6 +608,58 @@ _kgspRpcParamRoom(OBJRPC *pRpc, NvU32 fixedSize)
     return (pRpc->maxRpcSize > used) ? (NvU32)(pRpc->maxRpcSize - used) : 0;
 }
 
+// NV_MEMORY_DESC_PARAMS (alloc_channel.h): two 64-bit and two 32-bit values.
+static void
+_kgspRpcSwapMemDescParams(NV_MEMORY_DESC_PARAMS *q)
+{
+    KGSP_RPC_REVERSE(q->base);
+    KGSP_RPC_REVERSE(q->size);
+    KGSP_RPC_REVERSE(q->addressSpace);
+    KGSP_RPC_REVERSE(q->cacheAttrib);
+}
+
+// NV_CHANNEL_ALLOC_PARAMS (alloc_channel.h), used by every GPFIFO channel class.
+// Every member is a 32- or 64-bit value or an array of them.
+static void
+_kgspRpcSwapChannelAlloc(NV_CHANNEL_ALLOC_PARAMS *q)
+{
+    NvU32 i;
+
+    KGSP_RPC_REVERSE(q->hObjectError);
+    KGSP_RPC_REVERSE(q->hObjectBuffer);
+    KGSP_RPC_REVERSE(q->gpFifoOffset);
+    KGSP_RPC_REVERSE(q->gpFifoEntries);
+    KGSP_RPC_REVERSE(q->flags);
+    KGSP_RPC_REVERSE(q->hContextShare);
+    KGSP_RPC_REVERSE(q->hVASpace);
+    KGSP_RPC_REVERSE(q->hHandleVASpace);
+    for (i = 0; i < NV_ARRAY_ELEMENTS(q->hUserdMemory); i++)
+        KGSP_RPC_REVERSE(q->hUserdMemory[i]);
+    for (i = 0; i < NV_ARRAY_ELEMENTS(q->userdOffset); i++)
+        KGSP_RPC_REVERSE(q->userdOffset[i]);
+    KGSP_RPC_REVERSE(q->engineType);
+    KGSP_RPC_REVERSE(q->cid);
+    KGSP_RPC_REVERSE(q->subDeviceId);
+    KGSP_RPC_REVERSE(q->hObjectEccError);
+    _kgspRpcSwapMemDescParams(&q->instanceMem);
+    _kgspRpcSwapMemDescParams(&q->userdMem);
+    _kgspRpcSwapMemDescParams(&q->ramfcMem);
+    _kgspRpcSwapMemDescParams(&q->mthdbufMem);
+    KGSP_RPC_REVERSE(q->hPhysChannelGroup);
+    KGSP_RPC_REVERSE(q->internalFlags);
+    _kgspRpcSwapMemDescParams(&q->errorNotifierMem);
+    _kgspRpcSwapMemDescParams(&q->eccErrorNotifierMem);
+    KGSP_RPC_REVERSE(q->ProcessID);
+    KGSP_RPC_REVERSE(q->SubProcessID);
+    for (i = 0; i < NV_ARRAY_ELEMENTS(q->encryptIv); i++)
+        KGSP_RPC_REVERSE(q->encryptIv[i]);
+    for (i = 0; i < NV_ARRAY_ELEMENTS(q->decryptIv); i++)
+        KGSP_RPC_REVERSE(q->decryptIv[i]);
+    for (i = 0; i < NV_ARRAY_ELEMENTS(q->hmacNonce); i++)
+        KGSP_RPC_REVERSE(q->hmacNonce[i]);
+    KGSP_RPC_REVERSE(q->tpcConfigID);
+}
+
 // GSP_RM_ALLOC: a fixed header, then the class-specific parameters.
 static void
 _kgspRpcSwapRmAlloc(OBJRPC *pRpc, NvBool bToWire)
@@ -705,6 +769,27 @@ _kgspRpcSwapRmAlloc(OBJRPC *pRpc, NvBool bToWire)
             KGSP_RPC_REVERSE(q->bigPageSize);
             KGSP_RPC_REVERSE(q->vaBase);
             KGSP_RPC_REVERSE(q->pasid);
+            return;
+        }
+
+        case GF100_CHANNEL_GPFIFO:
+        case KEPLER_CHANNEL_GPFIFO_A:
+        case KEPLER_CHANNEL_GPFIFO_B:
+        case MAXWELL_CHANNEL_GPFIFO_A:
+        case PASCAL_CHANNEL_GPFIFO_A:
+        case VOLTA_CHANNEL_GPFIFO_A:
+        case TURING_CHANNEL_GPFIFO_A:
+        case AMPERE_CHANNEL_GPFIFO_A:
+        case HOPPER_CHANNEL_GPFIFO_A:
+        case BLACKWELL_CHANNEL_GPFIFO_A:
+        case BLACKWELL_CHANNEL_GPFIFO_B:
+        {
+            NV_CHANNEL_ALLOC_PARAMS *q = (NV_CHANNEL_ALLOC_PARAMS *)pParams;
+
+            if (paramsSize < sizeof(*q))
+                break;
+
+            _kgspRpcSwapChannelAlloc(q);
             return;
         }
 
