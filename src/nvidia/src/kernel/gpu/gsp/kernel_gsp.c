@@ -101,6 +101,7 @@
 #include "class/cl90f1.h"  // FERMI_VASPACE_A
 #include "class/cl0070.h"  // NV01_MEMORY_VIRTUAL, NV_MEMORY_VIRTUAL_ALLOCATION_PARAMS
 #include "class/cl90cd.h"  // NV_EVENT_BUFFER, NV_EVENT_BUFFER_ALLOC_PARAMETERS
+#include "class/cl90d0.h"  // NV_OPERATIONAL_EVENT_BUFFER_BIND
 #include "ctrl/ctrl90cd.h" // NV_EVENT_BUFFER_CTRL_CMD_* (hand-converted, see kgspRpcSwapCtrlParams)
 #include "ctrl/ctrl402c.h" // NV402C I2C controls (generated converters)
 #include "alloc/alloc_channel.h"  // NV_CHANNEL_ALLOC_PARAMS
@@ -860,6 +861,25 @@ _kgspRpcSwapRmAlloc(OBJRPC *pRpc, NvBool bToWire)
             KGSP_RPC_REVERSE(q->hBufferHeader);
             KGSP_RPC_REVERSE(q->hRecordBuffer);
             KGSP_RPC_REVERSE(q->hVardataBuffer);
+            return;
+        }
+
+        case NV_OPERATIONAL_EVENT_BUFFER_BIND:
+        {
+            // NV_OPERATIONAL_EVENT_BUFFER_BIND_ALLOC_PARAMETERS (cl90d0.h): a handle, byte fields
+            // and the 16-byte UUID (all left as they are), a 64-bit cursor and eight 64-bit
+            // capability descriptors.
+            NV_OPERATIONAL_EVENT_BUFFER_BIND_ALLOC_PARAMETERS *q =
+                (NV_OPERATIONAL_EVENT_BUFFER_BIND_ALLOC_PARAMETERS *)pParams;
+            NvU32 i;
+
+            if (paramsSize < sizeof(*q))
+                break;
+
+            KGSP_RPC_REVERSE(q->hEventBuffer);
+            KGSP_RPC_REVERSE(q->startingCursor);
+            for (i = 0; i < NV_ARRAY_ELEMENTS(q->capDescriptors); i++)
+                KGSP_RPC_REVERSE(q->capDescriptors[i]);
             return;
         }
 
