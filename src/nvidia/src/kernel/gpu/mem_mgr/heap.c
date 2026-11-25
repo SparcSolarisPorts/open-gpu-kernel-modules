@@ -1777,6 +1777,36 @@ got_one:
 failed:
     {
 
+#if NVCPU_IS_BIG_ENDIAN
+        //
+        // Diagnostic for the SPARC port: this failure is otherwise silent
+        // (LEVEL_INFO) and surfaces only as NV_ERR_NO_MEMORY from the caller.
+        //
+        {
+            NvU32 r;
+
+            NV_PRINTF(LEVEL_ERROR,
+                      "BE diag: heapAlloc failed: heap base=0x%llx total=0x%llx free=0x%llx reserved=0x%llx type=%d; "
+                      "request size=0x%llx alignPad=0x%llx align=0x%llx flags=0x%x attr=0x%x attr2=0x%x\n",
+                      pHeap->base, pHeap->total, pHeap->free, pHeap->reserved, (int)pHeap->heapType,
+                      (NvU64)pFbAllocInfo->size, (NvU64)pFbAllocInfo->alignPad,
+                      (NvU64)pFbAllocInfo->align, pVidHeapAlloc->flags,
+                      pVidHeapAlloc->attr, pVidHeapAlloc->attr2);
+            for (r = 0; r < pMemoryManager->Ram.numFBRegions; r++)
+            {
+                NV_PRINTF(LEVEL_ERROR,
+                          "BE diag: FB region %u base=0x%llx limit=0x%llx rsvdSize=0x%llx rsvd=%d internalHeap=%d protected=%d\n",
+                          r,
+                          pMemoryManager->Ram.fbRegion[r].base,
+                          pMemoryManager->Ram.fbRegion[r].limit,
+                          pMemoryManager->Ram.fbRegion[r].rsvdSize,
+                          (int)pMemoryManager->Ram.fbRegion[r].bRsvdRegion,
+                          (int)pMemoryManager->Ram.fbRegion[r].bInternalHeap,
+                          (int)pMemoryManager->Ram.fbRegion[r].bProtected);
+            }
+        }
+#endif
+
         NV_PRINTF(LEVEL_INFO,
                   "failed to allocate block.  Heap total=0x%llx free=0x%llx\n",
                   pHeap->total, pHeap->free);
