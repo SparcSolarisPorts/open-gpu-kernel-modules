@@ -66,6 +66,7 @@ main(void)
     static struct NvKmsQueryDispParams disp;
     struct NvKmsFreeDeviceParams fr;
     int fd;
+    int gpufd;
     unsigned int i;
 
     fd = open("/dev/nvidia-modeset", O_RDWR);
@@ -78,6 +79,20 @@ main(void)
         (unsigned int)sizeof (struct NvKmsIoctlParams),
         (unsigned int)sizeof (alloc), (unsigned int)sizeof (disp));
 
+    /*
+     * NVKMS only finds GPUs that resman reports as attached. A GPU is
+     * attached while its adapter is initialised, and the last close of
+     * /dev/nvidia0 shuts the adapter down again. Hold the node open for the
+     * whole run, as an X server does, so the GPU stays attached.
+     */
+    gpufd = open("/dev/nvidia0", O_RDWR);
+    if (gpufd < 0) {
+        perror("open /dev/nvidia0");
+        close(fd);
+        return (2);
+    }
+    printf("opened /dev/nvidia0 (fd %d) to keep the GPU initialised\n", gpufd);
+
     memset(&alloc, 0, sizeof (alloc));
     strncpy(alloc.request.versionString, NV_VERSION_STRING,
         sizeof (alloc.request.versionString) - 1);
@@ -88,6 +103,7 @@ main(void)
     if (nvkms_call(fd, NVKMS_IOCTL_ALLOC_DEVICE, &alloc, sizeof (alloc),
         "alloc device") != 0) {
         close(fd);
+        close(gpufd);
         return (1);
     }
     printf("%-22s status %d (0 = success)\n", "alloc device",
@@ -95,6 +111,7 @@ main(void)
     if (alloc.reply.status != NVKMS_ALLOC_DEVICE_STATUS_SUCCESS) {
         nfail++;
         close(fd);
+        close(gpufd);
         printf("done, %d failure(s)\n", nfail);
         return (1);
     }
@@ -126,6 +143,7 @@ main(void)
         "free device");
 
     close(fd);
+    close(gpufd);
     printf("done, %d failure(s)\n", nfail);
     return (nfail != 0);
 }
