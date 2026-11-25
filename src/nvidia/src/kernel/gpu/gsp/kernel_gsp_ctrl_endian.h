@@ -10154,6 +10154,40 @@ _kgspCtrlSwap_NVC36F_CTRL_INTERNAL_GPFIFO_GET_WORK_SUBMIT_TOKEN_PARAMS(NVC36F_CT
     KGSP_RPC_REVERSE((*p).workSubmitToken);
 }
 
+static void
+_kgspCtrlSwap_NV402C_CTRL_I2C_GET_PORT_INFO_PARAMS(NV402C_CTRL_I2C_GET_PORT_INFO_PARAMS *p)
+{
+    (void)p;
+}
+
+static void
+_kgspCtrlSwap_NV402C_CTRL_I2C_GET_PORT_SPEED_PARAMS(NV402C_CTRL_I2C_GET_PORT_SPEED_PARAMS *p)
+{
+    NvU32 i0;
+
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).portSpeed); i0++)
+    {
+        KGSP_RPC_REVERSE((*p).portSpeed[i0]);
+    }
+}
+
+static void
+_kgspCtrlSwap_NV402C_CTRL_I2C_DEVICE_INFO(NV402C_CTRL_I2C_DEVICE_INFO *p)
+{
+    KGSP_RPC_REVERSE((*p).i2cAddress);
+}
+
+static void
+_kgspCtrlSwap_NV402C_CTRL_I2C_TABLE_GET_DEV_INFO_PARAMS(NV402C_CTRL_I2C_TABLE_GET_DEV_INFO_PARAMS *p)
+{
+    NvU32 i0;
+
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).i2cDevInfo); i0++)
+    {
+        _kgspCtrlSwap_NV402C_CTRL_I2C_DEVICE_INFO(&(*p).i2cDevInfo[i0]);
+    }
+}
+
 /* NV_TRUE: command known and buffer large enough; params converted. */
 static NvBool
 _kgspCtrlSwapParams(NvU32 cmd, NvU8 *pParams, NvU32 paramsSize)
@@ -14539,6 +14573,21 @@ _kgspCtrlSwapParams(NvU32 cmd, NvU8 *pParams, NvU32 paramsSize)
             if (paramsSize < sizeof(NV2080_CTRL_INTERNAL_GCX_ENTRY_PREREQUISITE_PARAMS))
                 return NV_FALSE;
             _kgspCtrlSwap_NV2080_CTRL_INTERNAL_GCX_ENTRY_PREREQUISITE_PARAMS((NV2080_CTRL_INTERNAL_GCX_ENTRY_PREREQUISITE_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x402c0101: /* NV402C_CTRL_CMD_I2C_GET_PORT_INFO */
+            if (paramsSize < sizeof(NV402C_CTRL_I2C_GET_PORT_INFO_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV402C_CTRL_I2C_GET_PORT_INFO_PARAMS((NV402C_CTRL_I2C_GET_PORT_INFO_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x402c0103: /* NV402C_CTRL_CMD_I2C_GET_PORT_SPEED */
+            if (paramsSize < sizeof(NV402C_CTRL_I2C_GET_PORT_SPEED_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV402C_CTRL_I2C_GET_PORT_SPEED_PARAMS((NV402C_CTRL_I2C_GET_PORT_SPEED_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x402c0104: /* NV402C_CTRL_CMD_I2C_TABLE_GET_DEV_INFO */
+            if (paramsSize < sizeof(NV402C_CTRL_I2C_TABLE_GET_DEV_INFO_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV402C_CTRL_I2C_TABLE_GET_DEV_INFO_PARAMS((NV402C_CTRL_I2C_TABLE_GET_DEV_INFO_PARAMS *)pParams);
             return NV_TRUE;
         case 0x906f0105: /* NV906F_CTRL_CMD_GET_DEFER_RC_STATE */
             if (paramsSize < sizeof(NV906F_CTRL_CMD_GET_DEFER_RC_STATE_PARAMS))

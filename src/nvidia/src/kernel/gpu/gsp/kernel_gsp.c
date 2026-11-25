@@ -101,6 +101,7 @@
 #include "class/cl90f1.h"  // FERMI_VASPACE_A
 #include "class/cl0070.h"  // NV01_MEMORY_VIRTUAL, NV_MEMORY_VIRTUAL_ALLOCATION_PARAMS
 #include "class/cl90cd.h"  // NV_EVENT_BUFFER, NV_EVENT_BUFFER_ALLOC_PARAMETERS
+#include "ctrl/ctrl90cd.h" // NV_EVENT_BUFFER_CTRL_CMD_* (hand-converted, see kgspRpcSwapCtrlParams)
 #include "alloc/alloc_channel.h"  // NV_CHANNEL_ALLOC_PARAMS
 #include "class/cl906f.h"  // GF100_CHANNEL_GPFIFO and the later GPFIFO channel classes
 #include "class/cla06f.h"
@@ -926,6 +927,55 @@ kgspRpcSwapCtrlParams(NvU32 cmd, NvU32 rpcFlags, void *pParams, NvU32 paramsSize
     // Raw parameters: the generated converter knows every structure it could build.
     if (_kgspCtrlSwapParams(cmd, (NvU8 *)pParams, paramsSize))
         return NV_TRUE;
+
+    // The event buffer controls are not named NVxxxx_CTRL_CMD_*, so the generator skips them.
+    switch (cmd)
+    {
+        case NV_EVENT_BUFFER_CTRL_CMD_ENABLE_EVENTS:
+        {
+            // NvBool enable (a byte, padding after it), then a 32-bit flags word.
+            NV_EVENT_BUFFER_CTRL_CMD_ENABLE_EVENTS_PARAMS *q =
+                (NV_EVENT_BUFFER_CTRL_CMD_ENABLE_EVENTS_PARAMS *)pParams;
+
+            if (paramsSize < sizeof(*q))
+                break;
+
+            KGSP_RPC_REVERSE(q->flags);
+            return NV_TRUE;
+        }
+
+        case NV_EVENT_BUFFER_CTRL_CMD_UPDATE_GET:
+        {
+            NV_EVENT_BUFFER_CTRL_CMD_UPDATE_GET_PARAMS *q =
+                (NV_EVENT_BUFFER_CTRL_CMD_UPDATE_GET_PARAMS *)pParams;
+
+            if (paramsSize < sizeof(*q))
+                break;
+
+            KGSP_RPC_REVERSE(q->recordBufferGet);
+            KGSP_RPC_REVERSE(q->varDataBufferGet);
+            return NV_TRUE;
+        }
+
+        case NV_EVENT_BUFFER_CTRL_CMD_POST_TELEMETRY_EVENT:
+        {
+            // 32- and 16-bit values around two byte arrays, which stay as they are.
+            NV_EVENT_BUFFER_CTRL_CMD_POST_TELEMETRY_EVENT_PARAMS *q =
+                (NV_EVENT_BUFFER_CTRL_CMD_POST_TELEMETRY_EVENT_PARAMS *)pParams;
+
+            if (paramsSize < sizeof(*q))
+                break;
+
+            KGSP_RPC_REVERSE(q->eventType);
+            KGSP_RPC_REVERSE(q->typeVersion);
+            KGSP_RPC_REVERSE(q->eventDataSz);
+            KGSP_RPC_REVERSE(q->varDataSz);
+            return NV_TRUE;
+        }
+
+        default:
+            break;
+    }
 
     _kgspRpcReportUnconvertedParams("control", cmd, paramsSize);
     return NV_FALSE;
