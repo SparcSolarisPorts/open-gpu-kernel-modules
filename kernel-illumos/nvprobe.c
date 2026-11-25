@@ -106,9 +106,12 @@ rm_alloc(int fd, NvHandle hClient, NvHandle hParent, NvHandle hNew,
     return (a.status == NV_OK ? 0 : -1);
 }
 
-/* Like rm_control() but prints nothing and does not count a failure. */
-static int
-rm_control_quiet(int fd, NvHandle hClient, NvHandle hObject, NvU32 cmd,
+/*
+ * Like rm_control() but prints nothing and does not count a failure.
+ * Returns the RM status, or 0xffffffff when the ioctl itself failed.
+ */
+static NvU32
+rm_control_st(int fd, NvHandle hClient, NvHandle hObject, NvU32 cmd,
     void *params, NvU32 size)
 {
     NVOS54_PARAMETERS c;
@@ -120,8 +123,16 @@ rm_control_quiet(int fd, NvHandle hClient, NvHandle hObject, NvU32 cmd,
     c.params = NV_PTR_TO_NvP64(params);
     c.paramsSize = size;
     if (ioctl(fd, (int)NVP_IOWR(NV_ESC_RM_CONTROL, sizeof (c)), &c) != 0)
-        return (-1);
-    return (c.status == NV_OK ? 0 : -1);
+        return (0xffffffffU);
+    return ((NvU32)c.status);
+}
+
+static int
+rm_control_quiet(int fd, NvHandle hClient, NvHandle hObject, NvU32 cmd,
+    void *params, NvU32 size)
+{
+    return (rm_control_st(fd, hClient, hObject, cmd, params, size) == NV_OK ?
+        0 : -1);
 }
 
 /*
@@ -173,6 +184,8 @@ stage3(int fd, NvHandle hClient)
         NV0073_CTRL_SPECIFIC_GET_TYPE_PARAMS ty;
         NV0073_CTRL_SPECIFIC_GET_CONNECTOR_DATA_PARAMS cd;
         NV0073_CTRL_SYSTEM_GET_CONNECT_STATE_PARAMS one;
+        static NV0073_CTRL_SPECIFIC_GET_EDID_V2_PARAMS edid;
+        NvU32 st;
         unsigned int k;
 
         if (!(sup.displayMask & id))
@@ -208,6 +221,33 @@ stage3(int fd, NvHandle hClient)
             NV0073_CTRL_CMD_SYSTEM_GET_CONNECT_STATE, &one, sizeof (one),
             "  connect state") == 0)
             printf("    %s\n", one.displayMask ? "CONNECTED" : "not connected");
+
+        /*
+         * Read the EDID straight from the display (no cache, raw read).
+         * A monitor that answers on DDC or DP AUX shows up here even when
+         * the hotplug/connect state is empty. Status 0 with a non-zero
+         * size and the 00 ff ff ff ff ff ff 00 header means a monitor.
+         */
+        memset(&edid, 0, sizeof (edid));
+        edid.displayId = id;
+        edid.bufferSize = NV0073_CTRL_SPECIFIC_GET_EDID_MAX_EDID_BYTES;
+        edid.flags =
+            NV0073_CTRL_SPECIFIC_GET_EDID_FLAGS_COPY_CACHE_NO |
+            NV0073_CTRL_SPECIFIC_GET_EDID_FLAGS_READ_MODE_RAW;
+        st = rm_control_st(fd, hClient, NVP_H_DISPLAY,
+            NV0073_CTRL_CMD_SPECIFIC_GET_EDID_V2, &edid, sizeof (edid));
+        if (st == NV_OK) {
+            printf("    edid: %u bytes, header", (unsigned int)edid.bufferSize);
+            for (k = 0; k < 8; k++)
+                printf(" %02x", edid.edidBuffer[k]);
+            if (edid.bufferSize >= 12)
+                printf(", mfg id %02x%02x product %02x%02x",
+                    edid.edidBuffer[8], edid.edidBuffer[9],
+                    edid.edidBuffer[11], edid.edidBuffer[10]);
+            printf("\n");
+        } else {
+            printf("    edid: status 0x%08x\n", (unsigned int)st);
+        }
     }
 
     /*
