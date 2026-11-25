@@ -35,11 +35,14 @@
 #include <class/cl0000.h>
 #include <class/cl0080.h>
 #include <class/cl2080.h>
+#include <class/cl0073.h>
 #include <ctrl/ctrl0000/ctrl0000gpu.h>
 #include <ctrl/ctrl2080/ctrl2080gpu.h>
+#include <ctrl/ctrl0073/ctrl0073system.h>
 
 #define NVP_H_DEVICE    0xde000001U
 #define NVP_H_SUBDEVICE 0xde000002U
+#define NVP_H_DISPLAY   0xde000003U
 
 /* Same layout as the driver's NV_IOC_* macros (and Linux _IOWR). */
 #define NVP_IOWR(nr, size)                                          \
@@ -103,6 +106,49 @@ rm_alloc(int fd, NvHandle hClient, NvHandle hParent, NvHandle hNew,
 }
 
 /*
+ * Stage 3: display. Allocate NV04_DISPLAY_COMMON (what nvidia_modeset does
+ * first) and ask how many heads the GPU has, which display devices the
+ * board supports and which of them have something connected.
+ */
+static void
+stage3(int fd, NvHandle hClient)
+{
+    NV0073_CTRL_SYSTEM_GET_NUM_HEADS_PARAMS heads;
+    NV0073_CTRL_SYSTEM_GET_SUPPORTED_PARAMS sup;
+    NV0073_CTRL_SYSTEM_GET_CONNECT_STATE_PARAMS conn;
+
+    if (rm_alloc(fd, hClient, NVP_H_DEVICE, NVP_H_DISPLAY, NV04_DISPLAY_COMMON,
+        NULL, 0, "alloc display common") != 0)
+        return;
+
+    memset(&heads, 0, sizeof (heads));
+    if (rm_control(fd, hClient, NVP_H_DISPLAY,
+        NV0073_CTRL_CMD_SYSTEM_GET_NUM_HEADS, &heads, sizeof (heads),
+        "display num heads") == 0)
+        printf("  heads %u\n", (unsigned int)heads.numHeads);
+
+    memset(&sup, 0, sizeof (sup));
+    if (rm_control(fd, hClient, NVP_H_DISPLAY,
+        NV0073_CTRL_CMD_SYSTEM_GET_SUPPORTED, &sup, sizeof (sup),
+        "display supported") != 0)
+        return;
+    printf("  displayMask 0x%08x, displayMaskDDC 0x%08x\n",
+        (unsigned int)sup.displayMask, (unsigned int)sup.displayMaskDDC);
+    if (sup.displayMask == 0) {
+        printf("  no display devices on this board\n");
+        return;
+    }
+
+    memset(&conn, 0, sizeof (conn));
+    conn.displayMask = sup.displayMask;
+    if (rm_control(fd, hClient, NVP_H_DISPLAY,
+        NV0073_CTRL_CMD_SYSTEM_GET_CONNECT_STATE, &conn, sizeof (conn),
+        "display connect state") == 0)
+        printf("  connected displayMask 0x%08x\n",
+            (unsigned int)conn.displayMask);
+}
+
+/*
  * Stage 2: attach the GPU for this client, allocate a device and a
  * subdevice (both are forwarded to the GSP) and read the GPU UUID.
  */
@@ -152,6 +198,8 @@ stage2(int fd, NvHandle hClient, NvU32 gpuId)
         }
         printf("\n");
     }
+
+    stage3(fd, hClient);
 }
 
 int
