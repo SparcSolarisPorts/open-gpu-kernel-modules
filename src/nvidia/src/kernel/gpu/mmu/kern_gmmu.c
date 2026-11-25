@@ -2195,6 +2195,31 @@ kgmmuInstBlkInit_IMPL
         if (status == NV_OK)
             MEM_WR32(pInstBlk + magicValueOffset, magicValueData);
 
+#if NVCPU_IS_BIG_ENDIAN
+        //
+        // Diagnostic for the SPARC port: the words just stored, read back as a
+        // word and as bytes from the same mapping.
+        //
+        {
+            static NvU32 nInstDiag;
+
+            if (nInstDiag < 12)
+            {
+                const volatile NvU8 *pb = (const volatile NvU8 *)(pInstBlk + dirBaseLoOffset);
+
+                nInstDiag++;
+                NV_PRINTF(LEVEL_ERROR,
+                          "BE diag: InstBlk space %d pa 0x%llx dirBaseLo off 0x%x data 0x%08x hi off 0x%x data 0x%08x; "
+                          "readback lo word 0x%08x bytes %02x %02x %02x %02x\n",
+                          (int)memdescGetAddressSpace(pInstBlkDesc),
+                          memdescGetPhysAddr(pInstBlkDesc, AT_GPU, 0),
+                          dirBaseLoOffset, dirBaseLoData, dirBaseHiOffset, dirBaseHiData,
+                          MEM_RD32(pInstBlk + dirBaseLoOffset),
+                          pb[0], pb[1], pb[2], pb[3]);
+            }
+        }
+#endif
+
         memmgrMemDescEndTransfer(pMemoryManager, pInstBlkDesc,
                                  TRANSFER_FLAGS_SHADOW_ALLOC);
     }

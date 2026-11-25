@@ -775,6 +775,40 @@ _gmmuWalkCBUpdatePde
                                     transferFlags));
     }
 
+#if NVCPU_IS_BIG_ENDIAN
+    //
+    // Diagnostic for the SPARC port: compare the PDE bytes written with the
+    // bytes read back through the same transfer path. Limited to a few lines.
+    //
+    {
+        static NvU32 nPdeDiag;
+
+        if (nPdeDiag < 24)
+        {
+            NvU8             rb[8] = {0};
+            TRANSFER_SURFACE src   = {0};
+            NV_STATUS        rdStatus;
+
+            nPdeDiag++;
+            src.pMemDesc = pMemDesc[GMMU_USER_PAGE_DIR_INDEX];
+            src.offset   = entryIndex * pLevelFmt->entrySize;
+            rdStatus = memmgrMemRead(GPU_GET_MEMORY_MANAGER(pGpu), &src, rb,
+                                     NV_MIN(pLevelFmt->entrySize, (NvU32)sizeof(rb)),
+                                     TRANSFER_FLAGS_NONE);
+            NV_PRINTF(LEVEL_ERROR,
+                      "BE diag: PDE idx %u entrySize %u space %d pa 0x%llx wrote %02x %02x %02x %02x %02x %02x %02x %02x "
+                      "read(%x) %02x %02x %02x %02x %02x %02x %02x %02x\n",
+                      entryIndex, (NvU32)pLevelFmt->entrySize,
+                      (int)memdescGetAddressSpace(src.pMemDesc),
+                      memdescGetPhysAddr(src.pMemDesc, AT_GPU, 0),
+                      entry.v8[0], entry.v8[1], entry.v8[2], entry.v8[3],
+                      entry.v8[4], entry.v8[5], entry.v8[6], entry.v8[7],
+                      (NvU32)rdStatus,
+                      rb[0], rb[1], rb[2], rb[3], rb[4], rb[5], rb[6], rb[7]);
+        }
+    }
+#endif
+
     return NV_TRUE;
 }
 
