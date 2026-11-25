@@ -30,6 +30,12 @@ cat > "$TMP/tu.c" <<'EOF'
 #include <ctrl/ctrlb06f.h>
 #include <ctrl/ctrlc36f.h>
 #include <ctrl/ctrl402c.h>
+#include <ctrl/ctrl5070/ctrl5070base.h>
+#include <ctrl/ctrl5070/ctrl5070common.h>
+#include <ctrl/ctrl5070/ctrl5070chnc.h>
+#include <ctrl/ctrl5070/ctrl5070or.h>
+#include <ctrl/ctrl5070/ctrl5070rg.h>
+#include <ctrl/ctrl5070/ctrl5070system.h>
 EOF
 
 gcc -E -P \
@@ -42,7 +48,9 @@ gcc -E -P \
 set -- --pp "$TMP/tu.i" --out "$OUT" \
     --hdr "$CTRL"/ctrl2080/*.h "$CTRL"/ctrl0080/*.h "$CTRL"/ctrl0073/*.h "$CTRL"/ctrl90f1.h \
     "$CTRL"/ctrl906f.h "$CTRL"/ctrla06f/*.h "$CTRL"/ctrlb06f.h "$CTRL"/ctrlc36f.h \
-    "$CTRL"/ctrl402c.h
+    "$CTRL"/ctrl402c.h \
+    "$CTRL"/ctrl5070/ctrl5070chnc.h "$CTRL"/ctrl5070/ctrl5070or.h \
+    "$CTRL"/ctrl5070/ctrl5070rg.h "$CTRL"/ctrl5070/ctrl5070system.h
 [ -n "$REPORT" ] && set -- "$@" --report "$REPORT"
 
 python3 -I "$HERE/gen-ctrl-endian.py" "$@"

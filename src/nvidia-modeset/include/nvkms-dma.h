@@ -95,11 +95,31 @@ static inline NvU32 nvDmaLoadPioMethod(
     return __atomic_load_n(ptr, __ATOMIC_ACQUIRE);
 }
 
+/*
+ * The display engine reads push buffer words and writes notifier words in
+ * little-endian byte order.  Those buffers live in system memory, which the
+ * CPU accesses in its own byte order, so a big-endian host has to swap each
+ * word on the way in and out.  The swap is its own inverse.  Registers
+ * reached through the BAR (PUT/GET) are already byte-swapped by the mapping
+ * and are not passed through this.
+ */
+#if NVCPU_IS_BIG_ENDIAN
+static inline NvU32 nvDmaGpuWord(NvU32 value)
+{
+    return __builtin_bswap32(value);
+}
+#else
+static inline NvU32 nvDmaGpuWord(NvU32 value)
+{
+    return value;
+}
+#endif
+
 static inline void nvDmaSetEvoMethodData(
     NVEvoChannelPtr pChannel,
     const NvU32 data)
 {
-    *(pChannel->pb.buffer) = data;
+    *(pChannel->pb.buffer) = nvDmaGpuWord(data);
     pChannel->pb.buffer++;
 }
 

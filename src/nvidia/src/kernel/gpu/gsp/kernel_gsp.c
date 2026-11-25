@@ -140,6 +140,12 @@
 #include "ctrl/ctrl0080.h"  // kernel_gsp_ctrl_endian.h (generated) names structures from both
 #include "ctrl/ctrl2080.h"  // control parameter families
 #include "ctrl/ctrl0073.h"  // (display common controls too)
+#include "ctrl/ctrl5070/ctrl5070base.h"    // NV5070 display controls (NVKMS)
+#include "ctrl/ctrl5070/ctrl5070common.h"
+#include "ctrl/ctrl5070/ctrl5070chnc.h"
+#include "ctrl/ctrl5070/ctrl5070or.h"
+#include "ctrl/ctrl5070/ctrl5070rg.h"
+#include "ctrl/ctrl5070/ctrl5070system.h"
 #include "ctrl/ctrl90f1.h"  // FERMI_VASPACE_A controls
 #include "gmcapi/gmcapi_engine_types.h"
 #include "gmcapi/gmcapi_system_info.h"

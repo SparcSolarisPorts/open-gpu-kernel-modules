@@ -106,7 +106,7 @@ void nvEvoMakeRoom(NVEvoChannelPtr pChannel, NvU32 count)
                          (char *)push_buffer->base);
 
     if (putOffset >= push_buffer->offset_max) {
-        *(push_buffer->buffer) = 0x20000000;
+        *(push_buffer->buffer) = nvDmaGpuWord(0x20000000);
         push_buffer->buffer = push_buffer->base;
         nvDmaKickoffEvo(pChannel);
         putOffset = 0;
@@ -121,7 +121,7 @@ void nvEvoMakeRoom(NVEvoChannelPtr pChannel, NvU32 count)
 
             if (push_buffer->fifo_free_count <= count) {
                 if (getOffset) {
-                    *(push_buffer->buffer) = 0x20000000;
+                    *(push_buffer->buffer) = nvDmaGpuWord(0x20000000);
                     push_buffer->buffer = push_buffer->base;
                     nvDmaKickoffEvo(pChannel);
                     putOffset = 0;
@@ -175,7 +175,7 @@ static inline void EvoWriteNotifier(volatile NvU32 *pNotifier, NvU32 value)
      * sysmem or both in vidmem, however.
      */
 
-    *pNotifier = value;
+    *pNotifier = nvDmaGpuWord(value);
 }
 
 /* Write the EVO core notifier at the given offset to the given value. */
@@ -206,7 +206,7 @@ static NvBool EvoCheckNotifier(const NVDispEvoRec *pDispEvo,
 
     // While the completion notifier is not set to done_true
     do {
-        const NvU32 val = *pNotifier;
+        const NvU32 val = nvDmaGpuWord(*pNotifier);
         const NvU32 done_mask = DRF_SHIFTMASK(done_extent_bit:done_base_bit);
         const NvU32 done_val = done_value << done_base_bit;
 
@@ -303,7 +303,7 @@ NvU32 nvEvoReadCRC32Notifier(volatile NvU32 *pCRC32Notifier,
         volatile NvU32 *pFlag = pCRC32Notifier + status_offset;
         NvU32 flag_mask =
               DRF_SHIFTMASK((info.flag_extent_bit):(info.flag_base_bit));
-        NvU32 flag = (*pFlag & flag_mask) >> info.flag_base_bit;
+        NvU32 flag = (nvDmaGpuWord(*pFlag) & flag_mask) >> info.flag_base_bit;
 
         switch (info.flag_type)
         {
@@ -340,7 +340,7 @@ NvU32 nvEvoReadCRC32Notifier(volatile NvU32 *pCRC32Notifier,
                 DRF_SHIFTMASK((info.field_extent_bit):(info.field_base_bit));
 
             info.field_frame_values[i].value =
-                (*pEntry & field_mask) >> info.field_base_bit;
+                (nvDmaGpuWord(*pEntry) & field_mask) >> info.field_base_bit;
             info.field_frame_values[i].supported = TRUE;
         }
         pCRC32Notifier += entry_stride;
@@ -377,7 +377,7 @@ NvBool nvEvoWaitForCRC32Notifier(const NVDevEvoPtr pDevEvo,
     pCRC32Notifier += offset;
 
     do {
-        const NvU32 status = *pCRC32Notifier;
+        const NvU32 status = nvDmaGpuWord(*pCRC32Notifier);
 
         if ((status & done_mask) == done_val) {
             return TRUE;

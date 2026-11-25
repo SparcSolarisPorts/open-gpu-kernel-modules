@@ -5406,8 +5406,8 @@ static NvU64 GetVblankTimestamp(NVDispEvoPtr pDispEvo, NvU32 apiHead)
      * - Read the RG semaphore timestamp (gpu timer domain)
      * - Subtract the gpu to cpu time diff to convert to CPU time domain
      */
-    rgHwTimestamp = ((NvU64)pSema->timeStamp.nanoseconds[1] << 32) |
-                    (NvU64)pSema->timeStamp.nanoseconds[0];
+    rgHwTimestamp = ((NvU64)nvDmaGpuWord(pSema->timeStamp.nanoseconds[1]) << 32) |
+                    (NvU64)nvDmaGpuWord(pSema->timeStamp.nanoseconds[0]);
     rgCpuTimestamp = rgHwTimestamp - pDevEvo->gpuCpuTimeDiff;
 
     /*

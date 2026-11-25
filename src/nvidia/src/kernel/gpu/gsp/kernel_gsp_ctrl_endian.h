@@ -10188,6 +10188,312 @@ _kgspCtrlSwap_NV402C_CTRL_I2C_TABLE_GET_DEV_INFO_PARAMS(NV402C_CTRL_I2C_TABLE_GE
     }
 }
 
+static void
+_kgspCtrlSwap_NV5070_CTRL_CMD_BASE_PARAMS(NV5070_CTRL_CMD_BASE_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subdeviceIndex);
+}
+
+static void
+_kgspCtrlSwap_NV5070_CTRL_CMD_IS_MODE_POSSIBLE_PARAMS(NV5070_CTRL_CMD_IS_MODE_POSSIBLE_PARAMS *p)
+{
+    NvU32 i0, i1;
+
+    _kgspCtrlSwap_NV5070_CTRL_CMD_BASE_PARAMS(&(*p).base);
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).Head); i0++)
+    {
+        KGSP_RPC_REVERSE((*p).Head[i0].HeadActive);
+        KGSP_RPC_REVERSE((*p).Head[i0].PixelClock.Frequency);
+        KGSP_RPC_REVERSE((*p).Head[i0].PixelClock.Adj1000Div1001);
+        KGSP_RPC_REVERSE((*p).Head[i0].RasterSize.Width);
+        KGSP_RPC_REVERSE((*p).Head[i0].RasterSize.Height);
+        KGSP_RPC_REVERSE((*p).Head[i0].RasterBlankStart.X);
+        KGSP_RPC_REVERSE((*p).Head[i0].RasterBlankStart.Y);
+        KGSP_RPC_REVERSE((*p).Head[i0].RasterBlankEnd.X);
+        KGSP_RPC_REVERSE((*p).Head[i0].RasterBlankEnd.Y);
+        KGSP_RPC_REVERSE((*p).Head[i0].RasterVertBlank2.YStart);
+        KGSP_RPC_REVERSE((*p).Head[i0].RasterVertBlank2.YEnd);
+        KGSP_RPC_REVERSE((*p).Head[i0].Control.Structure);
+        KGSP_RPC_REVERSE((*p).Head[i0].Control.MasterLockMode);
+        KGSP_RPC_REVERSE((*p).Head[i0].Control.MasterLockPin);
+        KGSP_RPC_REVERSE((*p).Head[i0].Control.SlaveLockMode);
+        KGSP_RPC_REVERSE((*p).Head[i0].Control.SlaveLockPin);
+        KGSP_RPC_REVERSE((*p).Head[i0].OutputScaler.VerticalTaps);
+        KGSP_RPC_REVERSE((*p).Head[i0].OutputScaler.HorizontalTaps);
+        KGSP_RPC_REVERSE((*p).Head[i0].ViewportSizeOut.Width);
+        KGSP_RPC_REVERSE((*p).Head[i0].ViewportSizeOut.Height);
+        KGSP_RPC_REVERSE((*p).Head[i0].ViewportSizeOutMin.Width);
+        KGSP_RPC_REVERSE((*p).Head[i0].ViewportSizeOutMin.Height);
+        KGSP_RPC_REVERSE((*p).Head[i0].ViewportSizeOutMax.Width);
+        KGSP_RPC_REVERSE((*p).Head[i0].ViewportSizeOutMax.Height);
+        KGSP_RPC_REVERSE((*p).Head[i0].ViewportSizeIn.Width);
+        KGSP_RPC_REVERSE((*p).Head[i0].ViewportSizeIn.Height);
+        KGSP_RPC_REVERSE((*p).Head[i0].Params.Format);
+        KGSP_RPC_REVERSE((*p).Head[i0].Params.SuperSample);
+        KGSP_RPC_REVERSE((*p).Head[i0].BaseUsageBounds.Usable);
+        KGSP_RPC_REVERSE((*p).Head[i0].BaseUsageBounds.PixelDepth);
+        KGSP_RPC_REVERSE((*p).Head[i0].BaseUsageBounds.SuperSample);
+        KGSP_RPC_REVERSE((*p).Head[i0].BaseUsageBounds.BaseLutUsage);
+        KGSP_RPC_REVERSE((*p).Head[i0].BaseUsageBounds.OutputLutUsage);
+        KGSP_RPC_REVERSE((*p).Head[i0].OverlayUsageBounds.Usable);
+        KGSP_RPC_REVERSE((*p).Head[i0].OverlayUsageBounds.PixelDepth);
+        KGSP_RPC_REVERSE((*p).Head[i0].OverlayUsageBounds.OverlayLutUsage);
+        KGSP_RPC_REVERSE((*p).Head[i0].BaseLutLo.Mode);
+        KGSP_RPC_REVERSE((*p).Head[i0].OutputLutLo.Mode);
+        for (i1 = 0; i1 < NV_ARRAY_ELEMENTS((*p).Head[i0].displayId); i1++)
+        {
+            KGSP_RPC_REVERSE((*p).Head[i0].displayId[i1]);
+        }
+        KGSP_RPC_REVERSE((*p).Head[i0].outputResourcePixelDepthBPP);
+        KGSP_RPC_REVERSE((*p).Head[i0].CriticalWatermark);
+    }
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).Dac); i0++)
+    {
+        KGSP_RPC_REVERSE((*p).Dac[i0].owner);
+        KGSP_RPC_REVERSE((*p).Dac[i0].protocol);
+    }
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).Sor); i0++)
+    {
+        KGSP_RPC_REVERSE((*p).Sor[i0].owner);
+        KGSP_RPC_REVERSE((*p).Sor[i0].ownerMask);
+        KGSP_RPC_REVERSE((*p).Sor[i0].protocol);
+        KGSP_RPC_REVERSE((*p).Sor[i0].pixelReplicateMode);
+    }
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).Pior); i0++)
+    {
+        KGSP_RPC_REVERSE((*p).Pior[i0].owner);
+        KGSP_RPC_REVERSE((*p).Pior[i0].protocol);
+    }
+    KGSP_RPC_REVERSE((*p).RequestedOperation);
+    KGSP_RPC_REVERSE((*p).options);
+    KGSP_RPC_REVERSE((*p).IsPossible);
+    KGSP_RPC_REVERSE((*p).MinPState);
+    KGSP_RPC_REVERSE((*p).minPerfLevel);
+    KGSP_RPC_REVERSE((*p).worstCaseMargin);
+}
+
+static void
+_kgspCtrlSwap_NV5070_CTRL_CMD_GET_CHANNEL_INFO_PARAMS(NV5070_CTRL_CMD_GET_CHANNEL_INFO_PARAMS *p)
+{
+    _kgspCtrlSwap_NV5070_CTRL_CMD_BASE_PARAMS(&(*p).base);
+    KGSP_RPC_REVERSE((*p).channelClass);
+    KGSP_RPC_REVERSE((*p).channelInstance);
+    KGSP_RPC_REVERSE((*p).channelState);
+}
+
+static void
+_kgspCtrlSwap_NV5070_CTRL_SET_ACCL_PARAMS(NV5070_CTRL_SET_ACCL_PARAMS *p)
+{
+    _kgspCtrlSwap_NV5070_CTRL_CMD_BASE_PARAMS(&(*p).base);
+    KGSP_RPC_REVERSE((*p).channelClass);
+    KGSP_RPC_REVERSE((*p).channelInstance);
+    KGSP_RPC_REVERSE((*p).accelerators);
+    KGSP_RPC_REVERSE((*p).accelMask);
+}
+
+static void
+_kgspCtrlSwap_NV5070_CTRL_GET_ACCL_PARAMS(NV5070_CTRL_GET_ACCL_PARAMS *p)
+{
+    _kgspCtrlSwap_NV5070_CTRL_CMD_BASE_PARAMS(&(*p).base);
+    KGSP_RPC_REVERSE((*p).channelClass);
+    KGSP_RPC_REVERSE((*p).channelInstance);
+    KGSP_RPC_REVERSE((*p).accelerators);
+    KGSP_RPC_REVERSE((*p).accelMask);
+}
+
+static void
+_kgspCtrlSwap_NV5070_CTRL_GET_PINSET_COUNT_PARAMS(NV5070_CTRL_GET_PINSET_COUNT_PARAMS *p)
+{
+    _kgspCtrlSwap_NV5070_CTRL_CMD_BASE_PARAMS(&(*p).base);
+    KGSP_RPC_REVERSE((*p).pinsetCount);
+}
+
+static void
+_kgspCtrlSwap_NV5070_CTRL_GET_PINSET_PEER_PARAMS(NV5070_CTRL_GET_PINSET_PEER_PARAMS *p)
+{
+    _kgspCtrlSwap_NV5070_CTRL_CMD_BASE_PARAMS(&(*p).base);
+    KGSP_RPC_REVERSE((*p).pinset);
+    KGSP_RPC_REVERSE((*p).peerGpuInstance);
+    KGSP_RPC_REVERSE((*p).peerPinset);
+}
+
+static void
+_kgspCtrlSwap_NV5070_CTRL_SET_RMFREE_FLAGS_PARAMS(NV5070_CTRL_SET_RMFREE_FLAGS_PARAMS *p)
+{
+    _kgspCtrlSwap_NV5070_CTRL_CMD_BASE_PARAMS(&(*p).base);
+    KGSP_RPC_REVERSE((*p).flags);
+}
+
+static void
+_kgspCtrlSwap_NV5070_CTRL_IMP_SET_GET_PARAMETER_PARAMS(NV5070_CTRL_IMP_SET_GET_PARAMETER_PARAMS *p)
+{
+    _kgspCtrlSwap_NV5070_CTRL_CMD_BASE_PARAMS(&(*p).base);
+    KGSP_RPC_REVERSE((*p).index);
+    KGSP_RPC_REVERSE((*p).pstateApi);
+    KGSP_RPC_REVERSE((*p).head);
+    KGSP_RPC_REVERSE((*p).operation);
+    KGSP_RPC_REVERSE((*p).value);
+}
+
+static void
+_kgspCtrlSwap_NV5070_CTRL_SET_MEMPOOL_WAR_FOR_BLIT_TEARING_PARAMS(NV5070_CTRL_SET_MEMPOOL_WAR_FOR_BLIT_TEARING_PARAMS *p)
+{
+    _kgspCtrlSwap_NV5070_CTRL_CMD_BASE_PARAMS(&(*p).base);
+}
+
+static void
+_kgspCtrlSwap_NV5070_CTRL_CMD_GET_SOR_OP_MODE_PARAMS(NV5070_CTRL_CMD_GET_SOR_OP_MODE_PARAMS *p)
+{
+    _kgspCtrlSwap_NV5070_CTRL_CMD_BASE_PARAMS(&(*p).base);
+    KGSP_RPC_REVERSE((*p).orNumber);
+    KGSP_RPC_REVERSE((*p).category);
+    KGSP_RPC_REVERSE((*p).puTxda);
+    KGSP_RPC_REVERSE((*p).puTxdb);
+    KGSP_RPC_REVERSE((*p).puTxca);
+    KGSP_RPC_REVERSE((*p).puTxcb);
+    KGSP_RPC_REVERSE((*p).upper);
+    KGSP_RPC_REVERSE((*p).mode);
+    KGSP_RPC_REVERSE((*p).linkActA);
+    KGSP_RPC_REVERSE((*p).linkActB);
+    KGSP_RPC_REVERSE((*p).lvdsEn);
+    KGSP_RPC_REVERSE((*p).lvdsDual);
+    KGSP_RPC_REVERSE((*p).dupSync);
+    KGSP_RPC_REVERSE((*p).newMode);
+    KGSP_RPC_REVERSE((*p).balanced);
+    KGSP_RPC_REVERSE((*p).plldiv);
+    KGSP_RPC_REVERSE((*p).rotClk);
+    KGSP_RPC_REVERSE((*p).rotDat);
+}
+
+static void
+_kgspCtrlSwap_NV5070_CTRL_CMD_SET_SOR_OP_MODE_PARAMS(NV5070_CTRL_CMD_SET_SOR_OP_MODE_PARAMS *p)
+{
+    _kgspCtrlSwap_NV5070_CTRL_CMD_BASE_PARAMS(&(*p).base);
+    KGSP_RPC_REVERSE((*p).orNumber);
+    KGSP_RPC_REVERSE((*p).category);
+    KGSP_RPC_REVERSE((*p).puTxda);
+    KGSP_RPC_REVERSE((*p).puTxdb);
+    KGSP_RPC_REVERSE((*p).puTxca);
+    KGSP_RPC_REVERSE((*p).puTxcb);
+    KGSP_RPC_REVERSE((*p).upper);
+    KGSP_RPC_REVERSE((*p).mode);
+    KGSP_RPC_REVERSE((*p).linkActA);
+    KGSP_RPC_REVERSE((*p).linkActB);
+    KGSP_RPC_REVERSE((*p).lvdsEn);
+    KGSP_RPC_REVERSE((*p).lvdsDual);
+    KGSP_RPC_REVERSE((*p).dupSync);
+    KGSP_RPC_REVERSE((*p).newMode);
+    KGSP_RPC_REVERSE((*p).balanced);
+    KGSP_RPC_REVERSE((*p).plldiv);
+    KGSP_RPC_REVERSE((*p).rotClk);
+    KGSP_RPC_REVERSE((*p).rotDat);
+}
+
+static void
+_kgspCtrlSwap_NV5070_CTRL_SET_SOR_FLUSH_MODE_PARAMS(NV5070_CTRL_SET_SOR_FLUSH_MODE_PARAMS *p)
+{
+    _kgspCtrlSwap_NV5070_CTRL_CMD_BASE_PARAMS(&(*p).base);
+    KGSP_RPC_REVERSE((*p).sorNumber);
+    KGSP_RPC_REVERSE((*p).headMask);
+}
+
+static void
+_kgspCtrlSwap_NV5070_CTRL_CMD_GET_RG_STATUS_PARAMS(NV5070_CTRL_CMD_GET_RG_STATUS_PARAMS *p)
+{
+    _kgspCtrlSwap_NV5070_CTRL_CMD_BASE_PARAMS(&(*p).base);
+    KGSP_RPC_REVERSE((*p).head);
+    KGSP_RPC_REVERSE((*p).scanLocked);
+    KGSP_RPC_REVERSE((*p).flipLocked);
+    KGSP_RPC_REVERSE((*p).rgStalled);
+}
+
+static void
+_kgspCtrlSwap_NV5070_CTRL_CMD_UNDERFLOW_PARAMS(NV5070_CTRL_CMD_UNDERFLOW_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).head);
+    KGSP_RPC_REVERSE((*p).enable);
+    KGSP_RPC_REVERSE((*p).underflow);
+    KGSP_RPC_REVERSE((*p).epfifoUnderflow);
+    KGSP_RPC_REVERSE((*p).mode);
+}
+
+static void
+_kgspCtrlSwap_NV5070_CTRL_CMD_GET_RG_UNDERFLOW_PROP_PARAMS(NV5070_CTRL_CMD_GET_RG_UNDERFLOW_PROP_PARAMS *p)
+{
+    _kgspCtrlSwap_NV5070_CTRL_CMD_BASE_PARAMS(&(*p).base);
+    _kgspCtrlSwap_NV5070_CTRL_CMD_UNDERFLOW_PARAMS(&(*p).underflowParams);
+}
+
+static void
+_kgspCtrlSwap_NV5070_CTRL_CMD_SET_RG_UNDERFLOW_PROP_PARAMS(NV5070_CTRL_CMD_SET_RG_UNDERFLOW_PROP_PARAMS *p)
+{
+    _kgspCtrlSwap_NV5070_CTRL_CMD_BASE_PARAMS(&(*p).base);
+    _kgspCtrlSwap_NV5070_CTRL_CMD_UNDERFLOW_PARAMS(&(*p).underflowParams);
+}
+
+static void
+_kgspCtrlSwap_NV5070_CTRL_CMD_GET_RG_FLIPLOCK_PROP_PARAMS(NV5070_CTRL_CMD_GET_RG_FLIPLOCK_PROP_PARAMS *p)
+{
+    _kgspCtrlSwap_NV5070_CTRL_CMD_BASE_PARAMS(&(*p).base);
+    KGSP_RPC_REVERSE((*p).head);
+    KGSP_RPC_REVERSE((*p).maxSwapLockoutSkew);
+    KGSP_RPC_REVERSE((*p).swapLockoutStart);
+}
+
+static void
+_kgspCtrlSwap_NV5070_CTRL_CMD_SET_RG_FLIPLOCK_PROP_PARAMS(NV5070_CTRL_CMD_SET_RG_FLIPLOCK_PROP_PARAMS *p)
+{
+    _kgspCtrlSwap_NV5070_CTRL_CMD_BASE_PARAMS(&(*p).base);
+    KGSP_RPC_REVERSE((*p).head);
+    KGSP_RPC_REVERSE((*p).maxSwapLockoutSkew);
+    KGSP_RPC_REVERSE((*p).swapLockoutStart);
+}
+
+static void
+_kgspCtrlSwap_NV5070_CTRL_GET_RG_CONNECTED_LOCKPIN_STATELESS_PARAMS(NV5070_CTRL_GET_RG_CONNECTED_LOCKPIN_STATELESS_PARAMS *p)
+{
+    _kgspCtrlSwap_NV5070_CTRL_CMD_BASE_PARAMS(&(*p).base);
+    KGSP_RPC_REVERSE((*p).head);
+    KGSP_RPC_REVERSE((*p).peer.hDisplay);
+    KGSP_RPC_REVERSE((*p).peer.subdeviceIndex);
+    KGSP_RPC_REVERSE((*p).peer.head);
+    KGSP_RPC_REVERSE((*p).masterScanLock);
+    KGSP_RPC_REVERSE((*p).slaveScanLock);
+}
+
+static void
+_kgspCtrlSwap_NV5070_CTRL_GET_PINSET_LOCKPINS_PARAMS(NV5070_CTRL_GET_PINSET_LOCKPINS_PARAMS *p)
+{
+    _kgspCtrlSwap_NV5070_CTRL_CMD_BASE_PARAMS(&(*p).base);
+    KGSP_RPC_REVERSE((*p).pinset);
+    KGSP_RPC_REVERSE((*p).scanLockPin);
+    KGSP_RPC_REVERSE((*p).flipLockPin);
+}
+
+static void
+_kgspCtrlSwap_NV5070_CTRL_CMD_GET_RG_SCAN_LINE_PARAMS(NV5070_CTRL_CMD_GET_RG_SCAN_LINE_PARAMS *p)
+{
+    _kgspCtrlSwap_NV5070_CTRL_CMD_BASE_PARAMS(&(*p).base);
+    KGSP_RPC_REVERSE((*p).head);
+    KGSP_RPC_REVERSE((*p).scanLine);
+    KGSP_RPC_REVERSE((*p).inVblank);
+}
+
+static void
+_kgspCtrlSwap_NV5070_CTRL_GET_FRAMELOCK_HEADER_LOCKPINS_PARAMS(NV5070_CTRL_GET_FRAMELOCK_HEADER_LOCKPINS_PARAMS *p)
+{
+    _kgspCtrlSwap_NV5070_CTRL_CMD_BASE_PARAMS(&(*p).base);
+    KGSP_RPC_REVERSE((*p).frameLockPin);
+    KGSP_RPC_REVERSE((*p).rasterLockPin);
+    KGSP_RPC_REVERSE((*p).flipLockPin);
+}
+
+static void
+_kgspCtrlSwap_NV5070_CTRL_SYSTEM_GET_CAPS_V2_PARAMS(NV5070_CTRL_SYSTEM_GET_CAPS_V2_PARAMS *p)
+{
+    _kgspCtrlSwap_NV5070_CTRL_CMD_BASE_PARAMS(&(*p).base);
+}
+
 /* NV_TRUE: command known and buffer large enough; params converted. */
 static NvBool
 _kgspCtrlSwapParams(NvU32 cmd, NvU8 *pParams, NvU32 paramsSize)
@@ -14588,6 +14894,116 @@ _kgspCtrlSwapParams(NvU32 cmd, NvU8 *pParams, NvU32 paramsSize)
             if (paramsSize < sizeof(NV402C_CTRL_I2C_TABLE_GET_DEV_INFO_PARAMS))
                 return NV_FALSE;
             _kgspCtrlSwap_NV402C_CTRL_I2C_TABLE_GET_DEV_INFO_PARAMS((NV402C_CTRL_I2C_TABLE_GET_DEV_INFO_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x50700109: /* NV5070_CTRL_CMD_IS_MODE_POSSIBLE */
+            if (paramsSize < sizeof(NV5070_CTRL_CMD_IS_MODE_POSSIBLE_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV5070_CTRL_CMD_IS_MODE_POSSIBLE_PARAMS((NV5070_CTRL_CMD_IS_MODE_POSSIBLE_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x5070010b: /* NV5070_CTRL_CMD_GET_CHANNEL_INFO */
+            if (paramsSize < sizeof(NV5070_CTRL_CMD_GET_CHANNEL_INFO_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV5070_CTRL_CMD_GET_CHANNEL_INFO_PARAMS((NV5070_CTRL_CMD_GET_CHANNEL_INFO_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x5070010c: /* NV5070_CTRL_CMD_SET_ACCL */
+            if (paramsSize < sizeof(NV5070_CTRL_SET_ACCL_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV5070_CTRL_SET_ACCL_PARAMS((NV5070_CTRL_SET_ACCL_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x5070010d: /* NV5070_CTRL_CMD_GET_ACCL */
+            if (paramsSize < sizeof(NV5070_CTRL_GET_ACCL_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV5070_CTRL_GET_ACCL_PARAMS((NV5070_CTRL_GET_ACCL_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x50700115: /* NV5070_CTRL_CMD_GET_PINSET_COUNT */
+            if (paramsSize < sizeof(NV5070_CTRL_GET_PINSET_COUNT_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV5070_CTRL_GET_PINSET_COUNT_PARAMS((NV5070_CTRL_GET_PINSET_COUNT_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x50700116: /* NV5070_CTRL_CMD_GET_PINSET_PEER */
+            if (paramsSize < sizeof(NV5070_CTRL_GET_PINSET_PEER_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV5070_CTRL_GET_PINSET_PEER_PARAMS((NV5070_CTRL_GET_PINSET_PEER_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x50700117: /* NV5070_CTRL_CMD_SET_RMFREE_FLAGS */
+            if (paramsSize < sizeof(NV5070_CTRL_SET_RMFREE_FLAGS_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV5070_CTRL_SET_RMFREE_FLAGS_PARAMS((NV5070_CTRL_SET_RMFREE_FLAGS_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x50700118: /* NV5070_CTRL_CMD_IMP_SET_GET_PARAMETER */
+            if (paramsSize < sizeof(NV5070_CTRL_IMP_SET_GET_PARAMETER_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV5070_CTRL_IMP_SET_GET_PARAMETER_PARAMS((NV5070_CTRL_IMP_SET_GET_PARAMETER_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x50700119: /* NV5070_CTRL_CMD_SET_MEMPOOL_WAR_FOR_BLIT_TEARING */
+            if (paramsSize < sizeof(NV5070_CTRL_SET_MEMPOOL_WAR_FOR_BLIT_TEARING_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV5070_CTRL_SET_MEMPOOL_WAR_FOR_BLIT_TEARING_PARAMS((NV5070_CTRL_SET_MEMPOOL_WAR_FOR_BLIT_TEARING_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x50700202: /* NV5070_CTRL_CMD_GET_RG_STATUS */
+            if (paramsSize < sizeof(NV5070_CTRL_CMD_GET_RG_STATUS_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV5070_CTRL_CMD_GET_RG_STATUS_PARAMS((NV5070_CTRL_CMD_GET_RG_STATUS_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x50700203: /* NV5070_CTRL_CMD_GET_RG_UNDERFLOW_PROP */
+            if (paramsSize < sizeof(NV5070_CTRL_CMD_GET_RG_UNDERFLOW_PROP_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV5070_CTRL_CMD_GET_RG_UNDERFLOW_PROP_PARAMS((NV5070_CTRL_CMD_GET_RG_UNDERFLOW_PROP_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x50700204: /* NV5070_CTRL_CMD_SET_RG_UNDERFLOW_PROP */
+            if (paramsSize < sizeof(NV5070_CTRL_CMD_SET_RG_UNDERFLOW_PROP_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV5070_CTRL_CMD_SET_RG_UNDERFLOW_PROP_PARAMS((NV5070_CTRL_CMD_SET_RG_UNDERFLOW_PROP_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x50700205: /* NV5070_CTRL_CMD_GET_RG_FLIPLOCK_PROP */
+            if (paramsSize < sizeof(NV5070_CTRL_CMD_GET_RG_FLIPLOCK_PROP_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV5070_CTRL_CMD_GET_RG_FLIPLOCK_PROP_PARAMS((NV5070_CTRL_CMD_GET_RG_FLIPLOCK_PROP_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x50700206: /* NV5070_CTRL_CMD_SET_RG_FLIPLOCK_PROP */
+            if (paramsSize < sizeof(NV5070_CTRL_CMD_SET_RG_FLIPLOCK_PROP_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV5070_CTRL_CMD_SET_RG_FLIPLOCK_PROP_PARAMS((NV5070_CTRL_CMD_SET_RG_FLIPLOCK_PROP_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x5070020a: /* NV5070_CTRL_CMD_GET_RG_CONNECTED_LOCKPIN_STATELESS */
+            if (paramsSize < sizeof(NV5070_CTRL_GET_RG_CONNECTED_LOCKPIN_STATELESS_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV5070_CTRL_GET_RG_CONNECTED_LOCKPIN_STATELESS_PARAMS((NV5070_CTRL_GET_RG_CONNECTED_LOCKPIN_STATELESS_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x5070020b: /* NV5070_CTRL_CMD_GET_PINSET_LOCKPINS */
+            if (paramsSize < sizeof(NV5070_CTRL_GET_PINSET_LOCKPINS_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV5070_CTRL_GET_PINSET_LOCKPINS_PARAMS((NV5070_CTRL_GET_PINSET_LOCKPINS_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x5070020c: /* NV5070_CTRL_CMD_GET_RG_SCAN_LINE */
+            if (paramsSize < sizeof(NV5070_CTRL_CMD_GET_RG_SCAN_LINE_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV5070_CTRL_CMD_GET_RG_SCAN_LINE_PARAMS((NV5070_CTRL_CMD_GET_RG_SCAN_LINE_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x5070020d: /* NV5070_CTRL_CMD_GET_FRAMELOCK_HEADER_LOCKPINS */
+            if (paramsSize < sizeof(NV5070_CTRL_GET_FRAMELOCK_HEADER_LOCKPINS_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV5070_CTRL_GET_FRAMELOCK_HEADER_LOCKPINS_PARAMS((NV5070_CTRL_GET_FRAMELOCK_HEADER_LOCKPINS_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x50700422: /* NV5070_CTRL_CMD_GET_SOR_OP_MODE */
+            if (paramsSize < sizeof(NV5070_CTRL_CMD_GET_SOR_OP_MODE_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV5070_CTRL_CMD_GET_SOR_OP_MODE_PARAMS((NV5070_CTRL_CMD_GET_SOR_OP_MODE_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x50700423: /* NV5070_CTRL_CMD_SET_SOR_OP_MODE */
+            if (paramsSize < sizeof(NV5070_CTRL_CMD_SET_SOR_OP_MODE_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV5070_CTRL_CMD_SET_SOR_OP_MODE_PARAMS((NV5070_CTRL_CMD_SET_SOR_OP_MODE_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x50700457: /* NV5070_CTRL_CMD_SET_SOR_FLUSH_MODE */
+            if (paramsSize < sizeof(NV5070_CTRL_SET_SOR_FLUSH_MODE_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV5070_CTRL_SET_SOR_FLUSH_MODE_PARAMS((NV5070_CTRL_SET_SOR_FLUSH_MODE_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0x50700709: /* NV5070_CTRL_CMD_SYSTEM_GET_CAPS_V2 */
+            if (paramsSize < sizeof(NV5070_CTRL_SYSTEM_GET_CAPS_V2_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NV5070_CTRL_SYSTEM_GET_CAPS_V2_PARAMS((NV5070_CTRL_SYSTEM_GET_CAPS_V2_PARAMS *)pParams);
             return NV_TRUE;
         case 0x906f0105: /* NV906F_CTRL_CMD_GET_DEFER_RC_STATE */
             if (paramsSize < sizeof(NV906F_CTRL_CMD_GET_DEFER_RC_STATE_PARAMS))
