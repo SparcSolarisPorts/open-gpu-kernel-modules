@@ -39,6 +39,7 @@
 #include <ctrl/ctrl0000/ctrl0000gpu.h>
 #include <ctrl/ctrl2080/ctrl2080gpu.h>
 #include <ctrl/ctrl0073/ctrl0073system.h>
+#include <ctrl/ctrl0073/ctrl0073specific.h>
 
 #define NVP_H_DEVICE    0xde000001U
 #define NVP_H_SUBDEVICE 0xde000002U
@@ -116,6 +117,7 @@ stage3(int fd, NvHandle hClient)
     NV0073_CTRL_SYSTEM_GET_NUM_HEADS_PARAMS heads;
     NV0073_CTRL_SYSTEM_GET_SUPPORTED_PARAMS sup;
     NV0073_CTRL_SYSTEM_GET_CONNECT_STATE_PARAMS conn;
+    unsigned int bit;
 
     if (rm_alloc(fd, hClient, NVP_H_DEVICE, NVP_H_DISPLAY, NV04_DISPLAY_COMMON,
         NULL, 0, "alloc display common") != 0)
@@ -146,6 +148,49 @@ stage3(int fd, NvHandle hClient)
         "display connect state") == 0)
         printf("  connected displayMask 0x%08x\n",
             (unsigned int)conn.displayMask);
+
+    /* Per display: type, connector and a single-display connect check. */
+    for (bit = 0; bit < 32; bit++) {
+        NvU32 id = 1U << bit;
+        NV0073_CTRL_SPECIFIC_GET_TYPE_PARAMS ty;
+        NV0073_CTRL_SPECIFIC_GET_CONNECTOR_DATA_PARAMS cd;
+        NV0073_CTRL_SYSTEM_GET_CONNECT_STATE_PARAMS one;
+        unsigned int k;
+
+        if (!(sup.displayMask & id))
+            continue;
+        printf("  display 0x%08x:\n", (unsigned int)id);
+
+        memset(&ty, 0, sizeof (ty));
+        ty.displayId = id;
+        if (rm_control(fd, hClient, NVP_H_DISPLAY,
+            NV0073_CTRL_CMD_SPECIFIC_GET_TYPE, &ty, sizeof (ty),
+            "  display type") == 0)
+            printf("    type %u (1 CRT, 2 DFP, 3 TV)\n",
+                (unsigned int)ty.displayType);
+
+        memset(&cd, 0, sizeof (cd));
+        cd.displayId = id;
+        if (rm_control(fd, hClient, NVP_H_DISPLAY,
+            NV0073_CTRL_CMD_SPECIFIC_GET_CONNECTOR_DATA, &cd, sizeof (cd),
+            "  connector data") == 0) {
+            printf("    flags 0x%x DDCPartners 0x%x platform 0x%x count %u\n",
+                (unsigned int)cd.flags, (unsigned int)cd.DDCPartners,
+                (unsigned int)cd.platform, (unsigned int)cd.count);
+            for (k = 0; k < cd.count && k < NV0073_CTRL_MAX_CONNECTORS; k++)
+                printf("    connector %u: type 0x%x location %u\n",
+                    (unsigned int)cd.data[k].index,
+                    (unsigned int)cd.data[k].type,
+                    (unsigned int)cd.data[k].location);
+        }
+
+        memset(&one, 0, sizeof (one));
+        one.displayMask = id;
+        if (rm_control(fd, hClient, NVP_H_DISPLAY,
+            NV0073_CTRL_CMD_SYSTEM_GET_CONNECT_STATE, &one, sizeof (one),
+            "  connect state") == 0)
+            printf("    %s\n", one.displayMask ? "CONNECTED" : "not connected");
+    }
 }
 
 /*
