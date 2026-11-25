@@ -36,6 +36,13 @@ cat > "$TMP/tu.c" <<'EOF'
 #include <ctrl/ctrl5070/ctrl5070or.h>
 #include <ctrl/ctrl5070/ctrl5070rg.h>
 #include <ctrl/ctrl5070/ctrl5070system.h>
+#include <ctrl/ctrlc370/ctrlc370base.h>
+#include <ctrl/ctrlc370/ctrlc370chnc.h>
+#include <ctrl/ctrlc370/ctrlc370event.h>
+#include <ctrl/ctrlc370/ctrlc370or.h>
+#include <ctrl/ctrlc370/ctrlc370rg.h>
+#include <ctrl/ctrlc372/ctrlc372base.h>
+#include <ctrl/ctrlc372/ctrlc372chnc.h>
 EOF
 
 gcc -E -P \
@@ -50,7 +57,10 @@ set -- --pp "$TMP/tu.i" --out "$OUT" \
     "$CTRL"/ctrl906f.h "$CTRL"/ctrla06f/*.h "$CTRL"/ctrlb06f.h "$CTRL"/ctrlc36f.h \
     "$CTRL"/ctrl402c.h \
     "$CTRL"/ctrl5070/ctrl5070chnc.h "$CTRL"/ctrl5070/ctrl5070or.h \
-    "$CTRL"/ctrl5070/ctrl5070rg.h "$CTRL"/ctrl5070/ctrl5070system.h
+    "$CTRL"/ctrl5070/ctrl5070rg.h "$CTRL"/ctrl5070/ctrl5070system.h \
+    "$CTRL"/ctrlc370/ctrlc370chnc.h "$CTRL"/ctrlc370/ctrlc370event.h \
+    "$CTRL"/ctrlc370/ctrlc370or.h "$CTRL"/ctrlc370/ctrlc370rg.h \
+    "$CTRL"/ctrlc372/ctrlc372chnc.h
 [ -n "$REPORT" ] && set -- "$@" --report "$REPORT"
 
 python3 -I "$HERE/gen-ctrl-endian.py" "$@"

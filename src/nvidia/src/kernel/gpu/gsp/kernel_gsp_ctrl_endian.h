@@ -10494,6 +10494,236 @@ _kgspCtrlSwap_NV5070_CTRL_SYSTEM_GET_CAPS_V2_PARAMS(NV5070_CTRL_SYSTEM_GET_CAPS_
     _kgspCtrlSwap_NV5070_CTRL_CMD_BASE_PARAMS(&(*p).base);
 }
 
+static void
+_kgspCtrlSwap_NVC370_CTRL_CMD_BASE_PARAMS(NVC370_CTRL_CMD_BASE_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subdeviceIndex);
+}
+
+static void
+_kgspCtrlSwap_NVC370_CTRL_IDLE_CHANNEL_PARAMS(NVC370_CTRL_IDLE_CHANNEL_PARAMS *p)
+{
+    _kgspCtrlSwap_NVC370_CTRL_CMD_BASE_PARAMS(&(*p).base);
+    KGSP_RPC_REVERSE((*p).channelClass);
+    KGSP_RPC_REVERSE((*p).channelInstance);
+    KGSP_RPC_REVERSE((*p).desiredChannelStateMask);
+    KGSP_RPC_REVERSE((*p).accelerators);
+    KGSP_RPC_REVERSE((*p).timeout);
+}
+
+static void
+_kgspCtrlSwap_NVC370_CTRL_SET_ACCL_PARAMS(NVC370_CTRL_SET_ACCL_PARAMS *p)
+{
+    _kgspCtrlSwap_NVC370_CTRL_CMD_BASE_PARAMS(&(*p).base);
+    KGSP_RPC_REVERSE((*p).channelClass);
+    KGSP_RPC_REVERSE((*p).channelInstance);
+    KGSP_RPC_REVERSE((*p).accelerators);
+    KGSP_RPC_REVERSE((*p).accelMask);
+}
+
+static void
+_kgspCtrlSwap_NVC370_CTRL_GET_ACCL_PARAMS(NVC370_CTRL_GET_ACCL_PARAMS *p)
+{
+    _kgspCtrlSwap_NVC370_CTRL_CMD_BASE_PARAMS(&(*p).base);
+    KGSP_RPC_REVERSE((*p).channelClass);
+    KGSP_RPC_REVERSE((*p).channelInstance);
+    KGSP_RPC_REVERSE((*p).accelerators);
+    KGSP_RPC_REVERSE((*p).accelMask);
+}
+
+static void
+_kgspCtrlSwap_NVC370_CTRL_CHANNEL_CANCEL_FLIP_PARAMS(NVC370_CTRL_CHANNEL_CANCEL_FLIP_PARAMS *p)
+{
+    _kgspCtrlSwap_NVC370_CTRL_CMD_BASE_PARAMS(&(*p).base);
+    KGSP_RPC_REVERSE((*p).channelClass);
+    KGSP_RPC_REVERSE((*p).channelInstance);
+}
+
+static void
+_kgspCtrlSwap_NVC370_CTRL_CMD_GET_CHANNEL_INFO_PARAMS(NVC370_CTRL_CMD_GET_CHANNEL_INFO_PARAMS *p)
+{
+    _kgspCtrlSwap_NVC370_CTRL_CMD_BASE_PARAMS(&(*p).base);
+    KGSP_RPC_REVERSE((*p).channelClass);
+    KGSP_RPC_REVERSE((*p).channelInstance);
+    KGSP_RPC_REVERSE((*p).channelState);
+}
+
+static void
+_kgspCtrlSwap_NVC370_CTRL_EVENT_SET_NOTIFICATION_PARAMS(NVC370_CTRL_EVENT_SET_NOTIFICATION_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).hEvent);
+    KGSP_RPC_REVERSE((*p).event);
+    KGSP_RPC_REVERSE((*p).action);
+}
+
+static void
+_kgspCtrlSwap_NVC370_CTRL_SET_SOR_FLUSH_MODE_PARAMS(NVC370_CTRL_SET_SOR_FLUSH_MODE_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subDeviceInstance);
+    KGSP_RPC_REVERSE((*p).sorNumber);
+    KGSP_RPC_REVERSE((*p).headIndex);
+    KGSP_RPC_REVERSE((*p).attachFailedHeadMask);
+}
+
+static void
+_kgspCtrlSwap_NVC370_CTRL_GET_LOCKPINS_CAPS_PARAMS(NVC370_CTRL_GET_LOCKPINS_CAPS_PARAMS *p)
+{
+    _kgspCtrlSwap_NVC370_CTRL_CMD_BASE_PARAMS(&(*p).base);
+    KGSP_RPC_REVERSE((*p).pinset);
+    KGSP_RPC_REVERSE((*p).frameLockPin);
+    KGSP_RPC_REVERSE((*p).rasterLockPin);
+    KGSP_RPC_REVERSE((*p).flipLockPin);
+    KGSP_RPC_REVERSE((*p).stereoPin);
+    KGSP_RPC_REVERSE((*p).numScanLockPins);
+    KGSP_RPC_REVERSE((*p).numFlipLockPins);
+    KGSP_RPC_REVERSE((*p).numStereoPins);
+}
+
+static void
+_kgspCtrlSwap_NVC372_CTRL_CMD_BASE_PARAMS(NVC372_CTRL_CMD_BASE_PARAMS *p)
+{
+    KGSP_RPC_REVERSE((*p).subdeviceIndex);
+}
+
+static void
+_kgspCtrlSwap_NVC372_CTRL_IMP_HEAD(NVC372_CTRL_IMP_HEAD *p)
+{
+    KGSP_RPC_REVERSE((*p).maxPixelClkKHz);
+    KGSP_RPC_REVERSE((*p).rasterSize.width);
+    KGSP_RPC_REVERSE((*p).rasterSize.height);
+    KGSP_RPC_REVERSE((*p).rasterBlankStart.X);
+    KGSP_RPC_REVERSE((*p).rasterBlankStart.Y);
+    KGSP_RPC_REVERSE((*p).rasterBlankEnd.X);
+    KGSP_RPC_REVERSE((*p).rasterBlankEnd.Y);
+    KGSP_RPC_REVERSE((*p).rasterVertBlank2.yStart);
+    KGSP_RPC_REVERSE((*p).rasterVertBlank2.yEnd);
+    KGSP_RPC_REVERSE((*p).control.masterLockMode);
+    KGSP_RPC_REVERSE((*p).control.masterLockPin);
+    KGSP_RPC_REVERSE((*p).control.slaveLockMode);
+    KGSP_RPC_REVERSE((*p).control.slaveLockPin);
+    KGSP_RPC_REVERSE((*p).maxDownscaleFactorH);
+    KGSP_RPC_REVERSE((*p).maxDownscaleFactorV);
+    KGSP_RPC_REVERSE((*p).minFrameIdle.leadingRasterLines);
+    KGSP_RPC_REVERSE((*p).minFrameIdle.trailingRasterLines);
+    KGSP_RPC_REVERSE((*p).dscTargetBppX16);
+    KGSP_RPC_REVERSE((*p).possibleDscSliceCountMask);
+    KGSP_RPC_REVERSE((*p).maxDscSliceWidth);
+}
+
+static void
+_kgspCtrlSwap_NVC372_CTRL_IMP_WINDOW(NVC372_CTRL_IMP_WINDOW *p)
+{
+    KGSP_RPC_REVERSE((*p).windowIndex);
+    KGSP_RPC_REVERSE((*p).owningHead);
+    KGSP_RPC_REVERSE((*p).formatUsageBound);
+    KGSP_RPC_REVERSE((*p).rotatedFormatUsageBound);
+    KGSP_RPC_REVERSE((*p).maxPixelsFetchedPerLine);
+    KGSP_RPC_REVERSE((*p).maxDownscaleFactorH);
+    KGSP_RPC_REVERSE((*p).maxDownscaleFactorV);
+}
+
+static void
+_kgspCtrlSwap_NVC372_TILING_ASSIGNMENT(NVC372_TILING_ASSIGNMENT *p)
+{
+    (void)p;
+}
+
+static void
+_kgspCtrlSwap_NVC372_TILE_ENTRY(NVC372_TILE_ENTRY *p)
+{
+    (void)p;
+}
+
+static void
+_kgspCtrlSwap_NVC372_CTRL_IS_MODE_POSSIBLE_PARAMS(NVC372_CTRL_IS_MODE_POSSIBLE_PARAMS *p)
+{
+    NvU32 i0;
+
+    _kgspCtrlSwap_NVC372_CTRL_CMD_BASE_PARAMS(&(*p).base);
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).head); i0++)
+    {
+        _kgspCtrlSwap_NVC372_CTRL_IMP_HEAD(&(*p).head[i0]);
+    }
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).window); i0++)
+    {
+        _kgspCtrlSwap_NVC372_CTRL_IMP_WINDOW(&(*p).window[i0]);
+    }
+    KGSP_RPC_REVERSE((*p).options);
+    KGSP_RPC_REVERSE((*p).testMclkFreqKHz);
+    KGSP_RPC_REVERSE((*p).minImpVPState);
+    KGSP_RPC_REVERSE((*p).minPState);
+    KGSP_RPC_REVERSE((*p).minRequiredBandwidthKBPS);
+    KGSP_RPC_REVERSE((*p).floorBandwidthKBPS);
+    KGSP_RPC_REVERSE((*p).minRequiredHubclkKHz);
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).vblankIncreaseInLinesForOSLDMode); i0++)
+    {
+        KGSP_RPC_REVERSE((*p).vblankIncreaseInLinesForOSLDMode[i0]);
+    }
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).wakeUpRgLineForOSLDMode); i0++)
+    {
+        KGSP_RPC_REVERSE((*p).wakeUpRgLineForOSLDMode[i0]);
+    }
+    KGSP_RPC_REVERSE((*p).worstCaseMargin);
+    KGSP_RPC_REVERSE((*p).dispClkKHz);
+    KGSP_RPC_REVERSE((*p).numTilingAssignments);
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).tilingAssignments); i0++)
+    {
+        _kgspCtrlSwap_NVC372_TILING_ASSIGNMENT(&(*p).tilingAssignments[i0]);
+    }
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).tileList); i0++)
+    {
+        _kgspCtrlSwap_NVC372_TILE_ENTRY(&(*p).tileList[i0]);
+    }
+}
+
+static void
+_kgspCtrlSwap_NVC372_CTRL_IMP_OR_SETTINGS_HEAD(NVC372_CTRL_IMP_OR_SETTINGS_HEAD *p)
+{
+    NvU32 i0;
+
+    KGSP_RPC_REVERSE((*p).maxPixelClkKhz);
+    KGSP_RPC_REVERSE((*p).outputResourcePixelDepthBPP);
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).displayId); i0++)
+    {
+        KGSP_RPC_REVERSE((*p).displayId[i0]);
+    }
+}
+
+static void
+_kgspCtrlSwap_NVC372_CTRL_IMP_OR_SETTINGS_SOR(NVC372_CTRL_IMP_OR_SETTINGS_SOR *p)
+{
+    KGSP_RPC_REVERSE((*p).ownerMask);
+    KGSP_RPC_REVERSE((*p).protocol);
+    KGSP_RPC_REVERSE((*p).pixelReplicateMode);
+}
+
+static void
+_kgspCtrlSwap_NVC372_CTRL_IS_MODE_POSSIBLE_OR_SETTINGS_PARAMS(NVC372_CTRL_IS_MODE_POSSIBLE_OR_SETTINGS_PARAMS *p)
+{
+    NvU32 i0;
+
+    _kgspCtrlSwap_NVC372_CTRL_CMD_BASE_PARAMS(&(*p).base);
+    KGSP_RPC_REVERSE((*p).numHeads);
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).head); i0++)
+    {
+        _kgspCtrlSwap_NVC372_CTRL_IMP_OR_SETTINGS_HEAD(&(*p).head[i0]);
+    }
+    for (i0 = 0; i0 < NV_ARRAY_ELEMENTS((*p).sor); i0++)
+    {
+        _kgspCtrlSwap_NVC372_CTRL_IMP_OR_SETTINGS_SOR(&(*p).sor[i0]);
+    }
+}
+
+static void
+_kgspCtrlSwap_NVC372_CTRL_CMD_GET_ACTIVE_VIEWPORT_POINT_IN_PARAMS(NVC372_CTRL_CMD_GET_ACTIVE_VIEWPORT_POINT_IN_PARAMS *p)
+{
+    _kgspCtrlSwap_NVC372_CTRL_CMD_BASE_PARAMS(&(*p).base);
+    KGSP_RPC_REVERSE((*p).windowIndex);
+    KGSP_RPC_REVERSE((*p).activeViewportPointIn.x);
+    KGSP_RPC_REVERSE((*p).activeViewportPointIn.y);
+}
+
 /* NV_TRUE: command known and buffer large enough; params converted. */
 static NvBool
 _kgspCtrlSwapParams(NvU32 cmd, NvU8 *pParams, NvU32 paramsSize)
@@ -15134,6 +15364,61 @@ _kgspCtrlSwapParams(NvU32 cmd, NvU8 *pParams, NvU32 paramsSize)
             if (paramsSize < sizeof(NVC36F_CTRL_INTERNAL_GPFIFO_GET_WORK_SUBMIT_TOKEN_PARAMS))
                 return NV_FALSE;
             _kgspCtrlSwap_NVC36F_CTRL_INTERNAL_GPFIFO_GET_WORK_SUBMIT_TOKEN_PARAMS((NVC36F_CTRL_INTERNAL_GPFIFO_GET_WORK_SUBMIT_TOKEN_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0xc3700101: /* NVC370_CTRL_CMD_IDLE_CHANNEL */
+            if (paramsSize < sizeof(NVC370_CTRL_IDLE_CHANNEL_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NVC370_CTRL_IDLE_CHANNEL_PARAMS((NVC370_CTRL_IDLE_CHANNEL_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0xc3700102: /* NVC370_CTRL_CMD_SET_ACCL */
+            if (paramsSize < sizeof(NVC370_CTRL_SET_ACCL_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NVC370_CTRL_SET_ACCL_PARAMS((NVC370_CTRL_SET_ACCL_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0xc3700103: /* NVC370_CTRL_CMD_GET_ACCL */
+            if (paramsSize < sizeof(NVC370_CTRL_GET_ACCL_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NVC370_CTRL_GET_ACCL_PARAMS((NVC370_CTRL_GET_ACCL_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0xc3700104: /* NVC370_CTRL_CMD_GET_CHANNEL_INFO */
+            if (paramsSize < sizeof(NVC370_CTRL_CMD_GET_CHANNEL_INFO_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NVC370_CTRL_CMD_GET_CHANNEL_INFO_PARAMS((NVC370_CTRL_CMD_GET_CHANNEL_INFO_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0xc3700105: /* NVC370_CTRL_CMD_CHANNEL_CANCEL_FLIP */
+            if (paramsSize < sizeof(NVC370_CTRL_CHANNEL_CANCEL_FLIP_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NVC370_CTRL_CHANNEL_CANCEL_FLIP_PARAMS((NVC370_CTRL_CHANNEL_CANCEL_FLIP_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0xc3700201: /* NVC370_CTRL_CMD_GET_LOCKPINS_CAPS */
+            if (paramsSize < sizeof(NVC370_CTRL_GET_LOCKPINS_CAPS_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NVC370_CTRL_GET_LOCKPINS_CAPS_PARAMS((NVC370_CTRL_GET_LOCKPINS_CAPS_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0xc3700401: /* NVC370_CTRL_CMD_SET_SOR_FLUSH_MODE */
+            if (paramsSize < sizeof(NVC370_CTRL_SET_SOR_FLUSH_MODE_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NVC370_CTRL_SET_SOR_FLUSH_MODE_PARAMS((NVC370_CTRL_SET_SOR_FLUSH_MODE_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0xc3700901: /* NVC370_CTRL_CMD_EVENT_SET_NOTIFICATION */
+            if (paramsSize < sizeof(NVC370_CTRL_EVENT_SET_NOTIFICATION_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NVC370_CTRL_EVENT_SET_NOTIFICATION_PARAMS((NVC370_CTRL_EVENT_SET_NOTIFICATION_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0xc3720101: /* NVC372_CTRL_CMD_IS_MODE_POSSIBLE */
+            if (paramsSize < sizeof(NVC372_CTRL_IS_MODE_POSSIBLE_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NVC372_CTRL_IS_MODE_POSSIBLE_PARAMS((NVC372_CTRL_IS_MODE_POSSIBLE_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0xc3720102: /* NVC372_CTRL_CMD_IS_MODE_POSSIBLE_OR_SETTINGS */
+            if (paramsSize < sizeof(NVC372_CTRL_IS_MODE_POSSIBLE_OR_SETTINGS_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NVC372_CTRL_IS_MODE_POSSIBLE_OR_SETTINGS_PARAMS((NVC372_CTRL_IS_MODE_POSSIBLE_OR_SETTINGS_PARAMS *)pParams);
+            return NV_TRUE;
+        case 0xc3720104: /* NVC372_CTRL_CMD_GET_ACTIVE_VIEWPORT_POINT_IN */
+            if (paramsSize < sizeof(NVC372_CTRL_CMD_GET_ACTIVE_VIEWPORT_POINT_IN_PARAMS))
+                return NV_FALSE;
+            _kgspCtrlSwap_NVC372_CTRL_CMD_GET_ACTIVE_VIEWPORT_POINT_IN_PARAMS((NVC372_CTRL_CMD_GET_ACTIVE_VIEWPORT_POINT_IN_PARAMS *)pParams);
             return NV_TRUE;
         default:
             break;

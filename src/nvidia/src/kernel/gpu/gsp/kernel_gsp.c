@@ -146,6 +146,26 @@
 #include "ctrl/ctrl5070/ctrl5070or.h"
 #include "ctrl/ctrl5070/ctrl5070rg.h"
 #include "ctrl/ctrl5070/ctrl5070system.h"
+#include "ctrl/ctrlc370/ctrlc370base.h"    // NVC370/NVC372 display controls (NVKMS)
+#include "ctrl/ctrlc370/ctrlc370chnc.h"
+#include "ctrl/ctrlc370/ctrlc370event.h"
+#include "ctrl/ctrlc370/ctrlc370or.h"
+#include "ctrl/ctrlc370/ctrlc370rg.h"
+#include "ctrl/ctrlc372/ctrlc372base.h"
+#include "ctrl/ctrlc372/ctrlc372chnc.h"
+#include "class/cl917d.h"   // display channel classes (alloc parameters, see _kgspRpcSwapRmAlloc)
+#include "class/clc37b.h"
+#include "class/clc37d.h"
+#include "class/clc37e.h"
+#include "class/clc57a.h"
+#include "class/clc57b.h"
+#include "class/clc57d.h"
+#include "class/clc57e.h"
+#include "class/clc67a.h"
+#include "class/clc67b.h"
+#include "class/clc67d.h"
+#include "class/clc67e.h"
+#include "class/clc77d.h"
 #include "ctrl/ctrl90f1.h"  // FERMI_VASPACE_A controls
 #include "gmcapi/gmcapi_engine_types.h"
 #include "gmcapi/gmcapi_system_info.h"
@@ -900,6 +920,53 @@ _kgspRpcSwapRmAlloc(OBJRPC *pRpc, NvBool bToWire)
             KGSP_RPC_REVERSE(q->offset);
             KGSP_RPC_REVERSE(q->limit);
             KGSP_RPC_REVERSE(q->hVASpace);
+            return;
+        }
+
+        // Display channels (NVKMS): core, window and window-immediate DMA channels of every
+        // display generation. All of them take NV50VAIO_CHANNELDMA_ALLOCATION_PARAMETERS.
+        case NV917D_CORE_CHANNEL_DMA:
+        case NVC37B_WINDOW_IMM_CHANNEL_DMA:
+        case NVC37D_CORE_CHANNEL_DMA:
+        case NVC37E_WINDOW_CHANNEL_DMA:
+        case NVC57B_WINDOW_IMM_CHANNEL_DMA:
+        case NVC57D_CORE_CHANNEL_DMA:
+        case NVC57E_WINDOW_CHANNEL_DMA:
+        case NVC67B_WINDOW_IMM_CHANNEL_DMA:
+        case NVC67D_CORE_CHANNEL_DMA:
+        case NVC67E_WINDOW_CHANNEL_DMA:
+        case NVC77D_CORE_CHANNEL_DMA:
+        {
+            NV50VAIO_CHANNELDMA_ALLOCATION_PARAMETERS *q =
+                (NV50VAIO_CHANNELDMA_ALLOCATION_PARAMETERS *)pParams;
+
+            if (paramsSize < sizeof(*q))
+                break;
+
+            KGSP_RPC_REVERSE(q->channelInstance);
+            KGSP_RPC_REVERSE(q->hObjectBuffer);
+            KGSP_RPC_REVERSE(q->hObjectNotify);
+            KGSP_RPC_REVERSE(q->offset);
+            KGSP_RPC_REVERSE(q->pControl);   // 64-bit; stored by the GSP, not dereferenced
+            KGSP_RPC_REVERSE(q->flags);
+            KGSP_RPC_REVERSE(q->channelPBSize);
+            KGSP_RPC_REVERSE(q->subDeviceId);
+            return;
+        }
+
+        // Cursor channels are PIO channels with their own, smaller parameter block.
+        case NVC57A_CURSOR_IMM_CHANNEL_PIO:
+        case NVC67A_CURSOR_IMM_CHANNEL_PIO:
+        {
+            NV50VAIO_CHANNELPIO_ALLOCATION_PARAMETERS *q =
+                (NV50VAIO_CHANNELPIO_ALLOCATION_PARAMETERS *)pParams;
+
+            if (paramsSize < sizeof(*q))
+                break;
+
+            KGSP_RPC_REVERSE(q->channelInstance);
+            KGSP_RPC_REVERSE(q->hObjectNotify);
+            KGSP_RPC_REVERSE(q->pControl);
             return;
         }
 
