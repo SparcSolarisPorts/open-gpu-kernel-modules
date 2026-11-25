@@ -98,6 +98,7 @@
 #include "rmapi/rmapi.h"   // RMAPI_RPC_FLAGS_* (RM_RPC payload byte order conversion)
 #include "class/cl0000.h"  // NV0000_ALLOC_PARAMETERS
 #include "class/cl0005.h"  // NV0005_ALLOC_PARAMETERS
+#include "class/cl90f1.h"  // FERMI_VASPACE_A
 #include "nvos.h"          // NV01_EVENT_KERNEL_CALLBACK_EX
 #include "class/cl0080.h"  // NV0080_ALLOC_PARAMETERS
 #include "class/cl2080.h"  // NV2080_ALLOC_PARAMETERS
@@ -684,6 +685,25 @@ _kgspRpcSwapRmAlloc(OBJRPC *pRpc, NvBool bToWire)
                 break;
 
             KGSP_RPC_REVERSE(q->subDeviceId);
+            return;
+        }
+
+        case FERMI_VASPACE_A:
+        {
+            // NV_VASPACE_ALLOCATION_PARAMETERS (nvos.h): every member is a 32- or 64-bit value.
+            NV_VASPACE_ALLOCATION_PARAMETERS *q = (NV_VASPACE_ALLOCATION_PARAMETERS *)pParams;
+
+            if (paramsSize < sizeof(*q))
+                break;
+
+            KGSP_RPC_REVERSE(q->index);
+            KGSP_RPC_REVERSE(q->flags);
+            KGSP_RPC_REVERSE(q->vaSize);
+            KGSP_RPC_REVERSE(q->vaStartInternal);
+            KGSP_RPC_REVERSE(q->vaLimitInternal);
+            KGSP_RPC_REVERSE(q->bigPageSize);
+            KGSP_RPC_REVERSE(q->vaBase);
+            KGSP_RPC_REVERSE(q->pasid);
             return;
         }
 
