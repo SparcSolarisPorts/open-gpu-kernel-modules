@@ -3,7 +3,7 @@
 # nvtest.sh: trial-load the NVIDIA modules from /tmp so that a reboot puts
 # the machine back the way it was.
 #
-#   nvtest.sh load [-d outdir] [-t minutes] [-a] [-m] [-n] [-p]
+#   nvtest.sh load [-d outdir] [-t minutes] [-a] [-m] [-n] [-p] [-l]
 #   nvtest.sh keep
 #   nvtest.sh revert [-r]
 #   nvtest.sh status
@@ -23,6 +23,9 @@
 #         so a later attach maps the BARs and identifies the chip but does
 #         not start the GPU (no GSP boot, no firmware file needed). The
 #         nvidia.conf in the source tree is not changed.
+#         With -l the staged nvidia.conf gets NVreg_EnableGpuFirmwareLogs=1,
+#         which asks the driver to print the GSP firmware's own log to the
+#         system log. It needs gsp_log_<chip>.bin next to the GSP firmware.
 # bind    After "load -n", adds the PCI IDs with update_drv so the driver
 #         attaches to the GPU. This is the step that touches the hardware.
 # keep    Cancels the watchdog. The modules stay until the next reboot.
@@ -130,7 +133,8 @@ cmd_load() {
     out=$HERE/_out/SunOS_$TAG
     noalias=0
     noinit=0
-    while getopts d:t:amnp o; do
+    fwlogs=0
+    while getopts d:t:amnpl o; do
         case $o in
         d) out=$OPTARG ;;
         t) mins=$OPTARG ;;
@@ -138,6 +142,7 @@ cmd_load() {
         m) mods="nvidia nvidia_modeset" ;;
         n) noalias=1 ;;
         p) noinit=1 ;;
+        l) fwlogs=1 ;;
         *) usage ;;
         esac
     done
@@ -179,6 +184,10 @@ cmd_load() {
         cp "$(confsrc "$m")" "$STAGE/$m.conf" || fail "copy of $m.conf failed"
         if [ $noinit = 1 ] && [ "$m" = nvidia ]; then
             echo 'NVreg_GpuInitOnProbe=0;' >> "$STAGE/$m.conf" ||
+                fail "cannot edit the staged $m.conf"
+        fi
+        if [ $fwlogs = 1 ] && [ "$m" = nvidia ]; then
+            echo 'NVreg_EnableGpuFirmwareLogs=1;' >> "$STAGE/$m.conf" ||
                 fail "cannot edit the staged $m.conf"
         fi
         for pair in "$STAGE/$m:/kernel/drv/$KISA/$m" "$STAGE/$m.conf:/kernel/drv/$m.conf"; do
