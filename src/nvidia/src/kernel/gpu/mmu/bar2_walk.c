@@ -254,10 +254,12 @@ _bar2WalkCBFillEntries
                     entryStart = memdescGetPhysAddr(pMemDesc, FORCE_VMMU_TRANSLATION(pMemDesc, addressTranslation), entryOffset);
                     for (i = 0; i < sizeInDWord; i++)
                     {
+                        NvU32 word = gmmuEntryGetWord32(&entryValue, i);
+
                         // BAR0 write.
                         status = kbusMemAccessBar0Window_HAL(pGpu, pKernelBus,
                                               (entryStart + (sizeof(NvU32) * i)),
-                                              &entryValue.v32[i],
+                                              &word,
                                               sizeof(NvU32),
                                               NV_FALSE,
                                               ADDR_FBMEM);
@@ -439,9 +441,11 @@ _bar2WalkCBUpdatePde
 
                 for (i = 0; i < sizeInDWord; i++)
                 {
+                    NvU32 word = gmmuEntryGetWord32(&entry, i);
+
                     status = kbusMemAccessBar0Window_HAL(pGpu, pKernelBus,
                                           (entryStart + (sizeof(NvU32) * i)),
-                                          &entry.v32[i],
+                                          &word,
                                           sizeof(NvU32),
                                           NV_FALSE,
                                           ADDR_FBMEM);

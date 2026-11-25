@@ -246,6 +246,20 @@ union GMMU_ENTRY_VALUE
 };
 
 /*!
+ * Numeric value of 32-bit word @p i of an entry. An entry is a little-endian byte
+ * image, so this is the value a register-style (numeric) 32-bit write must carry
+ * for the GPU to see the same bytes, on any host byte order. On a little-endian
+ * host it equals pEntry->v32[i].
+ */
+static NV_FORCEINLINE NvU32
+gmmuEntryGetWord32(const GMMU_ENTRY_VALUE *pEntry, NvU32 i)
+{
+    const NvU8 *p = &pEntry->v8[i * 4];
+
+    return ((NvU32)p[0]) | ((NvU32)p[1] << 8) | ((NvU32)p[2] << 16) | ((NvU32)p[3] << 24);
+}
+
+/*!
  * Top-level structure describing a GPU MMU format.
  */
 struct GMMU_FMT

@@ -170,7 +170,25 @@ NvS32 NV_API_CALL os_string_compare(const char *str1, const char *str2)
 
 void *NV_API_CALL os_mem_copy(void *dst, const void *src, NvU32 length)
 {
+#if defined(NV_SOLARIS)
+    /*
+     * The destination may be a BAR mapping, which is a byte-swapping mapping on
+     * SPARC: a wide load or store through it reverses each 8-, 4- or 2-byte
+     * group, so memcpy() would not copy bytes. Single-byte accesses are not
+     * affected. The volatile accesses keep the compiler from turning this loop
+     * back into a call to memcpy().
+     */
+    volatile NvU8 *d = (volatile NvU8 *)dst;
+    const volatile NvU8 *s = (const volatile NvU8 *)src;
+    NvU32 i;
+
+    for (i = 0; i < length; i++)
+        d[i] = s[i];
+
+    return dst;
+#else
     return memcpy(dst, src, length);
+#endif
 }
 
 NV_STATUS NV_API_CALL os_memcpy_from_user(void *to, const void *from, NvU32 n)

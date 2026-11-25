@@ -253,6 +253,48 @@ nvFieldIsValid64(const NV_FIELD_DESC64 *pField)
     return NV_TRUE;
 }
 
+/*
+ * Entry buffers described by these descriptors are little-endian byte images, as
+ * the GPU reads them. On a big-endian host an NvU32 or NvU64 access of the same
+ * buffer would disagree about which half is which (a 32-bit access at offset 0
+ * is the high half of a 64-bit access), so big-endian hosts load and store the
+ * bytes explicitly. Little-endian hosts keep the plain access.
+ */
+#if NVCPU_IS_BIG_ENDIAN
+static NV_FORCEINLINE NvU32
+nvFieldLoad32(const NvU8 *p)
+{
+    return ((NvU32)p[0]) | ((NvU32)p[1] << 8) | ((NvU32)p[2] << 16) | ((NvU32)p[3] << 24);
+}
+
+static NV_FORCEINLINE void
+nvFieldStore32(NvU8 *p, const NvU32 v)
+{
+    p[0] = (NvU8)(v);
+    p[1] = (NvU8)(v >> 8);
+    p[2] = (NvU8)(v >> 16);
+    p[3] = (NvU8)(v >> 24);
+}
+
+static NV_FORCEINLINE NvU64
+nvFieldLoad64(const NvU8 *p)
+{
+    return ((NvU64)nvFieldLoad32(p)) | ((NvU64)nvFieldLoad32(p + 4) << 32);
+}
+
+static NV_FORCEINLINE void
+nvFieldStore64(NvU8 *p, const NvU64 v)
+{
+    nvFieldStore32(p, (NvU32)v);
+    nvFieldStore32(p + 4, (NvU32)(v >> 32));
+}
+#else
+static NV_FORCEINLINE NvU32 nvFieldLoad32(const NvU8 *p)  { return *(const NvU32 *)p; }
+static NV_FORCEINLINE void   nvFieldStore32(NvU8 *p, const NvU32 v) { *(NvU32 *)p = v; }
+static NV_FORCEINLINE NvU64 nvFieldLoad64(const NvU8 *p)  { return *(const NvU64 *)p; }
+static NV_FORCEINLINE void   nvFieldStore64(NvU8 *p, const NvU64 v) { *(NvU64 *)p = v; }
+#endif
+
 /*!
  * Set a 32-bit field based on its descriptor.
  *
@@ -268,14 +310,14 @@ nvFieldSet32
     NvU8                  *pMem
 )
 {
-          NvU32 *pValue  = (NvU32*)(pMem + pField->offset);
+          NvU8  *pValue  = pMem + pField->offset;
     const NvU32  shifted = value << pField->shift;
 
     NV_ASSERT_CHECKED_PRECOMP(nvFieldIsValid32(pField));
     NV_ASSERT_CHECKED_PRECOMP((shifted >> pField->shift) == value);
     NV_ASSERT_CHECKED_PRECOMP((shifted & pField->maskPos) == shifted);
 
-    *pValue = (*pValue & pField->maskNeg) | shifted;
+    nvFieldStore32(pValue, (nvFieldLoad32(pValue) & pField->maskNeg) | shifted);
 }
 
 /*!
@@ -299,12 +341,12 @@ nvFieldSet64
     for (i = 0; i < pField->regionCount; i++)
     {
         // Compute location and mask
-              NvU64 *pValue  = (NvU64*)(pMem + pField->regions[i].offset);
+              NvU8  *pValue  = pMem + pField->regions[i].offset;
         const NvU64  shifted = value << pField->regions[i].shift;
 
         // Store the portion of the value that fits in this field
-        *pValue = (*pValue & ~pField->regions[i].maskPos) |
-            (shifted & pField->regions[i].maskPos);
+        nvFieldStore64(pValue, (nvFieldLoad64(pValue) & ~pField->regions[i].maskPos) |
+            (shifted & pField->regions[i].maskPos));
 
         // Shift off the bits we just stored
         value >>= pField->regions[i].width;
@@ -368,7 +410,7 @@ nvFieldGet32
 )
 {
     NV_ASSERT_CHECKED_PRECOMP(nvFieldIsValid32(pField));
-    return (*(const NvU32*)(pMem + pField->offset) & pField->maskPos) >> pField->shift;
+    return (nvFieldLoad32(pMem + pField->offset) & pField->maskPos) >> pField->shift;
 }
 
 /*!
@@ -391,7 +433,7 @@ nvFieldGet64
     NV_ASSERT_CHECKED_PRECOMP(nvFieldIsValid64(pField));
     for (i = 0; i < pField->regionCount; i++)
     {
-        NvU64 region_value = (*(const NvU64*)(pMem + pField->regions[i].offset) &
+        NvU64 region_value = (nvFieldLoad64(pMem + pField->regions[i].offset) &
             pField->regions[i].maskPos) >> pField->regions[i].shift;
 
         value |= region_value << shift;
