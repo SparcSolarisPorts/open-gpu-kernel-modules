@@ -278,6 +278,9 @@ nv_start_device(nv_state_t *nv, nvidia_stack_t *sp)
 
     nv->flags |= NV_FLAG_INITIALIZED;
 
+    /* A successful start is otherwise silent; say so (one line per start). */
+    dev_err(nvis->dip, CE_NOTE, "rm_init_adapter succeeded");
+
     rm_request_dnotifier_state(sp, nv);
 
     /* Balanced by the FINE ref at the start of nv_stop_device(). */
